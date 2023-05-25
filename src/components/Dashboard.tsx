@@ -31,7 +31,7 @@ export default function Dashboard() {
         </Flex>
 
         <Grid
-          h="200px"
+          h="100%"
           templateRows="repeat(2, 1fr)"
           templateColumns="repeat(5, 1fr)"
           gap={4}
