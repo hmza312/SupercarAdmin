@@ -16,17 +16,41 @@ import { FiSettings } from "react-icons/fi";
 import { BsShieldCheck } from "react-icons/bs";
 import Link from "next/link";
 
+import { useRouter } from "next/router";
+import { ROUTING } from "@/util/constant";
+import React from "react";
+
+interface SideBarLink {
+  text: string;
+  linkTo: (typeof ROUTING)[keyof typeof ROUTING];
+  icon: React.ReactNode;
+}
+
+const sideBarLinks: Array<SideBarLink> = [
+  { text: "Dashboard", linkTo: ROUTING.home, icon: <RxDashboard /> },
+  { text: "Customers", linkTo: ROUTING.customers, icon: <BiStats /> },
+  { text: "Vehicles", linkTo: ROUTING.vehicles, icon: <IoWalletOutline /> },
+  { text: "Requests", linkTo: ROUTING.requests, icon: <BiUser /> },
+  { text: "Payments", linkTo: ROUTING.payments, icon: <FiSettings /> },
+  { text: "Waitlist", linkTo: ROUTING.waitList, icon: <FiSettings /> },
+  { text: "Settings", linkTo: ROUTING.settings, icon: <BsShieldCheck /> },
+  { text: "Help Centre", linkTo: ROUTING.helpCentre, icon: <BiHelpCircle /> },
+];
+
 export default function SideBar() {
+  const router = useRouter();
+
   return (
     <>
       <Flex
         display={"flex"}
-        height={"100%"}
+        minHeight={"100%"}
         bg={"white"}
         width={"20rem"}
         minW={"20rem"}
         background={"var(--dark-color)"}
         rounded={"2xl"}
+        overflow={"auto"}
         flexDir={"column"}
       >
         <Link href={"/"}>
@@ -44,49 +68,24 @@ export default function SideBar() {
 
         {/* icons */}
         <Flex flexDir={"column"} p={"2rem"} gap={"0.3rem"} pt={"0"}>
-          <SideBarLinks
-            isActive={true}
-            heading={"Dashboard"}
-            linkIcon={<RxDashboard />}
-          />
-          <SideBarLinks
-            isActive={false}
-            heading={"Customers"}
-            linkIcon={<BiStats />}
-          />
-          <SideBarLinks
-            isActive={false}
-            heading={"Vehicles"}
-            linkIcon={<IoWalletOutline />}
-          />
-          <SideBarLinks
-            isActive={false}
-            heading={"Requests"}
-            linkIcon={<BiUser />}
-          />
-          <SideBarLinks
-            isActive={false}
-            heading={"Payments"}
-            linkIcon={<FiSettings />}
-          />
-          <SideBarLinks
-            isActive={false}
-            heading={"Waitlist"}
-            linkIcon={<FiSettings />}
-          />
-
-          <Divider marginTop={"0.2rem"} background={"var(--blue-color)"} />
-
-          <SideBarLinks
-            isActive={false}
-            heading={"Settings"}
-            linkIcon={<BsShieldCheck />}
-          />
-          <SideBarLinks
-            isActive={false}
-            heading={"Help Centre"}
-            linkIcon={<BiHelpCircle />}
-          />
+          {sideBarLinks.map((link, idx) => {
+            return (
+              <React.Fragment key={idx}>
+                <SideBarLinks
+                  linkTo={link.linkTo}
+                  isActive={router.asPath == link.linkTo}
+                  heading={link.text}
+                  linkIcon={link.icon}
+                />
+                {idx == 5 && (
+                  <Divider
+                    marginTop={"0.2rem"}
+                    background={"var(--blue-color)"}
+                  />
+                )}
+              </React.Fragment>
+            );
+          })}
         </Flex>
 
         <Flex p={"0.5rem"} px={"2rem"} alignItems={"center"} cursor={"pointer"}>
@@ -109,14 +108,16 @@ const SideBarLinks = ({
   isActive,
   heading,
   linkIcon,
+  linkTo,
 }: {
   isActive: boolean;
   heading: string;
   linkIcon: React.ReactNode;
+  linkTo: string;
 }) => {
   return (
     <>
-      <Link href={"/"}>
+      <Link href={linkTo}>
         <Flex
           bg={`${isActive ? "var(--orange-color)" : ""}`}
           p={"1rem"}
