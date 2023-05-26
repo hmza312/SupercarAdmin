@@ -48,8 +48,6 @@ body {
   scrollbar-color: white transparent;
 }
 
-
-
 /* aux css */
 
 .dashboard-container {
@@ -110,4 +108,3 @@ body {
   background-color: var(--grey-color); /* Cyan */
   border-radius: 1rem;
 }
-
