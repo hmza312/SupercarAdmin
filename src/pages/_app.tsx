@@ -9,8 +9,6 @@ import DarkTheme from "@/components/design/DarkTheme";
 export default function App({ Component, pageProps }: AppProps) {
   const [isUnder1100] = useMediaQuery("(max-width: 1100px)");
 
-  console.log(isUnder1100);
-
   return (
     <>
       <ChakraProvider theme={appTheme}>

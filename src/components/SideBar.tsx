@@ -43,10 +43,10 @@ export default function SideBar({ useMobStyle }: { useMobStyle: boolean }) {
   const router = useRouter();
 
   const [isOpen, setIsOpen] = useState<boolean>(false);
-  const narBarRef = useRef<HTMLDivElement>(null);
+  const navBarRef = useRef<HTMLDivElement>(null);
 
   useOutsideClick({
-    ref: narBarRef,
+    ref: navBarRef,
     handler: () => setIsOpen(false),
   });
 
@@ -54,7 +54,7 @@ export default function SideBar({ useMobStyle }: { useMobStyle: boolean }) {
     <>
       {useMobStyle && <MobNavBar onOpen={() => setIsOpen(!isOpen)} />}
       <Flex
-        ref={narBarRef}
+        ref={navBarRef}
         display={"flex"}
         minHeight={"100%"}
         bg={"white"}
@@ -64,18 +64,12 @@ export default function SideBar({ useMobStyle }: { useMobStyle: boolean }) {
         rounded={"2xl"}
         overflow={"auto"}
         flexDir={"column"}
-        style={
+        className={
           useMobStyle
-            ? {
-                position: "fixed",
-                bottom: "0",
-                top: "0",
-                left: "0",
-                transform: `TranslateX(${isOpen ? "0" : "-1000px"})`,
-                transition: "transform 300ms ease-in-out",
-                zIndex: "999",
-              }
-            : {}
+            ? `sticky-sidebar ${
+                isOpen ? "sticky-sidebar-open" : "sticky-sidebar-close"
+              }`
+            : ""
         }
       >
         <Link href={"/"}>
