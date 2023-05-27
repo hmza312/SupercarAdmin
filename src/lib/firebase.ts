@@ -51,3 +51,4 @@ export const tempMembersColRef = collection(
   "temp_members"
 );
 export const vehiclesColRef = collection(firebase.firebaseStore, "vehicles");
+export const paymentsColRef = collection(firebase.firebaseStore, "payments");

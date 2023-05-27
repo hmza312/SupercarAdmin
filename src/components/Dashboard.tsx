@@ -13,6 +13,7 @@ import {
   Text,
   Badge,
   Button,
+  Center,
 } from "@chakra-ui/react";
 
 export default function Dashboard() {
@@ -45,8 +46,8 @@ const DashboardHeader = () => {
           alignSelf={"flex-end"}
           marginBottom={"-0.1rem"}
         >
-          <InputGroup size="md">
-            <Input pr="0.5rem" width={"md"} placeholder="Search anything" />
+          <InputGroup size="md" colorScheme="gray">
+            <Input pr="0.5rem" width={"md"} placeholder="Search anything" background={'var(--grey-color)'} />
             <InputRightElement width="2.5rem">
               <SearchIcon />
             </InputRightElement>
@@ -60,94 +61,90 @@ const DashboardHeader = () => {
 import { IoIosPeople } from "react-icons/io";
 import { AiFillCar } from "react-icons/ai";
 
+import StatSection from "./dashboard/StatSection";
+import Analytics from "./dashboard/Analytics";
+import { useEffect, useState } from "react";
+import { membersColRef, paymentsColRef, vehiclesColRef } from "@/lib/firebase";
+import { getCountFromServer, getDocs } from "firebase/firestore";
+import RecentPayments from "./dashboard/RecentPayments";
+import { PaymentDocType } from "@/lib/firebase_docstype";
+
+
 const DashBoardContent = () => {
+
+  const [totalCustomers, setTotalCustomers] = useState<number> (0);
+  const [totalVehicles, setTotalVehicles] = useState<number> (0);
+  const [payments, setPayments] = useState<Array<PaymentDocType>>([])
+  
+  
+
+  useEffect (()=> {
+    const fetchCustomersCount = async () => {
+      const count = await getCountFromServer(membersColRef)
+      setTotalCustomers (count.data().count);
+    };
+    
+    const fetchVehiclesCount = async ()=> {
+      const count = await getCountFromServer(vehiclesColRef)
+      setTotalVehicles (count.data().count);
+    };
+
+    const fetchRecentPayments = async ()=> {
+      const paymentDocs = await getDocs(paymentsColRef)
+      const res = paymentDocs.docs.map (d=> d.data()) as Array<PaymentDocType>
+      setPayments(res);
+      
+    };
+
+    
+    fetchCustomersCount()
+    fetchVehiclesCount()
+    fetchRecentPayments()
+
+     
+  }, [])
+
+
   return (
     <Grid
       templateColumns="repeat(7, 1f)"
       templateRows="repeat(7, 1fr)"
       gap="0.6rem"
       height="100%"
-      overflow="auto"
+      minHeight={'40rem'}
+      overflowY="auto"
     >
-      <GridItem
-        gridColumn="1 / span 2"
-        gridRow="1 / span 1"
-        bg="var(--grey-color)"
-        rounded={"xl"}
-      >
-        <Flex
-          width={"100%"}
-          height={"100%"}
-          gap={"1.5rem"}
-          alignItems={"center"}
-          p={"2rem"}
+        <GridItem
+          gridColumn="1 / span 2"
+          gridRow="1 / span 1"
+          bg="var(--grey-color)"
+          rounded={"xl"}
         >
-          <Box
-            background={"var(--orange-color)"}
-            justifyContent={"center"}
-            alignItems={"center"}
-            p={"0.3rem"}
-            rounded={"md"}
+          <StatSection
+            title="Total Customers"
+            badgeStatus="green"
+            count={totalCustomers}
+            percentage="+12.9%"
           >
             <IoIosPeople style={{ fontSize: "2rem" }} />
-          </Box>
+          </StatSection>
+        </GridItem>
 
-          <Box flexDir={"column"}>
-            <Text>Total Customers</Text>
-            <Flex justifyContent={"space-between"}>
-              <Heading fontSize={"2xl"}>20</Heading>
-              <Badge
-                display={"block"}
-                alignSelf={"center"}
-                justifySelf={"flex-end"}
-                colorScheme="green"
-              >
-                +12.9%
-              </Badge>
-            </Flex>
-          </Box>
-        </Flex>
-      </GridItem>
-
-      <GridItem
-        gridColumn="3 / span 2"
-        gridRow="1 / span 1"
-        bg="var(--grey-color)"
-        rounded={"xl"}
-      >
-        <Flex
-          width={"100%"}
-          height={"100%"}
-          gap={"1.5rem"}
-          alignItems={"center"}
-          p={"2rem"}
+        <GridItem
+          gridColumn="3 / span 2"
+          gridRow="1 / span 1"
+          bg="var(--grey-color)"
+          rounded={"xl"}
         >
-          <Box
-            background={"var(--orange-color)"}
-            justifyContent={"center"}
-            alignItems={"center"}
-            p={"0.3rem"}
-            rounded={"md"}
+          <StatSection
+            title="Total Vehicles"
+            badgeStatus="red"
+            count={totalVehicles}
+            percentage="+12.9%"
           >
             <AiFillCar style={{ fontSize: "2rem" }} />
-          </Box>
-
-          <Box flexDir={"column"}>
-            <Text>Total Vehicles</Text>
-            <Flex justifyContent={"space-between"}>
-              <Heading fontSize={"2xl"}>512</Heading>
-              <Badge
-                display={"block"}
-                alignSelf={"center"}
-                justifySelf={"flex-end"}
-                colorScheme="red"
-              >
-                +12.9%
-              </Badge>
-            </Flex>
-          </Box>
-        </Flex>
-      </GridItem>
+          </StatSection>
+        </GridItem>
 
       <GridItem
         gridColumn="1 / span 4"
@@ -155,9 +152,7 @@ const DashBoardContent = () => {
         bg="var(--grey-color)"
         rounded={"xl"}
       >
-        <Flex width={"100%"} height={"100%"} p={"0.1rem"}>
-          <ChartSection />
-        </Flex>
+        <Analytics />
       </GridItem>
 
       <GridItem
@@ -166,11 +161,7 @@ const DashBoardContent = () => {
         bg="var(--grey-color)"
         rounded={"xl"}
       >
-        <Flex p={"0.5rem"}>
-          <Flex>
-            <Heading fontSize={"2xl"}>Recent Payments</Heading>
-          </Flex>
-        </Flex>
+        <RecentPayments payments={payments}/>
       </GridItem>
 
       <GridItem
@@ -193,9 +184,12 @@ const DashBoardContent = () => {
             <Text>10</Text>
           </Box>
 
-          <Box background={"blue"} overflowY={"scroll"}>
-            content
-          </Box>
+          <Flex overflowY={"scroll"} flex={1} flexDir={'column'} gap = {'0.5rem'}>
+            <WaitListPayment />
+            <WaitListPayment />
+            <WaitListPayment />
+            <WaitListPayment />
+          </Flex>
 
           <Button
             color={"black"}
@@ -221,40 +215,19 @@ const DashBoardContent = () => {
   );
 };
 
-import dynamic from "next/dynamic";
-const Chart = dynamic(() => import("react-apexcharts"), { ssr: false });
 
-import { useState } from "react";
-
-const ChartSection = () => {
-  const [state, setState] = useState({
-    options: {
-      chart: {
-        id: "apexchart-example",
-        height: "100%",
-        width: "100%",
-      },
-      xaxis: {
-        categories: [1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998, 1999],
-      },
-    },
-    series: [
-      {
-        name: "series-1",
-        data: [30, 40, 35, 50, 49, 60, 70, 91, 125],
-      },
-    ],
-  });
-
-  return (
-    <>
-      <Chart
-        options={state.options}
-        series={state.series}
-        type="area"
-        width={"100%"}
-        height={"100%"}
-      />
-    </>
-  );
-};
+const WaitListPayment = ()=> {
+  return <>
+    <Flex 
+      background={'var(--card-bg)'} rounded={'md'} p = {'1rem'} flexDir={'column'} gap = {'0.5rem'}
+    >
+      <Flex width={'100%'}>
+        <Heading fontSize={'lg'}>Bruce Thomas</Heading>
+        <Text fontSize={'sm'} marginLeft={'auto'}>{`${new Date().toDateString()}`}</Text>
+      </Flex>
+      <Box justifySelf={'flex-start'}>
+        <Button background={'white'} color={'black'} size={'sm'}>View Application</Button>
+      </Box>
+    </Flex>
+  </>
+}
