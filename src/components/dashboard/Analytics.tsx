@@ -1,13 +1,13 @@
 import { useState } from "react";
-import { Flex } from "@chakra-ui/react";
+import { Box, Flex } from "@chakra-ui/react";
 import dynamic from "next/dynamic";
 const Chart = dynamic(() => import("react-apexcharts"), { ssr: false });
 
 export default function Analytics () {
     return <>
-        <Flex width={"100%"} height={"100%"} p={"0.1rem"}>
+        <Box width={"100%"} height={"100%"} p={"0.1rem"}>
           <ChartSection />
-        </Flex>
+        </Box>
     </>
 }
 
@@ -36,7 +36,7 @@ const ChartSection = () => {
       <Chart
         options={state.options}
         series={state.series}
-        type="area"
+        type="bar"
         width={"100%"}
         height={"100%"}
       />

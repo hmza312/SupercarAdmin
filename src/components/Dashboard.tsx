@@ -68,6 +68,7 @@ import { membersColRef, paymentsColRef, vehiclesColRef } from "@/lib/firebase";
 import { getCountFromServer, getDocs } from "firebase/firestore";
 import RecentPayments from "./dashboard/RecentPayments";
 import { PaymentDocType } from "@/lib/firebase_docstype";
+import Activity from "./dashboard/Activity";
 
 
 const DashBoardContent = () => {
@@ -207,9 +208,7 @@ const DashBoardContent = () => {
         bg="var(--grey-color)"
         rounded={"xl"}
       >
-        <Flex p={"1rem"}>
-          <Heading fontSize={"2xl"}>Activity</Heading>
-        </Flex>
+        <Activity />
       </GridItem>
     </Grid>
   );
