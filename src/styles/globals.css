@@ -69,3 +69,9 @@ body {
   transition: transform 350ms ease-in-out;
   transform: translateX(-1000px);
 }
+
+.apexcharts-gridline {
+  stroke-width: 1px;
+  stroke-dasharray: 3px;
+  stroke-dashoffset: 0;
+}

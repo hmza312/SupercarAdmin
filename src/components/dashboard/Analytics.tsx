@@ -1,13 +1,16 @@
 import { useState } from "react";
-import { Box, Flex } from "@chakra-ui/react";
+import { Box, Flex, Heading } from "@chakra-ui/react";
 import dynamic from "next/dynamic";
 const Chart = dynamic(() => import("react-apexcharts"), { ssr: false });
 
 export default function Analytics () {
     return <>
-        <Box width={"100%"} height={"100%"} p={"0.1rem"}>
-          <ChartSection />
-        </Box>
+        <Flex height={'100%'} width={'100%'} p = {'0.5rem'} flexDir={'column'}>
+          <Heading fontSize={'2xl'}>Analytics</Heading>
+          <Box width={"100%"} height={"100%"} p={"0.1rem"}>
+            <ChartSection />
+          </Box>
+        </Flex>
     </>
 }
 
@@ -15,20 +18,50 @@ const ChartSection = () => {
   const [state, setState] = useState({
     options: {
       chart: {
-        id: "apexchart-example",
-        height: "100%",
-        width: "100%",
+        id: 'apexchart-example',
+        background: 'var(--grey-color)',
+        toolbar: {
+          show: false
+        }
       },
       xaxis: {
-        categories: [1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998, 1999],
+        categories: ['January', 'February', 'March', 'April', 'May', 'June']
       },
+      colors: ['rgba(100, 207, 246, 1)', 'rgba(58, 111, 249, 1)'],
+      dataLabels: {
+        enabled: false
+      },
+      legend: {
+        show: false
+      },
+      plotOptions: {
+        bar: {
+          columnWidth: "25%",
+          rangeBarOverlap: true,
+          rangeBarGroupRows: false,
+          borderRadius: 3,
+          endingShape: 'rounded'
+        }
+      },
+      stroke: {
+        colors: ["transparent"],
+        width: 5
+      },
+      theme: {
+        mode: 'dark'
+      }
     },
     series: [
       {
-        name: "series-1",
-        data: [30, 40, 35, 50, 49, 60, 70, 91, 125],
+        name: 'Sales',
+        data: [21, 35, 75, 51, 41, 47]
       },
-    ],
+      {
+        name: 'Leads',
+        data: [41, 79, 57, 47, 63, 71]
+      },
+      
+    ]
   });
 
   return (
