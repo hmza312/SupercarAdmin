@@ -1,4 +1,7 @@
-import { Timestamp } from "firebase/firestore";
+
+export type VehicleDocType = {
+  owner: string;
+}
 
 export type PaymentDocType = {
   amount: number;
@@ -23,4 +26,9 @@ export type MemberDocType = {
   photo: string | undefined;
   authenticated: string;
   deleted: boolean | undefined;
+  uid: string;
+  payments: Array<PaymentDocType> | null
+  vehicles: Array<VehicleDocType> | null
 };
+
+

@@ -1,8 +1,6 @@
 import {
   Flex,
   Heading,
-  Input,
-  InputGroup,
   Stack,
   Text,
   Avatar,
@@ -11,10 +9,10 @@ import {
 } from "@chakra-ui/react";
 import ContentHeader from "./design/ContentHeader";
 import WhiteButton from "./design/WhiteButton";
-import { useEffect, useState } from "react";
+import { Dispatch, SetStateAction, useEffect, useState } from "react";
 import { getCountFromServer, getDocs } from "firebase/firestore";
-import { membersColRef } from "@/lib/firebase";
-import { MemberDocType } from "@/lib/firebase_docstype";
+import { articlesColRef, membersColRef, paymentsColRef, vehiclesColRef } from "@/lib/firebase";
+import { MemberDocType, PaymentDocType, VehicleDocType } from "@/lib/firebase_docstype";
 
 export default function Customers() {
   const [customerCount, setCustomerCount] = useState<number>(0);
@@ -30,15 +28,27 @@ export default function Customers() {
 
     const fetchCustomers = async () => {
       const customersDocs = await getDocs(membersColRef);
+      const paymentsDocs = (await getDocs(paymentsColRef)).docs.map(d=>d.data()) as Array<PaymentDocType>;
+      const vehiclesDocs = (await getDocs(vehiclesColRef)).docs.map (d=>d.data()) as Array<VehicleDocType>;
+
       setCustomers(
-        customersDocs.docs.map((d) => d.data()) as Array<MemberDocType>
+        customersDocs.docs.map((d) =>{ 
+          return ({...d.data(), 
+            uid: d.id, 
+            payments: paymentsDocs.filter (p=> p.recipient == d.id),
+            vehicles: vehiclesDocs.filter (v => v.owner == d.id)
+          })
+        }) as Array<MemberDocType>
       );
     };
 
     getCustomerCount();
     fetchCustomers();
+    
+    
   }, []);
 
+  
   return (
     <Flex width="100%" flexDir="column" gap="1rem" height="100%">
       <ContentHeader
@@ -46,53 +56,63 @@ export default function Customers() {
         heading={`Total Customers (${customerCount})`}
       />
       <Flex gap="0.3rem">
-        <CustomersList customers={customers} />
-        <Flex
-          flex={1}
-          bg="var(--grey-color)"
-          rounded="lg"
-          height={"auto"}
-          justifyContent={"center"}
-          padding={"1rem"}
-        >
-          <Flex
-            py={"2rem"}
-            flexDir={"column"}
-            alignContent={"center"}
-            gap={"1rem"}
-          >
-            <Center>
-              <Avatar
-                size="xl"
-                name="Kent Dodds"
-                src="https://bit.ly/kent-c-dodds"
-              />
-            </Center>
-            <Center flexDir={"column"}>
-              <Heading fontSize={"xl"}>Kent C Dodds</Heading>
-              <Text fontSize={"sm"}>Owner at Corsa Auto Rentals</Text>
-            </Center>
-
-            <Divider color={"white"} />
-
-            <Center flexDir={"column"}>
-              <Heading fontSize={"xl"}>Email Address</Heading>
-              <Text fontSize={"md"}>ethan@ethanduran.com</Text>
-            </Center>
-
-            <Center gap={"1rem"} flexWrap={"wrap"}>
-              <WhiteButton>Message</WhiteButton>
-              <WhiteButton>Edit</WhiteButton>
-              <WhiteButton>Documents</WhiteButton>
-            </Center>
-          </Flex>
-        </Flex>
+        <CustomersList customers={customers} onSelect={setSelectedCustomer}/>
+        <CustomerProfile customer={selectedCustomer}/>
       </Flex>
     </Flex>
   );
 }
 
-const CustomersList = ({ customers }: { customers: Array<MemberDocType> }) => {
+const CustomerProfile = ({ customer }: { customer: MemberDocType | null}) => {
+
+  if (!customer) return <></>;
+  
+  return <Flex
+      flex={1}
+      bg="var(--grey-color)"
+      rounded="lg"
+      height={"auto"}
+      justifyContent={"center"}
+      padding={"1rem"}
+  >
+    <Flex
+      py={"2rem"}
+      flexDir={"column"}
+      alignContent={"center"}
+      gap={"1rem"}
+    >
+      <Center>
+        <Avatar
+          size="xl"
+          name={`${customer.name}_avatar`}
+          src= {`${customer.photo}`}
+        />
+      </Center>
+      <Center flexDir={"column"}>
+        <Heading fontSize={"xl"}>{customer.name}</Heading>
+        <Text fontSize={"sm"}>{customer.occupation}</Text>
+      </Center>
+
+      <Divider color={"white"} />
+
+      <Center flexDir={"column"}>
+        <Heading fontSize={"xl"}>Email Address</Heading>
+        <Text fontSize={"md"}>{customer.email}</Text>
+      </Center>
+
+      <Center gap={"1rem"} flexWrap={"wrap"}>
+        <WhiteButton>Message</WhiteButton>
+        <WhiteButton>Edit</WhiteButton>
+        <WhiteButton>Documents</WhiteButton>
+      </Center>
+    </Flex>
+  </Flex>
+}
+
+const CustomersList = (
+  { customers, onSelect }: 
+  { customers: Array<MemberDocType>, onSelect: Dispatch<SetStateAction<MemberDocType | null>> }
+) => {
   return (
     <Flex
       flex={3}
@@ -112,7 +132,9 @@ const CustomersList = ({ customers }: { customers: Array<MemberDocType> }) => {
         flexBasis={"90%"}
       >
         {customers.map((customer, idx) => {
-          return <CustomerData customer={customer} key={idx} />;
+          return <CustomerData customer={customer} key={idx} onClick={()=>{
+            onSelect(customer);
+          }}/>;
         })}
       </Flex>
       <Flex flexBasis={"17%"}>
@@ -122,9 +144,9 @@ const CustomersList = ({ customers }: { customers: Array<MemberDocType> }) => {
   );
 };
 
-const CustomerData = ({ customer }: { customer: MemberDocType }) => {
+const CustomerData = ({ customer, onClick }: { customer: MemberDocType, onClick: ()=> void }) => {
   if (customer.deleted) return <></>;
-
+  
   return (
     <Flex
       background="var(--grey-color)"
@@ -133,6 +155,7 @@ const CustomerData = ({ customer }: { customer: MemberDocType }) => {
       flexDir="row"
       rounded="lg"
       cursor={"pointer"}
+      onClick={onClick}
     >
       <Avatar size="md" name={`${customer.name}_avatar`} src={customer.photo} />
       <Stack spacing={0}>
@@ -145,14 +168,18 @@ const CustomerData = ({ customer }: { customer: MemberDocType }) => {
       </Stack>
 
       <Flex gap="1rem" marginLeft="auto">
-        {["Vehicles", "Payments", "Referrals"].map((title, idx) => {
-          return (
-            <Stack key={idx} spacing={0} textAlign="center">
-              <Text fontWeight="bold">{title}</Text>
-              <Text fontWeight="bold">20</Text>
-            </Stack>
-          );
-        })}
+      <Stack spacing={0} textAlign="center">
+              <Text fontWeight="bold">{`Vehicles`}</Text>
+              <Text fontWeight="bold">{`${customer.vehicles ? customer.vehicles.length : 0}`}</Text>
+        </Stack>
+        <Stack spacing={0} textAlign="center">
+              <Text fontWeight="bold">{`Payments`}</Text>
+              <Text fontWeight="bold">{`${customer.payments ? customer.payments.length : 0}`}</Text>
+        </Stack>
+        <Stack spacing={0} textAlign="center">
+              <Text fontWeight="bold">{`Referrals`}</Text>
+              <Text fontWeight="bold">{`${0}`}</Text>
+        </Stack>
       </Flex>
     </Flex>
   );
