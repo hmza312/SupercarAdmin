@@ -1,12 +1,13 @@
 import { Box, Flex, Heading } from "@chakra-ui/react";
-import ReactSpeedometer from "react-d3-speedometer"
+import ReactSpeedometer from "react-d3-speedometer";
 import WhiteButton from "../design/WhiteButton";
 
-export default function Activity () {
-    return <Flex p={"1rem"} flexDir={'column'} gap={'0.5rem'}>
-        <Heading fontSize={"2xl"}>Activity </Heading>
-        <Box width={'100%'} height={'5rem'} mb = {'0.5rem'}>
-            {/* <ReactSpeedometer
+export default function Activity() {
+  return (
+    <Flex p={"1rem"} flexDir={"column"} gap={"0.5rem"}>
+      <Heading fontSize={"2xl"}>Activity </Heading>
+      <Box width={"100%"} height={"5rem"} mb={"0.5rem"}>
+        {/* <ReactSpeedometer
                 height={6}
                 fluidWidth = {true}
                 maxSegmentLabels={2}
@@ -17,9 +18,8 @@ export default function Activity () {
                 maxValue={1000}
                 value={777}
             /> */}
-        </Box>
-        <WhiteButton>View All Activity</WhiteButton>
+      </Box>
+      <WhiteButton>View All Activity</WhiteButton>
     </Flex>
+  );
 }
-
-

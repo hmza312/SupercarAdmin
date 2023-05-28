@@ -21,8 +21,8 @@ export default function Dashboard() {
     <>
       <Flex width={"100%"} flexDir={"column"} gap={"1rem"} height={"100%"}>
         {/* Top Header */}
-        <ContentHeader 
-          heading="Welcome Back, Ethan 👋" 
+        <ContentHeader
+          heading="Welcome Back, Ethan 👋"
           description="Here’s an overview of your automation dashboard"
         />
         <DashBoardContent />
@@ -44,41 +44,34 @@ import { PaymentDocType } from "@/lib/firebase_docstype";
 import Activity from "./dashboard/Activity";
 import ContentHeader from "./design/ContentHeader";
 
-
 const DashBoardContent = () => {
+  const [totalCustomers, setTotalCustomers] = useState<number>(0);
+  const [totalVehicles, setTotalVehicles] = useState<number>(0);
+  const [payments, setPayments] = useState<Array<PaymentDocType>>([]);
 
-  const [totalCustomers, setTotalCustomers] = useState<number> (0);
-  const [totalVehicles, setTotalVehicles] = useState<number> (0);
-  const [payments, setPayments] = useState<Array<PaymentDocType>>([])
-  
-  
-
-  useEffect (()=> {
+  useEffect(() => {
     const fetchCustomersCount = async () => {
-      const count = await getCountFromServer(membersColRef)
-      setTotalCustomers (count.data().count);
-    };
-    
-    const fetchVehiclesCount = async ()=> {
-      const count = await getCountFromServer(vehiclesColRef)
-      setTotalVehicles (count.data().count);
+      const count = await getCountFromServer(membersColRef);
+      setTotalCustomers(count.data().count);
     };
 
-    const fetchRecentPayments = async ()=> {
-      const paymentDocs = await getDocs(paymentsColRef)
-      const res = paymentDocs.docs.map (d=> d.data()) as Array<PaymentDocType>
+    const fetchVehiclesCount = async () => {
+      const count = await getCountFromServer(vehiclesColRef);
+      setTotalVehicles(count.data().count);
+    };
+
+    const fetchRecentPayments = async () => {
+      const paymentDocs = await getDocs(paymentsColRef);
+      const res = paymentDocs.docs.map((d) =>
+        d.data()
+      ) as Array<PaymentDocType>;
       setPayments(res);
-      
     };
 
-    
-    fetchCustomersCount()
-    fetchVehiclesCount()
-    fetchRecentPayments()
-
-     
-  }, [])
-
+    fetchCustomersCount();
+    fetchVehiclesCount();
+    fetchRecentPayments();
+  }, []);
 
   return (
     <Grid
@@ -86,40 +79,40 @@ const DashBoardContent = () => {
       templateRows="repeat(7, 1fr)"
       gap="0.6rem"
       height="100%"
-      minHeight={'40rem'}
+      minHeight={"40rem"}
       overflowY="auto"
     >
-        <GridItem
-          gridColumn="1 / span 2"
-          gridRow="1 / span 1"
-          bg="var(--grey-color)"
-          rounded={"xl"}
+      <GridItem
+        gridColumn="1 / span 2"
+        gridRow="1 / span 1"
+        bg="var(--grey-color)"
+        rounded={"xl"}
+      >
+        <StatSection
+          title="Total Customers"
+          badgeStatus="green"
+          count={totalCustomers}
+          percentage="+12.9%"
         >
-          <StatSection
-            title="Total Customers"
-            badgeStatus="green"
-            count={totalCustomers}
-            percentage="+12.9%"
-          >
-            <IoIosPeople style={{ fontSize: "2rem" }} />
-          </StatSection>
-        </GridItem>
+          <IoIosPeople style={{ fontSize: "2rem" }} />
+        </StatSection>
+      </GridItem>
 
-        <GridItem
-          gridColumn="3 / span 2"
-          gridRow="1 / span 1"
-          bg="var(--grey-color)"
-          rounded={"xl"}
+      <GridItem
+        gridColumn="3 / span 2"
+        gridRow="1 / span 1"
+        bg="var(--grey-color)"
+        rounded={"xl"}
+      >
+        <StatSection
+          title="Total Vehicles"
+          badgeStatus="red"
+          count={totalVehicles}
+          percentage="+12.9%"
         >
-          <StatSection
-            title="Total Vehicles"
-            badgeStatus="red"
-            count={totalVehicles}
-            percentage="+12.9%"
-          >
-            <AiFillCar style={{ fontSize: "2rem" }} />
-          </StatSection>
-        </GridItem>
+          <AiFillCar style={{ fontSize: "2rem" }} />
+        </StatSection>
+      </GridItem>
 
       <GridItem
         gridColumn="1 / span 4"
@@ -136,7 +129,7 @@ const DashBoardContent = () => {
         bg="var(--grey-color)"
         rounded={"xl"}
       >
-        <RecentPayments payments={payments}/>
+        <RecentPayments payments={payments} />
       </GridItem>
 
       <GridItem
@@ -159,7 +152,7 @@ const DashBoardContent = () => {
             <Text>10</Text>
           </Box>
 
-          <Flex overflowY={"scroll"} flex={1} flexDir={'column'} gap = {'0.5rem'}>
+          <Flex overflowY={"scroll"} flex={1} flexDir={"column"} gap={"0.5rem"}>
             <WaitListPayment />
             <WaitListPayment />
             <WaitListPayment />
@@ -188,19 +181,29 @@ const DashBoardContent = () => {
   );
 };
 
-
-const WaitListPayment = ()=> {
-  return <>
-    <Flex 
-      background={'var(--card-bg)'} rounded={'md'} p = {'1rem'} flexDir={'column'} gap = {'0.5rem'}
-    >
-      <Flex width={'100%'}>
-        <Heading fontSize={'lg'}>Bruce Thomas</Heading>
-        <Text fontSize={'sm'} marginLeft={'auto'}>{`${new Date().toDateString()}`}</Text>
+const WaitListPayment = () => {
+  return (
+    <>
+      <Flex
+        background={"var(--card-bg)"}
+        rounded={"md"}
+        p={"1rem"}
+        flexDir={"column"}
+        gap={"0.5rem"}
+      >
+        <Flex width={"100%"}>
+          <Heading fontSize={"lg"}>Bruce Thomas</Heading>
+          <Text
+            fontSize={"sm"}
+            marginLeft={"auto"}
+          >{`${new Date().toDateString()}`}</Text>
+        </Flex>
+        <Box justifySelf={"flex-start"}>
+          <Button background={"white"} color={"black"} size={"sm"}>
+            View Application
+          </Button>
+        </Box>
       </Flex>
-      <Box justifySelf={'flex-start'}>
-        <Button background={'white'} color={'black'} size={'sm'}>View Application</Button>
-      </Box>
-    </Flex>
-  </>
-}
+    </>
+  );
+};

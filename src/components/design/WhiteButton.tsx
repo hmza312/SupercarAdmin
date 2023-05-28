@@ -9,7 +9,7 @@ const WhiteButton: React.FC<CustomButtonProps> = (props) => (
     background="var(--white-color)"
     color="black"
     _hover={{
-        background: "var(--white-color)"
+      background: "var(--white-color)",
     }}
     {...props}
   >

@@ -9,7 +9,7 @@ const OrangeButton: React.FC<CustomButtonProps> = (props) => (
     background="var(--orange-color)"
     color="white"
     _hover={{
-        background: "var(--orange-color)"
+      background: "var(--orange-color)",
     }}
     {...props}
   >

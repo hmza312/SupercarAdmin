@@ -5,8 +5,8 @@ export const colors = {
   useSystemColorMode: false,
   colorMode: "dark",
   gray: {
-    "400": "var(--white)"
-  }
+    "400": "var(--white)",
+  },
 };
 
 export const appTheme: Record<string, any> = extendTheme({ colors });

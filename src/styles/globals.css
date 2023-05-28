@@ -5,7 +5,7 @@
   --dark-color: rgba(33, 33, 33, 1);
   --grey-color: rgba(54, 54, 54, 1);
   --white-color: rgb(255, 255, 255);
-  --card-bg: linear-gradient(177.23deg, #212121 -13.49%, #2D2D2D 109.75%);
+  --card-bg: linear-gradient(177.23deg, #212121 -13.49%, #2d2d2d 109.75%);
 }
 
 * {
