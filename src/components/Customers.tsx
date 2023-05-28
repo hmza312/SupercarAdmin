@@ -19,7 +19,9 @@ import { MemberDocType } from "@/lib/firebase_docstype";
 export default function Customers() {
   const [customerCount, setCustomerCount] = useState<number>(0);
   const [customers, setCustomers] = useState<Array<MemberDocType>>([]);
+  const [selectedCustomer, setSelectedCustomer] = useState<MemberDocType | null> (null);
 
+  
   useEffect(() => {
     const getCustomerCount = async () => {
       const count = await getCountFromServer(membersColRef);
