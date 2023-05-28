@@ -21,42 +21,15 @@ export default function Dashboard() {
     <>
       <Flex width={"100%"} flexDir={"column"} gap={"1rem"} height={"100%"}>
         {/* Top Header */}
-        <DashboardHeader />
+        <ContentHeader 
+          heading="Welcome Back, Ethan 👋" 
+          description="Here’s an overview of your automation dashboard"
+        />
         <DashBoardContent />
       </Flex>
     </>
   );
 }
-
-const DashboardHeader = () => {
-  return (
-    <>
-      <Flex width={"100%"} flexDir={"row"} alignItems={"center"}>
-        <Stack spacing={"0.3rem"}>
-          <Heading fontSize={"2xl"}>Welcome Back, Ethan 👋</Heading>
-          <Text color={"rgba(166, 166, 166, 1)"}>
-            Here’s an overview of your automation dashboard
-          </Text>
-        </Stack>
-
-        <Flex
-          height={"100%"}
-          marginLeft={"auto"}
-          alignItems={"center"}
-          alignSelf={"flex-end"}
-          marginBottom={"-0.1rem"}
-        >
-          <InputGroup size="md" colorScheme="gray">
-            <Input pr="0.5rem" width={"md"} placeholder="Search anything" background={'var(--grey-color)'} />
-            <InputRightElement width="2.5rem">
-              <SearchIcon />
-            </InputRightElement>
-          </InputGroup>
-        </Flex>
-      </Flex>
-    </>
-  );
-};
 
 import { IoIosPeople } from "react-icons/io";
 import { AiFillCar } from "react-icons/ai";
@@ -69,6 +42,7 @@ import { getCountFromServer, getDocs } from "firebase/firestore";
 import RecentPayments from "./dashboard/RecentPayments";
 import { PaymentDocType } from "@/lib/firebase_docstype";
 import Activity from "./dashboard/Activity";
+import ContentHeader from "./design/ContentHeader";
 
 
 const DashBoardContent = () => {

@@ -1,11 +1,12 @@
 import { Flex, Heading, Input, InputGroup, Stack, Text, Avatar, Box, Center, Divider } from "@chakra-ui/react";
 import ContentHeader from "./design/ContentHeader";
 import WhiteButton from "./design/WhiteButton";
+import OrangeButton from "./design/OrangeButton";
 
-export default function Customers() {
+export default function RequestsContent() {
   return (
     <Flex width="100%" flexDir="column" gap="1rem" height="100%">
-      <ContentHeader description="" heading="Total Customers (50)" />
+      <ContentHeader description="Use the chatroom to discuss payments and other client relations" heading="Help Requests (102)" />
       <Flex gap="0.3rem">
         <CustomersList />
         <Flex flex={1} bg="var(--grey-color)" rounded="lg" height={'auto'} justifyContent={'center'} padding={'1rem'}>
@@ -100,14 +101,17 @@ const CustomerData = ({ }) => {
       </Stack>
 
       <Flex gap="1rem" marginLeft="auto">
-        {["Vehicles", "Payments", "Referrals"].map((title, idx) => {
+        {/* {["Vehicles", "Payments", "Referrals"].map((title, idx) => {
           return (
             <Stack key={idx} spacing={0} textAlign="center">
               <Text fontWeight="bold">{title}</Text>
               <Text fontWeight="bold">20</Text>
             </Stack>
           );
-        })}
+        })} */}
+        <OrangeButton>Message</OrangeButton>
+        <WhiteButton>Other</WhiteButton>
+        <WhiteButton>Close</WhiteButton>
       </Flex>
     </Flex>
   );
