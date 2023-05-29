@@ -1,5 +1,18 @@
 export type VehicleDocType = {
   owner: string;
+  cutout: string;
+  id: string;
+  make: string;
+  model: string;
+  odometer: string;
+  status: number;
+  t: string;
+  thumbnail: string;
+  title: string;
+  trim: string;
+  vin: string;
+  year: string;
+  owner_data: MemberDocType | null
 };
 
 export type PaymentDocType = {
@@ -9,6 +22,7 @@ export type PaymentDocType = {
   sender: string;
   status: boolean;
   timestamp: number;
+  user_data: MemberDocType | null
 };
 
 export type MemberDocType = {
@@ -40,4 +54,6 @@ export type RequestDocType = {
   user_email: string;
   user_mobile: string;
   user_name: string;
+  user_data: MemberDocType | null
 };
+

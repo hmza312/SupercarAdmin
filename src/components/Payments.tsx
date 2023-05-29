@@ -18,8 +18,8 @@ import WhiteButton from "./design/WhiteButton";
 import ContentHeader from "./design/ContentHeader";
 import { ViewIcon } from "@chakra-ui/icons";
 import { useDocsCount } from "@/lib/hooks/useDocsCount";
-import { paymentsColRef } from "@/lib/firebase";
-import { PaymentDocType } from "@/lib/firebase_docstype";
+import { membersColRef, paymentsColRef } from "@/lib/firebase";
+import { MemberDocType, PaymentDocType } from "@/lib/firebase_docstype";
 import { useEffect, useState } from "react";
 import { getDocs } from "firebase/firestore";
 
@@ -29,15 +29,17 @@ export default function Payments() {
 
   useEffect(() => {
     const fetchPayments = async () => {
-      const paymentsDocs = await getDocs(paymentsColRef);
-      setPayments(
-        paymentsDocs.docs.map((d) => d.data()) as Array<PaymentDocType>
-      );
+       const paymentsDocs = await getDocs(paymentsColRef);
+       const users = (await getDocs(membersColRef)).docs.map (d => ({...d.data(), uid: d.id})) as Array<MemberDocType>;
+
+       setPayments(
+         paymentsDocs.docs.map((d) => ({...d.data(), user_data: users.filter (u => u.uid == (d.data() as PaymentDocType).recipient)[0]})) as Array<PaymentDocType>
+       );
     };
 
     fetchPayments();
   }, []);
-
+  
   return (
     <Flex width="100%" flexDir="column" gap="1rem" height="100%" pb={"2rem"}>
       <ContentHeader
@@ -90,19 +92,31 @@ const PaymentsTable = ({ payments }: { payments: Array<PaymentDocType> }) => {
               <Tr key={i}>
                 <Td>
                   <Flex flexDir={"row"} gap={"0.3rem"}>
-                    <Avatar
-                      size="sm"
-                      name="Kent Dodds"
-                      src="https://bit.ly/kent-c-dodds"
-                    />
+                  {payment.user_data ? 
+                      <Avatar
+                        size="sm"
+                        name={`${payment.user_data.name}_avatar`}
+                        src={payment.user_data.photo}
+                      />
+                      :
+                      <Avatar
+                        size="sm"
+                        border={'1px solid white'}
+                     />
+                  }
+                    
                     <Center>
-                      <Text textAlign={"center"}>Kent C Dodds</Text>
+                      {payment.user_data ? 
+                        <Text textAlign={"center"}>{payment.user_data.name}</Text>
+                        :
+                        <Text textAlign={"center"}>UnKnown</Text>
+                      }
                     </Center>
                   </Flex>
                 </Td>
                 <Td>{new Date(payment.timestamp * 1000).toDateString()}</Td>
                 <Td>2021 Lamborghini Urus</Td>
-                <Td>{payment.amount}</Td>
+                <Td>${payment.amount}</Td>
                 <Td>
                   <Badge colorScheme="green">Deposited</Badge>
                 </Td>

@@ -57,11 +57,11 @@ const ChartSection = () => {
   const [state, setState] = useState({
     series: [
       {
-        name: "Sales",
+        name: "Payments",
         data: [21, 35, 75, 51, 41, 47],
       },
       {
-        name: "Leads",
+        name: "Vehicles",
         data: [41, 79, 57, 47, 63, 71],
       },
     ],
