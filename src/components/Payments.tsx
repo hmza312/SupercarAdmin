@@ -5,11 +5,9 @@ import {
   Text,
   Flex,
   Table,
-  TableCaption,
   TableContainer,
   Tbody,
   Td,
-  Tfoot,
   Th,
   Thead,
   Tr,
@@ -19,11 +17,33 @@ import {
 import WhiteButton from "./design/WhiteButton";
 import ContentHeader from "./design/ContentHeader";
 import { ViewIcon } from "@chakra-ui/icons";
+import { useDocsCount } from "@/lib/hooks/useDocsCount";
+import { paymentsColRef } from "@/lib/firebase";
+import { PaymentDocType } from "@/lib/firebase_docstype";
+import { useEffect, useState } from "react";
+import { getDocs } from "firebase/firestore";
 
 export default function Payments() {
+  const [paymentsCount] = useDocsCount(paymentsColRef);
+  const [payments, setPayments] = useState<Array<PaymentDocType>>([]);
+
+  useEffect(() => {
+    const fetchPayments = async () => {
+      const paymentsDocs = await getDocs(paymentsColRef);
+      setPayments(
+        paymentsDocs.docs.map((d) => d.data()) as Array<PaymentDocType>
+      );
+    };
+
+    fetchPayments();
+  }, []);
+
   return (
     <Flex width="100%" flexDir="column" gap="1rem" height="100%" pb={"2rem"}>
-      <ContentHeader heading="All Payments (223)" description="" />
+      <ContentHeader
+        heading={`All Payments (${paymentsCount})`}
+        description=""
+      />
       <Flex
         flex={3}
         width={"100%"}
@@ -41,14 +61,14 @@ export default function Payments() {
           overflowY={"auto"}
           flexBasis={"90%"}
         >
-          <PaymentsTable />
+          <PaymentsTable payments={payments} />
         </Flex>
       </Flex>
     </Flex>
   );
 }
 
-const PaymentsTable = () => {
+const PaymentsTable = ({ payments }: { payments: Array<PaymentDocType> }) => {
   const [under800] = useMediaQuery("(max-width: 800px)");
 
   return (
@@ -65,7 +85,7 @@ const PaymentsTable = () => {
           </Tr>
         </Thead>
         <Tbody>
-          {new Array(1000).fill(".").map((v, i) => {
+          {payments.map((payment, i) => {
             return (
               <Tr key={i}>
                 <Td>
@@ -80,9 +100,9 @@ const PaymentsTable = () => {
                     </Center>
                   </Flex>
                 </Td>
-                <Td>{new Date().toDateString()}</Td>
+                <Td>{new Date(payment.timestamp * 1000).toDateString()}</Td>
                 <Td>2021 Lamborghini Urus</Td>
-                <Td>$3,500.09</Td>
+                <Td>{payment.amount}</Td>
                 <Td>
                   <Badge colorScheme="green">Deposited</Badge>
                 </Td>

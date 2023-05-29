@@ -1,7 +1,6 @@
-
 export type VehicleDocType = {
   owner: string;
-}
+};
 
 export type PaymentDocType = {
   amount: number;
@@ -27,8 +26,18 @@ export type MemberDocType = {
   authenticated: string;
   deleted: boolean | undefined;
   uid: string;
-  payments: Array<PaymentDocType> | null
-  vehicles: Array<VehicleDocType> | null
+  payments: Array<PaymentDocType> | null;
+  vehicles: Array<VehicleDocType> | null;
 };
 
-
+export type RequestDocType = {
+  call_type: string;
+  created: number;
+  id: string;
+  status: number;
+  title: string;
+  user: string;
+  user_email: string;
+  user_mobile: string;
+  user_name: string;
+};

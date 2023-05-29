@@ -13,16 +13,35 @@ import {
 import ContentHeader from "./design/ContentHeader";
 import WhiteButton from "./design/WhiteButton";
 import OrangeButton from "./design/OrangeButton";
+import { useDocsCount } from "@/lib/hooks/useDocsCount";
+import { callsColRef } from "@/lib/firebase";
+import { useEffect, useState } from "react";
+import { getDocs } from "firebase/firestore";
+import { RequestDocType } from "@/lib/firebase_docstype";
 
 export default function RequestsContent() {
+  const [requestsCount] = useDocsCount(callsColRef);
+  const [requests, setRequests] = useState<Array<RequestDocType>>([]);
+
+  useEffect(() => {
+    const fetchRequests = async () => {
+      const requestDocs = await getDocs(callsColRef);
+      setRequests(
+        requestDocs.docs.map((d) => d.data()) as Array<RequestDocType>
+      );
+    };
+
+    fetchRequests();
+  }, []);
+
   return (
     <Flex width="100%" flexDir="column" gap="1rem" height="100%">
       <ContentHeader
         description="Use the chatroom to discuss payments and other client relations"
-        heading="Help Requests (102)"
+        heading={`Help Requests (${requestsCount})`}
       />
       <Flex gap="0.3rem">
-        <CustomersList />
+        <CustomersList requests={requests} />
         <Flex
           flex={1}
           bg="var(--grey-color)"
@@ -68,7 +87,8 @@ export default function RequestsContent() {
   );
 }
 
-const CustomersList = () => {
+const CustomersList = ({ requests }: { requests: Array<RequestDocType> }) => {
+  console.log(requests);
   return (
     <Flex
       flex={3}
@@ -87,27 +107,9 @@ const CustomersList = () => {
         overflowY={"auto"}
         flexBasis={"90%"}
       >
-        <CustomerData />
-        <CustomerData />
-        <CustomerData />
-        <CustomerData />
-        <CustomerData />
-        <CustomerData />
-        <CustomerData />
-        <CustomerData />
-        <CustomerData />
-        <CustomerData />
-        <CustomerData />
-        <CustomerData />
-        <CustomerData />
-        <CustomerData />
-        <CustomerData />
-        <CustomerData />
-        <CustomerData />
-        <CustomerData />
-        <CustomerData />
-        <CustomerData />
-        <CustomerData />
+        {requests.map((req, idx) => {
+          return <CustomerData key={idx} request={req} />;
+        })}
       </Flex>
       <Flex flexBasis={"17%"}>
         <WhiteButton>1</WhiteButton>
@@ -116,7 +118,7 @@ const CustomersList = () => {
   );
 };
 
-const CustomerData = ({}) => {
+const CustomerData = ({ request }: { request: RequestDocType }) => {
   return (
     <Flex
       background="var(--grey-color)"
@@ -128,10 +130,10 @@ const CustomerData = ({}) => {
       <Avatar size="md" name="Kent Dodds" src="https://bit.ly/kent-c-dodds" />
       <Stack spacing={0}>
         <Text fontSize="lg" whiteSpace="nowrap">
-          Kent C Dodds
+          {request.user_name}
         </Text>
         <Text fontSize="xs" whiteSpace="nowrap">
-          +92 311 6287297
+          {request.user_mobile}
         </Text>
       </Stack>
 
