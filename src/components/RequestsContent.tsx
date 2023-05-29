@@ -42,7 +42,7 @@ export default function RequestsContent() {
       />
       <Flex gap="0.3rem">
         <CustomersList requests={requests} />
-        <Flex
+        {/* <Flex
           flex={1}
           bg="var(--grey-color)"
           rounded="lg"
@@ -81,7 +81,7 @@ export default function RequestsContent() {
               <WhiteButton>Documents</WhiteButton>
             </Center>
           </Flex>
-        </Flex>
+        </Flex> */}
       </Flex>
     </Flex>
   );
