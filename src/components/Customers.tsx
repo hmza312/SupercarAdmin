@@ -6,6 +6,8 @@ import {
   Avatar,
   Center,
   Divider,
+  useMediaQuery,
+  useDisclosure,
 } from "@chakra-ui/react";
 import ContentHeader from "./design/ContentHeader";
 import WhiteButton from "./design/WhiteButton";
@@ -18,6 +20,7 @@ import {
   VehicleDocType,
 } from "@/lib/firebase_docstype";
 import { useDocsCount } from "@/lib/hooks/useDocsCount";
+import DrawerWrapper from "./design/Drawer";
 
 export default function Customers() {
   const [customerCount] = useDocsCount(membersColRef);
@@ -25,6 +28,9 @@ export default function Customers() {
   const [selectedCustomer, setSelectedCustomer] =
     useState<MemberDocType | null>(null);
 
+  const [isUnder850] = useMediaQuery("(max-width: 850px)")
+  const { isOpen, onOpen, onClose } = useDisclosure()
+  
   useEffect(() => {
     const fetchCustomers = async () => {
       const customersDocs = await getDocs(membersColRef);
@@ -70,20 +76,24 @@ export default function Customers() {
         heading={`Total Customers (${customerCount})`}
       />
       <Flex gap="0.3rem">
-        <CustomersList customers={customers} onSelect={setSelectedCustomer} />
-        <CustomerProfile customer={selectedCustomer} />
+        <CustomersList customers={customers} onSelect={setSelectedCustomer} onOpenDrawer={onOpen}/>
+        {isUnder850 ?<DrawerWrapper isOpen = {isOpen} onClose={onClose}>
+          <CustomerProfile customer={selectedCustomer} />
+        </DrawerWrapper>: <CustomerProfile customer={selectedCustomer} />}
       </Flex>
     </Flex>
   );
 }
 
 const CustomerProfile = ({ customer }: { customer: MemberDocType | null }) => {
+  const [isUnder850] = useMediaQuery("(max-width: 850px)")
   if (!customer) return <></>;
+
 
   return (
     <Flex
       flex={1}
-      bg="var(--grey-color)"
+      bg={isUnder850 ? "var(--bg-color)" : "var(--grey-color)"}
       rounded="lg"
       height={"auto"}
       justifyContent={"center"}
@@ -122,27 +132,30 @@ const CustomerProfile = ({ customer }: { customer: MemberDocType | null }) => {
 const CustomersList = ({
   customers,
   onSelect,
+  onOpenDrawer
 }: {
   customers: Array<MemberDocType>;
   onSelect: Dispatch<SetStateAction<MemberDocType | null>>;
+  onOpenDrawer: ()=> void
 }) => {
+  const [isUnder850] = useMediaQuery("(max-width: 850px)")
   return (
     <Flex
-      flex={3}
+      flex={isUnder850 ? 1 : 3}
       width={"100%"}
       height={"100vh"}
       maxH={"100vh"}
       minHeight={"100vh"}
       flexDir={"column"}
       gap={"1rem"}
-      p={"1rem"}
+      p={isUnder850 ? "0rem" :"1rem"}
       py={0}
     >
       <Flex
         flexDir={"column"}
         gap={"1rem"}
-        overflowY={"auto"}
-        flexBasis={"90%"}
+        overflowY={isUnder850 ? "initial" : "auto"}
+        flexBasis={isUnder850 ? "100%" : "90%"}
       >
         {customers.map((customer, idx) => {
           return (
@@ -151,6 +164,7 @@ const CustomersList = ({
               key={idx}
               onClick={() => {
                 onSelect(customer);
+                onOpenDrawer();
               }}
             />
           );
@@ -170,7 +184,9 @@ const CustomerData = ({
   customer: MemberDocType;
   onClick: () => void;
 }) => {
+  const [isUnder500] = useMediaQuery("(max-width: 500px)")
   if (customer.deleted) return <></>;
+
 
   return (
     <Flex
@@ -181,6 +197,8 @@ const CustomerData = ({
       rounded="lg"
       cursor={"pointer"}
       onClick={onClick}
+      overflowX={isUnder500 ? "auto" : 'initial'}
+      minH={isUnder500 ? '5rem' : 'initial'}
     >
       <Avatar size="md" name={`${customer.name}_avatar`} src={customer.photo} />
       <Stack spacing={0}>

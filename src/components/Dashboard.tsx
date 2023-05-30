@@ -14,6 +14,7 @@ import {
   Badge,
   Button,
   Center,
+  useMediaQuery,
 } from "@chakra-ui/react";
 
 export default function Dashboard() {
@@ -43,35 +44,29 @@ import RecentPayments from "./dashboard/RecentPayments";
 import { PaymentDocType } from "@/lib/firebase_docstype";
 import Activity from "./dashboard/Activity";
 import ContentHeader from "./design/ContentHeader";
+import { useDocsCount } from "@/lib/hooks/useDocsCount";
 
 const DashBoardContent = () => {
-  const [totalCustomers, setTotalCustomers] = useState<number>(0);
-  const [totalVehicles, setTotalVehicles] = useState<number>(0);
+  const [totalCustomers] = useDocsCount(membersColRef);
+  const [totalVehicles] = useDocsCount(vehiclesColRef);
   const [payments, setPayments] = useState<Array<PaymentDocType>>([]);
 
   useEffect(() => {
-    const fetchCustomersCount = async () => {
-      const count = await getCountFromServer(membersColRef);
-      setTotalCustomers(count.data().count);
-    };
-
-    const fetchVehiclesCount = async () => {
-      const count = await getCountFromServer(vehiclesColRef);
-      setTotalVehicles(count.data().count);
-    };
-
+    
     const fetchRecentPayments = async () => {
       const paymentDocs = await getDocs(paymentsColRef);
-      const res = paymentDocs.docs.map((d) =>
-        d.data()
-      ) as Array<PaymentDocType>;
+      const res = paymentDocs.docs.map((d) => d.data()) as Array<PaymentDocType>;
       setPayments(res);
     };
 
-    fetchCustomersCount();
-    fetchVehiclesCount();
     fetchRecentPayments();
   }, []);
+
+  const [isUnder850] = useMediaQuery ("(max-width: 850px)");
+
+  if (isUnder850) return <FlexBoxLayout 
+    totalCustomers={totalCustomers} totalVehicles={totalVehicles} payments = {payments}
+  />
 
   return (
     <Grid
@@ -138,35 +133,7 @@ const DashBoardContent = () => {
         bg="var(--grey-color)"
         rounded={"xl"}
       >
-        <Flex
-          flexDir={"column"}
-          width={"100%"}
-          height={"100%"}
-          gap={"1rem"}
-          p={"1rem"}
-        >
-          <Heading fontSize={"2xl"}>Waitlist</Heading>
-
-          <Box flexDir={"column"}>
-            <Text>Pending Users</Text>
-            <Text>10</Text>
-          </Box>
-
-          <Flex overflowY={"scroll"} flex={1} flexDir={"column"} gap={"0.5rem"}>
-            <WaitListPayment />
-            <WaitListPayment />
-            <WaitListPayment />
-            <WaitListPayment />
-          </Flex>
-
-          <Button
-            color={"black"}
-            background={"var(--white-color)"}
-            _hover={{ background: "var(--white-color)" }}
-          >
-            See Full User Waitlist
-          </Button>
-        </Flex>
+        <WaitList />
       </GridItem>
 
       <GridItem
@@ -180,6 +147,58 @@ const DashBoardContent = () => {
     </Grid>
   );
 };
+
+const FlexBoxLayout= ({ totalCustomers,totalVehicles, payments }: {
+    totalCustomers: number
+    totalVehicles: number
+    payments: Array<PaymentDocType>
+}) => { 
+  const [isUnder550] = useMediaQuery("(max-width: 550px)")
+  const [isUnder850] = useMediaQuery("(max-width: 850px");
+
+  return <Flex width={'100%'} flexDir={'column'} gap={'1rem'}>
+  <Flex width={'100%'} gap={'1rem'} justifyContent={'center'} flexWrap={'wrap'} flexDir={isUnder550 ? 'column': 'row'}>
+      <Flex flex={1} bg="var(--grey-color)" rounded={"xl"}>
+        <StatSection
+          title="Total Customers"
+          badgeStatus="green"
+          count={totalCustomers}
+          percentage="+12.9%"
+        >
+          <IoIosPeople style={{ fontSize: "2rem" }} />
+        </StatSection>
+      </Flex>
+      <Flex flex={1} bg="var(--grey-color)" rounded={"xl"}>
+      <StatSection
+          title="Total Vehicles"
+          badgeStatus="red"
+          count={totalVehicles}
+          percentage="+12.9%"
+        >
+          <AiFillCar style={{ fontSize: "2rem" }} />
+        </StatSection>
+      </Flex>
+  </Flex>
+
+  {/* graph */}
+  <Flex width={'100%'} bg="var(--grey-color)" rounded={"xl"}>
+    <Analytics />
+  </Flex>
+
+  {/*  recent payments */}
+  <Flex width={'100%'} bg="var(--grey-color)" rounded={"xl"}>
+    <RecentPayments payments={payments} />
+  </Flex>
+
+  {/* side bar */}
+  <Flex width={'100%'} gap={'0.5rem'} flexDir={isUnder550 ? 'column':'row'}>
+    <Flex bg="var(--grey-color)" rounded={"xl"} flex={1}><WaitList useMobStyle={isUnder850}/></Flex>
+    <Flex bg="var(--grey-color)" rounded={"xl"} flex={1}><Activity /></Flex>
+  </Flex>
+
+  <Flex my={'3rem'}></Flex>
+</Flex>}
+
 
 const WaitListPayment = () => {
   return (
@@ -207,3 +226,42 @@ const WaitListPayment = () => {
     </>
   );
 };
+
+
+const WaitList = ({ useMobStyle} : {useMobStyle?: boolean} = {useMobStyle: false})=> <Flex
+  flexDir={"column"}
+  width={"100%"}
+  height={"100%"}
+  gap={"1rem"}
+  p={"1rem"}
+>
+<Heading fontSize={"2xl"}>Waitlist</Heading>
+
+<Box flexDir={"column"}>
+  <Text>Pending Users</Text>
+  <Text>10</Text>
+</Box>
+
+<Flex overflowY={"scroll"} flex={1} flexDir={"column"} gap={"0.5rem"} maxH={useMobStyle ? '20rem' : 'initial'}>
+  <WaitListPayment />
+  <WaitListPayment />
+  <WaitListPayment />
+  <WaitListPayment />
+  <WaitListPayment />
+  <WaitListPayment />
+  <WaitListPayment />
+  <WaitListPayment />
+  <WaitListPayment />
+  <WaitListPayment />
+  <WaitListPayment />
+  <WaitListPayment />
+</Flex>
+
+<Button
+  color={"black"}
+  background={"var(--white-color)"}
+  _hover={{ background: "var(--white-color)" }}
+>
+  See Full User Waitlist
+</Button>
+</Flex>

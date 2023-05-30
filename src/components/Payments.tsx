@@ -48,6 +48,8 @@ export default function Payments() {
     fetchPayments();
   }, []);
 
+  const [under800] = useMediaQuery("(max-width: 800px)");
+
   return (
     <Flex width="100%" flexDir="column" gap="1rem" height="100%" pb={"2rem"}>
       <ContentHeader
@@ -60,7 +62,7 @@ export default function Payments() {
         minHeight={"90vh"}
         flexDir={"column"}
         gap={"1rem"}
-        p={"1rem"}
+        p={under800 ?  "0.5rem" :"1rem"}
         py={0}
         bg={"var(--grey-color)"}
         rounded={"lg"}

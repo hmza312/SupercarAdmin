@@ -9,6 +9,7 @@ import {
   Box,
   Center,
   Divider,
+  useMediaQuery,
 } from "@chakra-ui/react";
 import ContentHeader from "./design/ContentHeader";
 import WhiteButton from "./design/WhiteButton";
@@ -97,6 +98,9 @@ export default function RequestsContent() {
 }
 
 const CustomersList = ({ requests }: { requests: Array<RequestDocType> }) => {
+
+  const [isUnder650] = useMediaQuery("(max-width: 650px)")
+
   return (
     <Flex
       flex={3}
@@ -106,20 +110,21 @@ const CustomersList = ({ requests }: { requests: Array<RequestDocType> }) => {
       minHeight={"100vh"}
       flexDir={"column"}
       gap={"1rem"}
-      p={"1rem"}
+      p={isUnder650 ? "0.5rem" : "1rem"}
       py={0}
+      pb ={'2rem'}
     >
       <Flex
         flexDir={"column"}
         gap={"1rem"}
-        overflowY={"auto"}
-        flexBasis={"90%"}
+        overflowY={isUnder650 ? "initial" : "auto"}
+        flexBasis={isUnder650 ?  "100%": "90%"}
       >
         {requests.map((req, idx) => {
           return <CustomerData key={idx} request={req} />;
         })}
       </Flex>
-      <Flex flexBasis={"17%"}>
+      <Flex flexBasis={"17%"} my = {'1rem'}>
         <WhiteButton>1</WhiteButton>
       </Flex>
     </Flex>
@@ -127,6 +132,9 @@ const CustomersList = ({ requests }: { requests: Array<RequestDocType> }) => {
 };
 
 const CustomerData = ({ request }: { request: RequestDocType }) => {
+
+  const [isUnder650] = useMediaQuery("(max-width: 650px)")
+
   return (
     <Flex
       background="var(--grey-color)"
@@ -134,6 +142,8 @@ const CustomerData = ({ request }: { request: RequestDocType }) => {
       gap="1.5rem"
       flexDir="row"
       rounded="lg"
+      minH={isUnder650 ? '5rem' : 'initial'}
+      overflowX={isUnder650 ? 'auto' : 'initial'}
     >
       {request.user_data && request.user_data.photo && (
         <Avatar size="md" name="Kent Dodds" src={request.user_data.photo} />

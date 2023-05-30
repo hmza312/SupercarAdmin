@@ -1,3 +1,4 @@
+import { useMediaQuery } from "@chakra-ui/react";
 import { Oxygen } from "next/font/google";
 const oxygen = Oxygen({ subsets: ["latin"], weight: ["300"] });
 
@@ -11,13 +12,16 @@ export default function MainLayout({
   className?: string;
   padding?: string;
 }) {
+
+  const [isUnder500] = useMediaQuery("(max-width: 500px");
+
   return (
     <main
       style={{
         width: "100%",
         height: "100%",
         overflowY: "auto",
-        padding: `${!padding ? "1rem" : padding}`,
+        padding: `${!padding ? (isUnder500 ? "0.5rem" : "1rem") : padding}`,
       }}
       className={className ? className : oxygen.className}
     >

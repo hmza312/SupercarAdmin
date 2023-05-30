@@ -1,6 +1,8 @@
 import { membersColRef, vehiclesColRef } from "@/lib/firebase";
 import { getDocs } from "firebase/firestore";
-import { useEffect, useState } from "react";
+import { Dispatch, SetStateAction, useEffect, useState } from "react";
+
+import DrawerWrapper from "./design/Drawer";
 
 import {
   Box,
@@ -10,6 +12,9 @@ import {
   chakra,
   Link,
   Heading,
+  Center,
+  useMediaQuery,
+  useDisclosure,
 } from "@chakra-ui/react";
 import ContentHeader from "./design/ContentHeader";
 import WhiteButton from "./design/WhiteButton";
@@ -44,6 +49,10 @@ export default function Vehicles() {
   const [vehiclesToShow, paginationIndices, setActiveIdx] =
     usePagination<VehicleDocType>(vehicles, 15);
 
+  const [isUnder850] = useMediaQuery("(max-width: 850px)")  
+
+  const { isOpen, onOpen, onClose } = useDisclosure()
+
   return (
     <>
       <Flex width="100%" flexDir="column" gap="1rem" height="100%">
@@ -52,47 +61,53 @@ export default function Vehicles() {
           heading={`Vehicles (${vehicleCount})`}
         />
         <Flex gap={"0.1rem"}>
-          <VehiclesList vehicles={vehiclesToShow} />
-          <VehicleDetail vehicle={vehicles[1]} />
+          <VehiclesList vehicles={vehiclesToShow} onSelect={setSelectedVehicle}  onDrawerOpen={onOpen}/>
+          {!isUnder850 ? <VehicleDetail vehicle={selectedVehicle} />
+           : <DrawerWrapper isOpen = {isOpen} onClose={onClose}>
+              <VehicleDetail vehicle={selectedVehicle} />
+            </DrawerWrapper>
+          }
         </Flex>
       </Flex>
     </>
   );
 }
 
-const VehicleDetail = ({ vehicle }: { vehicle: VehicleDocType | null }) => {
+const VehicleDetail = ({ vehicle }: { vehicle: VehicleDocType | null  }) => {
+  const [isUnder850] = useMediaQuery("(max-width: 850px)");
+  
   if (vehicle == null) return <></>;
 
   return (
     <Flex
       flex={1}
-      bg="var(--grey-color)"
+      bg={isUnder850 ? "var(--bg-color)": "var(--grey-color)"}
       rounded="lg"
       height={"auto"}
       padding={"0.5rem"}
       flexDir={"column"}
       gap={"1rem"}
+      overflowY={'auto'}
     >
       <Heading fontSize={"xl"}>Vehicles</Heading>
       <img
         width={"100%"}
         height={"auto"}
         src={vehicle.thumbnail}
-        style={{ borderRadius: "0.5rem" }}
+        style={{ borderRadius: "0.5rem", maxHeight: '20rem' }}
       />
-      <Flex alignItems={"center"} flexDir={'column'}>
-        <Heading fontSize={"2xl"}>{vehicle.title}</Heading>
+      <Flex alignItems={"center"} flexDir={'column'} justifyContent={'center'} gap={'0.5rem'}>
+        <Heading textAlign={'center'} fontSize={"2xl"}>{vehicle.title}</Heading>
         {vehicle.owner_data ? 
           <>
-            <Text>{vehicle.owner_data.name}</Text>
-            <Text>{vehicle.owner_data.mobile}</Text>
+              <Text>${vehicle.owner_data.name ?? "unknown"}</Text>
+              <Text>{vehicle.owner_data.mobile ?? ""}</Text>
           </>
           : <>
             <Text>{"Unknown"}</Text>
           </>
         }
       </Flex>
-      
         <Flex gap={'1rem'} justifyContent={'center'} flexWrap={'wrap'}>
           <OrangeButton display={'block'}>Add Payment</OrangeButton>
           <WhiteButton display={'block'}>Edit</WhiteButton>
@@ -101,11 +116,13 @@ const VehicleDetail = ({ vehicle }: { vehicle: VehicleDocType | null }) => {
   );
 };
 
-const VehiclesList = ({ vehicles }: { vehicles: Array<any> }) => {
+const VehiclesList = ({ vehicles, onSelect, onDrawerOpen }: { vehicles: Array<any>, onSelect: Dispatch<SetStateAction<VehicleDocType | null>>, onDrawerOpen: ()=> void }) => {
+  const [isUnder850] = useMediaQuery("(max-width: 850px)")
+
   return (
     <>
       <Flex
-        flex={3}
+        flex={isUnder850 ? 1 : 3}
         width={"100%"}
         height={"100vh"}
         maxH={"100vh"}
@@ -123,7 +140,10 @@ const VehiclesList = ({ vehicles }: { vehicles: Array<any> }) => {
           width={"100%"}
         >
           {vehicles.map((vehicle, idx) => {
-            return <VehicleData vehicle={vehicle} key={idx} />;
+            return <VehicleData vehicle={vehicle} key={idx} onClick={()=> {
+              onSelect(vehicle);
+              onDrawerOpen()
+            }}/>;
           })}
         </Flex>
         <Flex flexBasis={"17%"}>
@@ -140,11 +160,12 @@ import { useDocsCount } from "@/lib/hooks/useDocsCount";
 import usePagination from "@/lib/hooks/usePagination";
 import OrangeButton from "./design/OrangeButton";
 
-const VehicleData = ({ vehicle }: { vehicle: VehicleDocType }) => {
+const VehicleData = ({ vehicle, onClick }: { vehicle: VehicleDocType, onClick: ()=> void }) => {
+  
   return (
     <>
       {/*eslint-disable-next-line @next/next/no-img-element */}
-      <Box rounded={"lg"} pb={"1rem"} bg={"var(--grey-color)"}>
+      <Box rounded={"lg"} pb={"1rem"} bg={"var(--grey-color)"} cursor={'pointer'} onClick={onClick}>
         <Image
           src={vehicle.thumbnail}
           alt="vehicle_image"
@@ -154,10 +175,10 @@ const VehicleData = ({ vehicle }: { vehicle: VehicleDocType }) => {
           borderRadius={"var(--chakra-radii-lg)"}
           style={{ objectFit: "fill" }}
         />
-        <Flex p={"0.1rem"} flexDir={"column"}>
+        <Flex p={"0.3rem"} flexDir={"column"}>
           <Heading fontSize={"md"}>{vehicle.title}</Heading>
           <Text fontWeight={"light"} fontSize={"sm"}>
-            {vehicle.owner_data ? vehicle.owner_data.name : "Unknown"}
+            {vehicle.owner_data ? vehicle.owner_data.name ?? "Unknown" : "Unknown"}
           </Text>
         </Flex>
       </Box>
