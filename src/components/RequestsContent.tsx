@@ -26,19 +26,23 @@ export default function RequestsContent() {
   useEffect(() => {
     const fetchRequests = async () => {
       const requestDocs = await getDocs(callsColRef);
-      const users = (await getDocs(membersColRef)).docs.map (d => ({...d.data(), uid: d.id })) as Array<MemberDocType>;
-      
+      const users = (await getDocs(membersColRef)).docs.map((d) => ({
+        ...d.data(),
+        uid: d.id,
+      })) as Array<MemberDocType>;
+
       setRequests(
-        (requestDocs.docs.map((d) => d.data()) as Array<RequestDocType>).map (d => {
-          return ({...d, user_data: users.filter (u => u.uid == d.user)[0]});
-        })
+        (requestDocs.docs.map((d) => d.data()) as Array<RequestDocType>).map(
+          (d) => {
+            return { ...d, user_data: users.filter((u) => u.uid == d.user)[0] };
+          }
+        )
       );
     };
 
     fetchRequests();
   }, []);
 
-  
   return (
     <Flex width="100%" flexDir="column" gap="1rem" height="100%">
       <ContentHeader
@@ -93,7 +97,6 @@ export default function RequestsContent() {
 }
 
 const CustomersList = ({ requests }: { requests: Array<RequestDocType> }) => {
-  
   return (
     <Flex
       flex={3}
@@ -124,7 +127,6 @@ const CustomersList = ({ requests }: { requests: Array<RequestDocType> }) => {
 };
 
 const CustomerData = ({ request }: { request: RequestDocType }) => {
-  
   return (
     <Flex
       background="var(--grey-color)"
@@ -133,10 +135,14 @@ const CustomerData = ({ request }: { request: RequestDocType }) => {
       flexDir="row"
       rounded="lg"
     >
-      {request.user_data && request.user_data.photo && <Avatar size="md" name="Kent Dodds" src={request.user_data.photo} />}
+      {request.user_data && request.user_data.photo && (
+        <Avatar size="md" name="Kent Dodds" src={request.user_data.photo} />
+      )}
 
-      {!request.user_data && <Avatar size={'md'}  border={'1px solid white'} showBorder={true}/>}
-      
+      {!request.user_data && (
+        <Avatar size={"md"} border={"1px solid white"} showBorder={true} />
+      )}
+
       <Stack spacing={0}>
         <Text fontSize="lg" whiteSpace="nowrap">
           {request.user_name}

@@ -29,17 +29,25 @@ export default function Payments() {
 
   useEffect(() => {
     const fetchPayments = async () => {
-       const paymentsDocs = await getDocs(paymentsColRef);
-       const users = (await getDocs(membersColRef)).docs.map (d => ({...d.data(), uid: d.id})) as Array<MemberDocType>;
+      const paymentsDocs = await getDocs(paymentsColRef);
+      const users = (await getDocs(membersColRef)).docs.map((d) => ({
+        ...d.data(),
+        uid: d.id,
+      })) as Array<MemberDocType>;
 
-       setPayments(
-         paymentsDocs.docs.map((d) => ({...d.data(), user_data: users.filter (u => u.uid == (d.data() as PaymentDocType).recipient)[0]})) as Array<PaymentDocType>
-       );
+      setPayments(
+        paymentsDocs.docs.map((d) => ({
+          ...d.data(),
+          user_data: users.filter(
+            (u) => u.uid == (d.data() as PaymentDocType).recipient
+          )[0],
+        })) as Array<PaymentDocType>
+      );
     };
 
     fetchPayments();
   }, []);
-  
+
   return (
     <Flex width="100%" flexDir="column" gap="1rem" height="100%" pb={"2rem"}>
       <ContentHeader
@@ -92,25 +100,24 @@ const PaymentsTable = ({ payments }: { payments: Array<PaymentDocType> }) => {
               <Tr key={i}>
                 <Td>
                   <Flex flexDir={"row"} gap={"0.3rem"}>
-                  {payment.user_data ? 
+                    {payment.user_data ? (
                       <Avatar
                         size="sm"
                         name={`${payment.user_data.name}_avatar`}
                         src={payment.user_data.photo}
                       />
-                      :
-                      <Avatar
-                        size="sm"
-                        border={'1px solid white'}
-                     />
-                  }
-                    
+                    ) : (
+                      <Avatar size="sm" border={"1px solid white"} />
+                    )}
+
                     <Center>
-                      {payment.user_data ? 
-                        <Text textAlign={"center"}>{payment.user_data.name}</Text>
-                        :
+                      {payment.user_data ? (
+                        <Text textAlign={"center"}>
+                          {payment.user_data.name}
+                        </Text>
+                      ) : (
                         <Text textAlign={"center"}>UnKnown</Text>
-                      }
+                      )}
                     </Center>
                   </Flex>
                 </Td>

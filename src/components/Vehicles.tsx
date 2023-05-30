@@ -15,22 +15,35 @@ import ContentHeader from "./design/ContentHeader";
 import WhiteButton from "./design/WhiteButton";
 
 export default function Vehicles() {
-    useEffect(()=> {
-      const fetchDocs = async () => {
-          const res = await getDocs (vehiclesColRef)
-          const users = (await getDocs(membersColRef)).docs.map(d => ({...d.data(), uid: d.id })) as Array<MemberDocType> 
-          
-          const docs = (res.docs.map (doc => doc.data()) as Array<VehicleDocType>)
-          .map (d => ({...d, owner_data: users.filter (u => u.uid == d.owner)[0]}))
-          setVehicles (docs);
-       }
+  useEffect(() => {
+    const fetchDocs = async () => {
+      const res = await getDocs(vehiclesColRef);
+      const users = (await getDocs(membersColRef)).docs.map((d) => ({
+        ...d.data(),
+        uid: d.id,
+      })) as Array<MemberDocType>;
 
-       fetchDocs()
-    }, [])
+      const docs = (
+        res.docs.map((doc) => doc.data()) as Array<VehicleDocType>
+      ).map((d) => ({
+        ...d,
+        owner_data: users.filter((u) => u.uid == d.owner)[0],
+      }));
+      setVehicles(docs);
+    };
+
+    fetchDocs();
+  }, []);
 
   const [vehicles, setVehicles] = useState<Array<VehicleDocType>>([]);
   const [vehicleCount] = useDocsCount(vehiclesColRef);
-  
+  const [selectedVehicle, setSelectedVehicle] = useState<VehicleDocType | null>(
+    null
+  );
+
+  const [vehiclesToShow, paginationIndices, setActiveIdx] =
+    usePagination<VehicleDocType>(vehicles, 15);
+
   return (
     <>
       <Flex width="100%" flexDir="column" gap="1rem" height="100%">
@@ -39,25 +52,40 @@ export default function Vehicles() {
           heading={`Vehicles (${vehicleCount})`}
         />
         <Flex gap={"0.1rem"}>
-          <VehiclesList vehicles={vehicles} />
-
-          <Flex
-            flex={1}
-            bg="var(--grey-color)"
-            rounded="lg"
-            height={"auto"}
-            padding={"1rem"}
-          >
-            <Heading fontSize={"xl"}>Vehicles</Heading>
-          </Flex>
+          <VehiclesList vehicles={vehiclesToShow} />
+          <VehicleDetail vehicle={vehicles[0]} />
         </Flex>
       </Flex>
     </>
   );
 }
 
-const VehiclesList = ({ vehicles }: { vehicles: Array<any> }) => {
+const VehicleDetail = ({ vehicle }: { vehicle: VehicleDocType }) => {
+  return (
+    <Flex
+      flex={1}
+      bg="var(--grey-color)"
+      rounded="lg"
+      height={"auto"}
+      padding={"0.5rem"}
+      flexDir={"column"}
+      gap={"1rem"}
+    >
+      <Heading fontSize={"xl"}>Vehicles</Heading>
+      <img
+        width={"100%"}
+        height={"auto"}
+        src={vehicle.thumbnail}
+        style={{ borderRadius: "0.5rem" }}
+      />
+      <Flex justifyContent={"center"}>
+        <Heading fontSize={"2xl"}>{vehicle.title}</Heading>
+      </Flex>
+    </Flex>
+  );
+};
 
+const VehiclesList = ({ vehicles }: { vehicles: Array<any> }) => {
   return (
     <>
       <Flex
@@ -93,6 +121,7 @@ const VehiclesList = ({ vehicles }: { vehicles: Array<any> }) => {
 import { Image } from "@chakra-ui/next-js";
 import { MemberDocType, VehicleDocType } from "@/lib/firebase_docstype";
 import { useDocsCount } from "@/lib/hooks/useDocsCount";
+import usePagination from "@/lib/hooks/usePagination";
 
 const VehicleData = ({ vehicle }: { vehicle: VehicleDocType }) => {
   return (
@@ -105,8 +134,8 @@ const VehicleData = ({ vehicle }: { vehicle: VehicleDocType }) => {
           height={180}
           width={280}
           quality={100}
-          borderRadius={'var(--chakra-radii-lg)'}
-          style={{ objectFit:"fill" }}
+          borderRadius={"var(--chakra-radii-lg)"}
+          style={{ objectFit: "fill" }}
         />
         <Flex p={"0.1rem"} flexDir={"column"}>
           <Heading fontSize={"md"}>{vehicle.title}</Heading>
