@@ -53,14 +53,16 @@ export default function Vehicles() {
         />
         <Flex gap={"0.1rem"}>
           <VehiclesList vehicles={vehiclesToShow} />
-          <VehicleDetail vehicle={vehicles[0]} />
+          <VehicleDetail vehicle={vehicles[1]} />
         </Flex>
       </Flex>
     </>
   );
 }
 
-const VehicleDetail = ({ vehicle }: { vehicle: VehicleDocType }) => {
+const VehicleDetail = ({ vehicle }: { vehicle: VehicleDocType | null }) => {
+  if (vehicle == null) return <></>;
+
   return (
     <Flex
       flex={1}
@@ -78,9 +80,23 @@ const VehicleDetail = ({ vehicle }: { vehicle: VehicleDocType }) => {
         src={vehicle.thumbnail}
         style={{ borderRadius: "0.5rem" }}
       />
-      <Flex justifyContent={"center"}>
+      <Flex alignItems={"center"} flexDir={'column'}>
         <Heading fontSize={"2xl"}>{vehicle.title}</Heading>
+        {vehicle.owner_data ? 
+          <>
+            <Text>{vehicle.owner_data.name}</Text>
+            <Text>{vehicle.owner_data.mobile}</Text>
+          </>
+          : <>
+            <Text>{"Unknown"}</Text>
+          </>
+        }
       </Flex>
+      
+        <Flex gap={'1rem'} justifyContent={'center'} flexWrap={'wrap'}>
+          <OrangeButton display={'block'}>Add Payment</OrangeButton>
+          <WhiteButton display={'block'}>Edit</WhiteButton>
+        </Flex>
     </Flex>
   );
 };
@@ -122,6 +138,7 @@ import { Image } from "@chakra-ui/next-js";
 import { MemberDocType, VehicleDocType } from "@/lib/firebase_docstype";
 import { useDocsCount } from "@/lib/hooks/useDocsCount";
 import usePagination from "@/lib/hooks/usePagination";
+import OrangeButton from "./design/OrangeButton";
 
 const VehicleData = ({ vehicle }: { vehicle: VehicleDocType }) => {
   return (
