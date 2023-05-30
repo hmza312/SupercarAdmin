@@ -1,3 +1,3 @@
 export default function WaitList() {
-  return <></>;
+   return <></>;
 }

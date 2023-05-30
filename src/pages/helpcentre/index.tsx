@@ -1,5 +1,5 @@
-import React from "react";
+import React from 'react';
 
 export default function WaitListPage() {
-  return <div>WaitList Page</div>;
+   return <div>WaitList Page</div>;
 }
