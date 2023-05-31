@@ -45,9 +45,9 @@ export default function Vehicles() {
    const [selectedVehicle, setSelectedVehicle] = useState<VehicleDocType | null>(null);
 
    const [isUnder850] = useMediaQuery('(max-width: 850px)');
-   const [isUnder1350] = useMediaQuery("(max-width: 1350px)");
-   const [isUpper1100] = useMediaQuery ("(min-width: 1350px");
-   
+   const [isUnder1350] = useMediaQuery('(max-width: 1350px)');
+   const [isUpper1100] = useMediaQuery('(min-width: 1350px');
+
    const { isOpen, onOpen, onClose } = useDisclosure();
 
    const [vehiclesToShow, paginationIndices, setActiveIdx] = usePagination<VehicleDocType>(
@@ -85,11 +85,11 @@ export default function Vehicles() {
                   }}
                   pageCounts={paginationIndices.length}
                />
-               {(!isUnder850 && !(isUpper1100 && isUnder1350)) ? (
-                  <VehicleDetail vehicle={selectedVehicle} renderInDrawer={false}/>
+               {!isUnder850 && !(isUpper1100 && isUnder1350) ? (
+                  <VehicleDetail vehicle={selectedVehicle} renderInDrawer={false} />
                ) : (
                   <DrawerWrapper isOpen={isOpen} onClose={onClose}>
-                     <VehicleDetail vehicle={selectedVehicle} renderInDrawer={true}/>
+                     <VehicleDetail vehicle={selectedVehicle} renderInDrawer={true} />
                   </DrawerWrapper>
                )}
             </Flex>
@@ -98,8 +98,13 @@ export default function Vehicles() {
    );
 }
 
-const VehicleDetail = ({ vehicle, renderInDrawer }: { vehicle: VehicleDocType | null, renderInDrawer: boolean }) => {
-   
+const VehicleDetail = ({
+   vehicle,
+   renderInDrawer
+}: {
+   vehicle: VehicleDocType | null;
+   renderInDrawer: boolean;
+}) => {
    if (vehicle == null) return <></>;
 
    return (
@@ -120,7 +125,7 @@ const VehicleDetail = ({ vehicle, renderInDrawer }: { vehicle: VehicleDocType | 
             width={'100%'}
             height={'auto'}
             src={vehicle.thumbnail}
-            style={{  maxHeight: '20rem' }}
+            style={{ maxHeight: '20rem' }}
          />
          <Flex alignItems={'center'} flexDir={'column'} justifyContent={'center'} gap={'0.1rem'}>
             <Heading textAlign={'center'} fontSize={'2xl'}>
@@ -137,7 +142,7 @@ const VehicleDetail = ({ vehicle, renderInDrawer }: { vehicle: VehicleDocType | 
                </>
             )}
          </Flex>
-         
+
          <Flex flexDir={'column'} justifyContent={'center'} alignContent={'center'}>
             <Center>
                <Text fontWeight={'500'}>{'Vehicle Model'}</Text>
@@ -146,7 +151,7 @@ const VehicleDetail = ({ vehicle, renderInDrawer }: { vehicle: VehicleDocType | 
                <Text>{vehicle.model}</Text>
             </Center>
             <Center px={'25%'} py={'0.5rem'}>
-               <Divider  borderColor={'var(--white-color)'} borderWidth={'1px'}/>
+               <Divider borderColor={'var(--white-color)'} borderWidth={'1px'} />
             </Center>
 
             <Center>
@@ -156,11 +161,11 @@ const VehicleDetail = ({ vehicle, renderInDrawer }: { vehicle: VehicleDocType | 
                <Text>{vehicle.make}</Text>
             </Center>
             <Center px={'25%'} py={'0.5rem'}>
-               <Divider  borderColor={'var(--white-color)'} borderWidth={'1px'}/>
+               <Divider borderColor={'var(--white-color)'} borderWidth={'1px'} />
             </Center>
          </Flex>
 
-         <Flex gap={'1rem'} justifyContent={'center'} flexWrap={'wrap'} p = {'0.3rem'}>
+         <Flex gap={'1rem'} justifyContent={'center'} flexWrap={'wrap'} p={'0.3rem'}>
             <OrangeButton display={'block'}>Add Payment</OrangeButton>
             <WhiteButton display={'block'}>Edit</WhiteButton>
          </Flex>
@@ -216,7 +221,7 @@ const VehiclesList = ({
                   );
                })}
             </Flex>
-            <Flex flexBasis={'17%'} alignSelf={'flex-end'}>
+            <Flex flexBasis={'17%'} alignSelf={'flex-end'} px={'0.5rem'}>
                <Pagination pageCounts={pageCounts} handlePageChange={handlePageChange} />
             </Flex>
          </Flex>
@@ -232,15 +237,14 @@ import OrangeButton from './design/OrangeButton';
 import Pagination from './design/Pagination';
 
 const VehicleData = ({ vehicle, onClick }: { vehicle: VehicleDocType; onClick: () => void }) => {
+   const [isUnder500] = useMediaQuery('(max-width: 500px)');
 
-   const [isUnder500] = useMediaQuery("(max-width: 500px)");
-   
    return (
       <>
          {/*eslint-disable-next-line @next/next/no-img-element */}
          <Box
             minH={'261px'}
-            minW={isUnder500 ? '100%':'359px'}
+            minW={isUnder500 ? '100%' : '359px'}
             maxH={'262px'}
             maxW={'359px'}
             rounded={'lg'}
@@ -252,20 +256,19 @@ const VehicleData = ({ vehicle, onClick }: { vehicle: VehicleDocType; onClick: (
             <Image
                src={vehicle.thumbnail}
                alt="vehicle_image"
-
                maxWidth={'359.236px'}
-               minW={isUnder500 ? '100%':'359.236px'}
+               minW={isUnder500 ? '100%' : '359.236px'}
                minH={'191px'}
                maxH={'191px'}
-
-               height={180}
-               width={280}
+               height={191}
+               width={359}
                quality={100}
                borderTopRadius={'10px'}
+               style={{ objectFit: 'cover' }}
             />
-            <Flex p={'17px'} pt= {'13px'} flexDir={'column'}>
-               <Heading fontSize={'17px'} fontWeight={'600'} >
-                 {vehicle.year} {vehicle.title}
+            <Flex p={'17px'} pt={'13px'} flexDir={'column'}>
+               <Heading fontSize={'17px'} fontWeight={'600'}>
+                  {vehicle.year} {vehicle.title}
                </Heading>
                <Text fontWeight={'light'} fontSize={'sm'}>
                   {vehicle.owner_data ? vehicle.owner_data.name ?? 'Unknown' : 'Unknown'}

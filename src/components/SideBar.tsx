@@ -28,13 +28,12 @@ interface SideBarLink {
    icon: React.ReactNode;
 }
 
-
 const sideBarLinks: Array<SideBarLink> = [
    { text: 'Dashboard', linkTo: ROUTING.home, icon: <RxDashboard /> },
    { text: 'Customers', linkTo: ROUTING.customers, icon: <BiStats /> },
    { text: 'Vehicles', linkTo: ROUTING.vehicles, icon: <IoWalletOutline /> },
    { text: 'Requests', linkTo: ROUTING.requests, icon: <BiUser /> },
-   { text: 'Payments', linkTo: ROUTING.payments, icon: <FiSettings /> },
+   { text: 'Payments', linkTo: ROUTING.payments, icon: <FiSettings /> }
    // { text: 'Waitlist', linkTo: ROUTING.waitList, icon: <FiSettings /> },
    // { text: 'Settings', linkTo: ROUTING.settings, icon: <BsShieldCheck /> },
    // { text: 'Help Centre', linkTo: ROUTING.helpCentre, icon: <BiHelpCircle /> }
@@ -53,8 +52,8 @@ export default function SideBar({ useMobStyle }: { useMobStyle: boolean }) {
 
    const matchRoutePath = (path: string) => {
       const matchingRoute = Object.values(ROUTING).find((route) => {
-        const routeRegex = new RegExp(`^${route}(\/|$)`);
-        return routeRegex.test(path);
+         const routeRegex = new RegExp(`^${route}(\/|$)`);
+         return routeRegex.test(path);
       });
       return matchingRoute || '/';
    };
