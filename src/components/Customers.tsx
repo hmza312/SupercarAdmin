@@ -11,12 +11,17 @@ import {
 } from '@chakra-ui/react';
 import ContentHeader from './design/ContentHeader';
 import WhiteButton from './design/WhiteButton';
-import { Dispatch, SetStateAction, useEffect, useState } from 'react';
+import { Dispatch, SetStateAction, useEffect, useRef, useState } from 'react';
 import { getDocs } from 'firebase/firestore';
 import { membersColRef, paymentsColRef, vehiclesColRef } from '@/lib/firebase';
 import { MemberDocType, PaymentDocType, VehicleDocType } from '@/lib/firebase_docstype';
 import { useDocsCount } from '@/lib/hooks/useDocsCount';
 import DrawerWrapper from './design/Drawer';
+import usePagination from '@/lib/hooks/usePagination';
+import { usePaginator } from 'chakra-paginator';
+import Pagination from './design/Pagination';
+
+const pageQt = 15;
 
 export default function Customers() {
    const [customerCount] = useDocsCount(membersColRef);
@@ -25,6 +30,23 @@ export default function Customers() {
 
    const [isUnder850] = useMediaQuery('(max-width: 850px)');
    const { isOpen, onOpen, onClose } = useDisclosure();
+
+
+   const [customersToShow, paginationIndices, setActiveIdx] = usePagination
+   <MemberDocType>(
+      customers,
+      pageQt
+   );
+      
+   const { currentPage, setCurrentPage } = usePaginator({
+      total: paginationIndices.length,
+      initialState: {
+         pageSize: pageQt,
+         currentPage: 1
+      }
+   });
+
+   
 
    useEffect(() => {
       const fetchCustomers = async () => {
@@ -60,14 +82,23 @@ export default function Customers() {
       fetchCustomers();
    }, []);
 
+   const topRef = useRef<any>(null);
+
    return (
-      <Flex width="100%" flexDir="column" gap="1rem" height="100%">
+      <Flex width="100%" flexDir="column" gap="1rem" height="100%" ref={topRef}>
          <ContentHeader description="" heading={`Total Customers (${customerCount})`} />
          <Flex gap="0.3rem">
             <CustomersList
-               customers={customers}
+               customers={customersToShow}
                onSelect={setSelectedCustomer}
                onOpenDrawer={onOpen}
+               handlePageChange={(i) => {
+                  setActiveIdx(i);
+                  (topRef.current as HTMLElement)?.scrollIntoView({
+                     behavior: "smooth"
+                  });
+               }}
+               pageCounts={paginationIndices.length}
             />
             {isUnder850 ? (
                <DrawerWrapper isOpen={isOpen} onClose={onClose}>
@@ -123,11 +154,15 @@ const CustomerProfile = ({ customer }: { customer: MemberDocType | null }) => {
 const CustomersList = ({
    customers,
    onSelect,
-   onOpenDrawer
+   onOpenDrawer,
+   pageCounts,
+   handlePageChange
 }: {
    customers: Array<MemberDocType>;
    onSelect: Dispatch<SetStateAction<MemberDocType | null>>;
    onOpenDrawer: () => void;
+   pageCounts: number;
+   handlePageChange: (page:number)=> void;
 }) => {
    const [isUnder850] = useMediaQuery('(max-width: 850px)');
    return (
@@ -161,8 +196,8 @@ const CustomersList = ({
                );
             })}
          </Flex>
-         <Flex flexBasis={'17%'}>
-            <WhiteButton>1</WhiteButton>
+         <Flex flexBasis={'17%'} alignSelf={'flex-end'}>
+               <Pagination pageCounts={pageCounts} handlePageChange={handlePageChange}/>
          </Flex>
       </Flex>
    );

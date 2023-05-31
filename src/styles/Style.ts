@@ -25,7 +25,8 @@ export const paginatorStyle: {
       fontSize: 'sm'
    },
    normalStyles: {
-      w: 7,
+      w: 10,
+      px: '1rem',
       fontSize: 'sm',
       _hover: {
          bg: 'var(--orange-color)',

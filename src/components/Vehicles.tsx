@@ -1,6 +1,6 @@
 import { membersColRef, vehiclesColRef } from '@/lib/firebase';
 import { getDocs } from 'firebase/firestore';
-import { Dispatch, SetStateAction, useEffect, useState } from 'react';
+import { Dispatch, SetStateAction, useEffect, useRef, useState } from 'react';
 
 import DrawerWrapper from './design/Drawer';
 
@@ -9,17 +9,15 @@ import {
    Text,
    Flex,
    Badge,
-   chakra,
    Link,
    Heading,
-   Center,
    useMediaQuery,
    useDisclosure
 } from '@chakra-ui/react';
 import ContentHeader from './design/ContentHeader';
 import WhiteButton from './design/WhiteButton';
 
-import { Paginator, Container, Previous, usePaginator, Next, PageGroup } from 'chakra-paginator';
+import { usePaginator } from 'chakra-paginator';
 
 const pageQt = 15;
 
@@ -46,14 +44,16 @@ export default function Vehicles() {
    const [vehicleCount] = useDocsCount(vehiclesColRef);
    const [selectedVehicle, setSelectedVehicle] = useState<VehicleDocType | null>(null);
 
-   const [vehiclesToShow, paginationIndices, setActiveIdx] = usePagination<VehicleDocType>(
+   
+   const [isUnder850] = useMediaQuery('(max-width: 850px)');
+   const { isOpen, onOpen, onClose } = useDisclosure();
+   
+   const [vehiclesToShow, paginationIndices, setActiveIdx] = usePagination
+   <VehicleDocType>(
       vehicles,
       pageQt
    );
-
-   const [isUnder850] = useMediaQuery('(max-width: 850px)');
-   const { isOpen, onOpen, onClose } = useDisclosure();
-
+      
    const { currentPage, setCurrentPage } = usePaginator({
       total: paginationIndices.length,
       initialState: {
@@ -62,9 +62,11 @@ export default function Vehicles() {
       }
    });
 
+   const topRef = useRef<any>(null);
+
    return (
       <>
-         <Flex width="100%" flexDir="column" gap="1rem" height="100%">
+         <Flex width="100%" flexDir="column" gap="1rem" height="100%" ref={topRef}>
             <ContentHeader
                description="Catalog of all vehicles available in you automation fleet"
                heading={`Vehicles (${vehicleCount})`}
@@ -75,8 +77,10 @@ export default function Vehicles() {
                   onSelect={setSelectedVehicle}
                   onDrawerOpen={onOpen}
                   handlePageChange={(i) => {
-                     console.log('page clicked: ', i);
                      setActiveIdx(i);
+                     (topRef.current as HTMLElement)?.scrollIntoView({
+                        behavior: "smooth"
+                     });
                   }}
                   pageCounts={paginationIndices.length}
                />
@@ -189,41 +193,7 @@ const VehiclesList = ({
                })}
             </Flex>
             <Flex flexBasis={'17%'} alignSelf={'flex-end'}>
-               {/*NOTE! typescript yelling about Paginator props has no children component  */}
-               {/*@ts-ignore */}
-               <Paginator
-                  outerLimit={2}
-                  pagesQuantity={pageCounts}
-                  innerLimit={1}
-                  onPageChange={handlePageChange}
-                  activeStyles={paginatorStyle.activeStyles}
-                  normalStyles={paginatorStyle.normalStyles}
-                  separatorStyles={paginatorStyle.separatorStyles}
-               >
-                  <Container align="center" gap={'0.6rem'}>
-                     <Previous
-                        bg={'var(--grey-color)'}
-                        color={'white'}
-                        _hover={{
-                           bg: 'var(--grey-color)',
-                           border: '1px solid var(--white-color)'
-                        }}
-                     >
-                        <AiOutlineArrowLeft />
-                     </Previous>
-                     <PageGroup isInline align="center" />
-                     <Next
-                        bg={'var(--grey-color)'}
-                        color={'white'}
-                        _hover={{
-                           bg: 'var(--grey-color)',
-                           border: '1px solid var(--white-color)'
-                        }}
-                     >
-                        <AiOutlineArrowRight />
-                     </Next>
-                  </Container>
-               </Paginator>
+               <Pagination pageCounts={pageCounts} handlePageChange={handlePageChange}/>
             </Flex>
          </Flex>
       </>
@@ -237,6 +207,7 @@ import usePagination from '@/lib/hooks/usePagination';
 import OrangeButton from './design/OrangeButton';
 import { paginatorStyle } from '@/styles/Style';
 import { AiOutlineArrowLeft, AiOutlineArrowRight } from 'react-icons/ai';
+import Pagination from './design/Pagination';
 
 const VehicleData = ({ vehicle, onClick }: { vehicle: VehicleDocType; onClick: () => void }) => {
    return (

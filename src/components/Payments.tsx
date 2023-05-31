@@ -20,8 +20,13 @@ import { ViewIcon } from '@chakra-ui/icons';
 import { useDocsCount } from '@/lib/hooks/useDocsCount';
 import { membersColRef, paymentsColRef } from '@/lib/firebase';
 import { MemberDocType, PaymentDocType } from '@/lib/firebase_docstype';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { getDocs } from 'firebase/firestore';
+import Pagination from './design/Pagination';
+import { usePaginator } from 'chakra-paginator';
+import usePagination from '@/lib/hooks/usePagination';
+
+const pageQt = 15;
 
 export default function Payments() {
    const [paymentsCount] = useDocsCount(paymentsColRef);
@@ -48,8 +53,23 @@ export default function Payments() {
 
    const [under800] = useMediaQuery('(max-width: 800px)');
 
+   const [requestsToShow, paginationIndices, setActiveIdx] = usePagination<PaymentDocType>(
+      payments,
+      pageQt
+   );
+   
+   const { currentPage, setCurrentPage } = usePaginator({
+      total: paginationIndices.length,
+      initialState: {
+         pageSize: pageQt,
+         currentPage: 1
+      }
+   });
+
+   const topRef = useRef<any> (null);
+
    return (
-      <Flex width="100%" flexDir="column" gap="1rem" height="100%" pb={'2rem'}>
+      <Flex width="100%" flexDir="column" gap="1rem" height="100%" pb={'2rem'} ref = {topRef}>
          <ContentHeader heading={`All Payments (${paymentsCount})`} description="" />
          <Flex
             flex={3}
@@ -64,6 +84,14 @@ export default function Payments() {
          >
             <Flex flexDir={'column'} gap={'1rem'} overflowY={'auto'} flexBasis={'90%'}>
                <PaymentsTable payments={payments} />
+            </Flex>
+            <Flex flexBasis={'17%'} alignSelf={'flex-end'}>
+               <Pagination pageCounts={paginationIndices.length} handlePageChange={(page)=> {
+                  setActiveIdx(page);
+                  (topRef.current as HTMLElement)?.scrollIntoView({
+                     behavior: "smooth"
+                  });
+               }}/>
             </Flex>
          </Flex>
       </Flex>

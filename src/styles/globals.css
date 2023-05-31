@@ -21,6 +21,7 @@ body {
    height: 100%;
    background: var(--bg-color) !important;
    color: white;
+   scroll-behavior: smooth;
 }
 
 #__next {

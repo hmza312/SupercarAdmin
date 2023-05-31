@@ -16,9 +16,14 @@ import WhiteButton from './design/WhiteButton';
 import OrangeButton from './design/OrangeButton';
 import { useDocsCount } from '@/lib/hooks/useDocsCount';
 import { callsColRef, membersColRef, vehiclesColRef } from '@/lib/firebase';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { getDocs } from 'firebase/firestore';
 import { MemberDocType, RequestDocType } from '@/lib/firebase_docstype';
+import Pagination from './design/Pagination';
+import { usePaginator } from 'chakra-paginator';
+import usePagination from '@/lib/hooks/usePagination';
+
+const pageQt = 15
 
 export default function RequestsContent() {
    const [requestsCount] = useDocsCount(callsColRef);
@@ -42,14 +47,39 @@ export default function RequestsContent() {
       fetchRequests();
    }, []);
 
+   const [requestsToShow, paginationIndices, setActiveIdx] = usePagination
+   <RequestDocType>(
+      requests,
+      pageQt
+   );
+      
+   const { currentPage, setCurrentPage } = usePaginator({
+      total: paginationIndices.length,
+      initialState: {
+         pageSize: pageQt,
+         currentPage: 1
+      }
+   });
+
+   const topRef = useRef<any>(null);
+
    return (
-      <Flex width="100%" flexDir="column" gap="1rem" height="100%">
+      <Flex width="100%" flexDir="column" gap="1rem" height="100%" ref = {topRef}>
          <ContentHeader
             description="Use the chatroom to discuss payments and other client relations"
             heading={`Help Requests (${requestsCount})`}
          />
          <Flex gap="0.3rem">
-            <CustomersList requests={requests} />
+            <CustomersList 
+               requests={requestsToShow} 
+               pageCounts={paginationIndices.length} 
+               handlePageChange={(i) => {
+                  setActiveIdx(i);
+                  (topRef.current as HTMLElement)?.scrollIntoView({
+                     behavior: "smooth"
+                  });
+               }}
+            />
             {/* <Flex
           flex={1}
           bg="var(--grey-color)"
@@ -95,7 +125,10 @@ export default function RequestsContent() {
    );
 }
 
-const CustomersList = ({ requests }: { requests: Array<RequestDocType> }) => {
+const CustomersList = (
+   { requests, pageCounts, handlePageChange }:
+   { requests: Array<RequestDocType>, pageCounts: number, handlePageChange: (page: number)=> void }
+) => {
    const [isUnder650] = useMediaQuery('(max-width: 650px)');
 
    return (
@@ -121,8 +154,8 @@ const CustomersList = ({ requests }: { requests: Array<RequestDocType> }) => {
                return <CustomerData key={idx} request={req} />;
             })}
          </Flex>
-         <Flex flexBasis={'17%'} my={'1rem'}>
-            <WhiteButton>1</WhiteButton>
+         <Flex flexBasis={'17%'} alignSelf={'flex-end'}>
+               <Pagination pageCounts={pageCounts} handlePageChange={handlePageChange}/>
          </Flex>
       </Flex>
    );
