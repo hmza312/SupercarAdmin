@@ -6,6 +6,16 @@ export const colors = {
    colorMode: 'dark',
    gray: {
       '400': 'var(--white)'
+   },fonts: {
+      heading: "GeneralSans-Medium",
+      body: "GeneralSans-Medium",
+   },
+   styles: {
+     global: {
+       "html, body": {
+         fontFamily: "GeneralSans-Medium",
+       },
+     },
    }
 };
 
@@ -36,11 +46,12 @@ export const paginatorStyle: {
       color: 'black'
    },
    activeStyles: {
-      w: 7,
       fontSize: 'sm',
       _hover: {},
       bg: 'var(--orange-color)',
-      color: 'white'
+      color: 'white',
+      w: 10,
+      h: 10,
    },
    separatorStyles: {
       bg: 'var(--white-color)',
