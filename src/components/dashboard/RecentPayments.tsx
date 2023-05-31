@@ -17,8 +17,13 @@ import {
    Badge
 } from '@chakra-ui/react';
 import WhiteButton from '../design/WhiteButton';
+import Link from 'next/link';
+import { ROUTING } from '@/util/constant';
+import { useRouter } from 'next/router';
 
 export default function RecentPayments({ payments }: { payments: Array<PaymentDocType> }) {
+   const router = useRouter();
+
    return (
       <>
          <Flex p={'1rem'} width={'100%'} height={'100%'} flexDir={'column'}>
@@ -37,7 +42,9 @@ export default function RecentPayments({ payments }: { payments: Array<PaymentDo
                <UsersPaymentTables payments={payments} />
             )}
 
-            <WhiteButton>See Full User WaitList</WhiteButton>
+            <WhiteButton onClick={() => router.push(ROUTING.payments)}>
+               See All Payments
+            </WhiteButton>
          </Flex>
       </>
    );

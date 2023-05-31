@@ -44,16 +44,14 @@ export default function Vehicles() {
    const [vehicleCount] = useDocsCount(vehiclesColRef);
    const [selectedVehicle, setSelectedVehicle] = useState<VehicleDocType | null>(null);
 
-   
    const [isUnder850] = useMediaQuery('(max-width: 850px)');
    const { isOpen, onOpen, onClose } = useDisclosure();
-   
-   const [vehiclesToShow, paginationIndices, setActiveIdx] = usePagination
-   <VehicleDocType>(
+
+   const [vehiclesToShow, paginationIndices, setActiveIdx] = usePagination<VehicleDocType>(
       vehicles,
       pageQt
    );
-      
+
    const { currentPage, setCurrentPage } = usePaginator({
       total: paginationIndices.length,
       initialState: {
@@ -79,7 +77,7 @@ export default function Vehicles() {
                   handlePageChange={(i) => {
                      setActiveIdx(i);
                      (topRef.current as HTMLElement)?.scrollIntoView({
-                        behavior: "smooth"
+                        behavior: 'smooth'
                      });
                   }}
                   pageCounts={paginationIndices.length}
@@ -193,7 +191,7 @@ const VehiclesList = ({
                })}
             </Flex>
             <Flex flexBasis={'17%'} alignSelf={'flex-end'}>
-               <Pagination pageCounts={pageCounts} handlePageChange={handlePageChange}/>
+               <Pagination pageCounts={pageCounts} handlePageChange={handlePageChange} />
             </Flex>
          </Flex>
       </>

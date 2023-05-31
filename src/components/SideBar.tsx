@@ -50,6 +50,14 @@ export default function SideBar({ useMobStyle }: { useMobStyle: boolean }) {
       handler: () => setIsOpen(false)
    });
 
+   const matchRoutePath = (path: string) => {
+      const matchingRoute = Object.values(ROUTING).find((route) => {
+         const routeRegex = new RegExp(`^${route}(\/|$)`);
+         return routeRegex.test(path);
+      });
+      return matchingRoute || '/';
+   };
+
    return (
       <>
          {useMobStyle && <MobNavBar onOpen={() => setIsOpen(!isOpen)} />}
@@ -94,7 +102,7 @@ export default function SideBar({ useMobStyle }: { useMobStyle: boolean }) {
                      <React.Fragment key={idx}>
                         <SideBarLinks
                            linkTo={link.linkTo}
-                           isActive={router.asPath == link.linkTo}
+                           isActive={matchRoutePath(router.asPath) == link.linkTo}
                            heading={link.text}
                            linkIcon={link.icon}
                            onClick={() => setIsOpen(false)}

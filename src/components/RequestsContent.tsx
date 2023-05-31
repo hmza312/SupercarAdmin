@@ -23,7 +23,7 @@ import Pagination from './design/Pagination';
 import { usePaginator } from 'chakra-paginator';
 import usePagination from '@/lib/hooks/usePagination';
 
-const pageQt = 15
+const pageQt = 15;
 
 export default function RequestsContent() {
    const [requestsCount] = useDocsCount(callsColRef);
@@ -47,12 +47,11 @@ export default function RequestsContent() {
       fetchRequests();
    }, []);
 
-   const [requestsToShow, paginationIndices, setActiveIdx] = usePagination
-   <RequestDocType>(
+   const [requestsToShow, paginationIndices, setActiveIdx] = usePagination<RequestDocType>(
       requests,
       pageQt
    );
-      
+
    const { currentPage, setCurrentPage } = usePaginator({
       total: paginationIndices.length,
       initialState: {
@@ -64,19 +63,19 @@ export default function RequestsContent() {
    const topRef = useRef<any>(null);
 
    return (
-      <Flex width="100%" flexDir="column" gap="1rem" height="100%" ref = {topRef}>
+      <Flex width="100%" flexDir="column" gap="1rem" height="100%" ref={topRef}>
          <ContentHeader
             description="Use the chatroom to discuss payments and other client relations"
             heading={`Help Requests (${requestsCount})`}
          />
          <Flex gap="0.3rem">
-            <CustomersList 
-               requests={requestsToShow} 
-               pageCounts={paginationIndices.length} 
+            <CustomersList
+               requests={requestsToShow}
+               pageCounts={paginationIndices.length}
                handlePageChange={(i) => {
                   setActiveIdx(i);
                   (topRef.current as HTMLElement)?.scrollIntoView({
-                     behavior: "smooth"
+                     behavior: 'smooth'
                   });
                }}
             />
@@ -125,10 +124,15 @@ export default function RequestsContent() {
    );
 }
 
-const CustomersList = (
-   { requests, pageCounts, handlePageChange }:
-   { requests: Array<RequestDocType>, pageCounts: number, handlePageChange: (page: number)=> void }
-) => {
+const CustomersList = ({
+   requests,
+   pageCounts,
+   handlePageChange
+}: {
+   requests: Array<RequestDocType>;
+   pageCounts: number;
+   handlePageChange: (page: number) => void;
+}) => {
    const [isUnder650] = useMediaQuery('(max-width: 650px)');
 
    return (
@@ -155,7 +159,7 @@ const CustomersList = (
             })}
          </Flex>
          <Flex flexBasis={'17%'} alignSelf={'flex-end'}>
-               <Pagination pageCounts={pageCounts} handlePageChange={handlePageChange}/>
+            <Pagination pageCounts={pageCounts} handlePageChange={handlePageChange} />
          </Flex>
       </Flex>
    );

@@ -1,21 +1,5 @@
 import { SearchIcon } from '@chakra-ui/icons';
-import {
-   Flex,
-   Heading,
-   Stack,
-   Input,
-   Box,
-   GridItem,
-   Grid,
-   InputGroup,
-   InputRightElement,
-   Icon,
-   Text,
-   Badge,
-   Button,
-   Center,
-   useMediaQuery
-} from '@chakra-ui/react';
+import { Flex, Heading, Box, GridItem, Grid, Text, Button, useMediaQuery } from '@chakra-ui/react';
 
 export default function Dashboard() {
    return (
@@ -39,12 +23,13 @@ import StatSection from './dashboard/StatSection';
 import Analytics from './dashboard/Analytics';
 import { useEffect, useState } from 'react';
 import { membersColRef, paymentsColRef, vehiclesColRef } from '@/lib/firebase';
-import { getCountFromServer, getDocs } from 'firebase/firestore';
+import { getDocs } from 'firebase/firestore';
 import RecentPayments from './dashboard/RecentPayments';
 import { PaymentDocType } from '@/lib/firebase_docstype';
 import Activity from './dashboard/Activity';
 import ContentHeader from './design/ContentHeader';
 import { useDocsCount } from '@/lib/hooks/useDocsCount';
+import { ROUTING } from '@/util/constant';
 
 const DashBoardContent = () => {
    const [totalCustomers] = useDocsCount(membersColRef);
@@ -92,6 +77,7 @@ const DashBoardContent = () => {
                badgeStatus="green"
                count={totalCustomers}
                percentage="+12.9%"
+               routeTo={ROUTING.customers}
             >
                <IoIosPeople style={{ fontSize: '2rem' }} />
             </StatSection>
@@ -104,6 +90,7 @@ const DashBoardContent = () => {
             rounded={'xl'}
          >
             <StatSection
+               routeTo={ROUTING.vehicles}
                title="Total Vehicles"
                badgeStatus="red"
                count={totalVehicles}
@@ -169,6 +156,7 @@ const FlexBoxLayout = ({
                   badgeStatus="green"
                   count={totalCustomers}
                   percentage="+12.9%"
+                  routeTo={ROUTING.customers}
                >
                   <IoIosPeople style={{ fontSize: '2rem' }} />
                </StatSection>
@@ -179,6 +167,7 @@ const FlexBoxLayout = ({
                   badgeStatus="red"
                   count={totalVehicles}
                   percentage="+12.9%"
+                  routeTo={ROUTING.vehicles}
                >
                   <AiFillCar style={{ fontSize: '2rem' }} />
                </StatSection>

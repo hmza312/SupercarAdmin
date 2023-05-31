@@ -31,13 +31,11 @@ export default function Customers() {
    const [isUnder850] = useMediaQuery('(max-width: 850px)');
    const { isOpen, onOpen, onClose } = useDisclosure();
 
-
-   const [customersToShow, paginationIndices, setActiveIdx] = usePagination
-   <MemberDocType>(
+   const [customersToShow, paginationIndices, setActiveIdx] = usePagination<MemberDocType>(
       customers,
       pageQt
    );
-      
+
    const { currentPage, setCurrentPage } = usePaginator({
       total: paginationIndices.length,
       initialState: {
@@ -45,8 +43,6 @@ export default function Customers() {
          currentPage: 1
       }
    });
-
-   
 
    useEffect(() => {
       const fetchCustomers = async () => {
@@ -95,7 +91,7 @@ export default function Customers() {
                handlePageChange={(i) => {
                   setActiveIdx(i);
                   (topRef.current as HTMLElement)?.scrollIntoView({
-                     behavior: "smooth"
+                     behavior: 'smooth'
                   });
                }}
                pageCounts={paginationIndices.length}
@@ -162,7 +158,7 @@ const CustomersList = ({
    onSelect: Dispatch<SetStateAction<MemberDocType | null>>;
    onOpenDrawer: () => void;
    pageCounts: number;
-   handlePageChange: (page:number)=> void;
+   handlePageChange: (page: number) => void;
 }) => {
    const [isUnder850] = useMediaQuery('(max-width: 850px)');
    return (
@@ -197,7 +193,7 @@ const CustomersList = ({
             })}
          </Flex>
          <Flex flexBasis={'17%'} alignSelf={'flex-end'}>
-               <Pagination pageCounts={pageCounts} handlePageChange={handlePageChange}/>
+            <Pagination pageCounts={pageCounts} handlePageChange={handlePageChange} />
          </Flex>
       </Flex>
    );

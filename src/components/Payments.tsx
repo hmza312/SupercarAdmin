@@ -57,7 +57,7 @@ export default function Payments() {
       payments,
       pageQt
    );
-   
+
    const { currentPage, setCurrentPage } = usePaginator({
       total: paginationIndices.length,
       initialState: {
@@ -66,10 +66,10 @@ export default function Payments() {
       }
    });
 
-   const topRef = useRef<any> (null);
+   const topRef = useRef<any>(null);
 
    return (
-      <Flex width="100%" flexDir="column" gap="1rem" height="100%" pb={'2rem'} ref = {topRef}>
+      <Flex width="100%" flexDir="column" gap="1rem" height="100%" pb={'2rem'} ref={topRef}>
          <ContentHeader heading={`All Payments (${paymentsCount})`} description="" />
          <Flex
             flex={3}
@@ -86,12 +86,15 @@ export default function Payments() {
                <PaymentsTable payments={payments} />
             </Flex>
             <Flex flexBasis={'17%'} alignSelf={'flex-end'}>
-               <Pagination pageCounts={paginationIndices.length} handlePageChange={(page)=> {
-                  setActiveIdx(page);
-                  (topRef.current as HTMLElement)?.scrollIntoView({
-                     behavior: "smooth"
-                  });
-               }}/>
+               <Pagination
+                  pageCounts={paginationIndices.length}
+                  handlePageChange={(page) => {
+                     setActiveIdx(page);
+                     (topRef.current as HTMLElement)?.scrollIntoView({
+                        behavior: 'smooth'
+                     });
+                  }}
+               />
             </Flex>
          </Flex>
       </Flex>
