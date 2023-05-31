@@ -8,11 +8,11 @@ import {
    Box,
    Text,
    Flex,
-   Badge,
-   Link,
    Heading,
    useMediaQuery,
-   useDisclosure
+   useDisclosure,
+   Center,
+   Divider
 } from '@chakra-ui/react';
 import ContentHeader from './design/ContentHeader';
 import WhiteButton from './design/WhiteButton';
@@ -45,6 +45,9 @@ export default function Vehicles() {
    const [selectedVehicle, setSelectedVehicle] = useState<VehicleDocType | null>(null);
 
    const [isUnder850] = useMediaQuery('(max-width: 850px)');
+   const [isUnder1350] = useMediaQuery("(max-width: 1350px)");
+   const [isUpper1100] = useMediaQuery ("(min-width: 1350px");
+   
    const { isOpen, onOpen, onClose } = useDisclosure();
 
    const [vehiclesToShow, paginationIndices, setActiveIdx] = usePagination<VehicleDocType>(
@@ -82,11 +85,11 @@ export default function Vehicles() {
                   }}
                   pageCounts={paginationIndices.length}
                />
-               {!isUnder850 ? (
-                  <VehicleDetail vehicle={selectedVehicle} />
+               {(!isUnder850 && !(isUpper1100 && isUnder1350)) ? (
+                  <VehicleDetail vehicle={selectedVehicle} renderInDrawer={false}/>
                ) : (
                   <DrawerWrapper isOpen={isOpen} onClose={onClose}>
-                     <VehicleDetail vehicle={selectedVehicle} />
+                     <VehicleDetail vehicle={selectedVehicle} renderInDrawer={true}/>
                   </DrawerWrapper>
                )}
             </Flex>
@@ -95,31 +98,31 @@ export default function Vehicles() {
    );
 }
 
-const VehicleDetail = ({ vehicle }: { vehicle: VehicleDocType | null }) => {
-   const [isUnder850] = useMediaQuery('(max-width: 850px)');
-
+const VehicleDetail = ({ vehicle, renderInDrawer }: { vehicle: VehicleDocType | null, renderInDrawer: boolean }) => {
+   
    if (vehicle == null) return <></>;
 
    return (
       <Flex
          flex={1}
-         bg={isUnder850 ? 'var(--bg-color)' : 'var(--grey-color)'}
+         bg={renderInDrawer ? 'var(--bg-color)' : 'var(--grey-color)'}
          rounded="lg"
          height={'auto'}
-         padding={'0.5rem'}
          flexDir={'column'}
          gap={'1rem'}
          overflowY={'auto'}
+         mb={renderInDrawer ? '2rem' : 'initial'}
       >
-         <Heading fontSize={'xl'}>Vehicles</Heading>
-
+         <Flex p={'1rem'} pb={'0rem'}>
+            <Heading fontSize={'xl'}>Vehicle Info</Heading>
+         </Flex>
          <img
             width={'100%'}
             height={'auto'}
             src={vehicle.thumbnail}
-            style={{ borderRadius: '0.5rem', maxHeight: '20rem' }}
+            style={{  maxHeight: '20rem' }}
          />
-         <Flex alignItems={'center'} flexDir={'column'} justifyContent={'center'} gap={'0.5rem'}>
+         <Flex alignItems={'center'} flexDir={'column'} justifyContent={'center'} gap={'0.1rem'}>
             <Heading textAlign={'center'} fontSize={'2xl'}>
                {vehicle.title}
             </Heading>
@@ -134,7 +137,30 @@ const VehicleDetail = ({ vehicle }: { vehicle: VehicleDocType | null }) => {
                </>
             )}
          </Flex>
-         <Flex gap={'1rem'} justifyContent={'center'} flexWrap={'wrap'}>
+         
+         <Flex flexDir={'column'} justifyContent={'center'} alignContent={'center'}>
+            <Center>
+               <Text fontWeight={'500'}>{'Vehicle Model'}</Text>
+            </Center>
+            <Center>
+               <Text>{vehicle.model}</Text>
+            </Center>
+            <Center px={'25%'} py={'0.5rem'}>
+               <Divider  borderColor={'var(--white-color)'} borderWidth={'1px'}/>
+            </Center>
+
+            <Center>
+               <Text fontWeight={'500'}>{'Brand'}</Text>
+            </Center>
+            <Center>
+               <Text>{vehicle.make}</Text>
+            </Center>
+            <Center px={'25%'} py={'0.5rem'}>
+               <Divider  borderColor={'var(--white-color)'} borderWidth={'1px'}/>
+            </Center>
+         </Flex>
+
+         <Flex gap={'1rem'} justifyContent={'center'} flexWrap={'wrap'} p = {'0.3rem'}>
             <OrangeButton display={'block'}>Add Payment</OrangeButton>
             <WhiteButton display={'block'}>Edit</WhiteButton>
          </Flex>
@@ -203,15 +229,20 @@ import { MemberDocType, VehicleDocType } from '@/lib/firebase_docstype';
 import { useDocsCount } from '@/lib/hooks/useDocsCount';
 import usePagination from '@/lib/hooks/usePagination';
 import OrangeButton from './design/OrangeButton';
-import { paginatorStyle } from '@/styles/Style';
-import { AiOutlineArrowLeft, AiOutlineArrowRight } from 'react-icons/ai';
 import Pagination from './design/Pagination';
 
 const VehicleData = ({ vehicle, onClick }: { vehicle: VehicleDocType; onClick: () => void }) => {
+
+   const [isUnder500] = useMediaQuery("(max-width: 500px)");
+   
    return (
       <>
          {/*eslint-disable-next-line @next/next/no-img-element */}
          <Box
+            minH={'261px'}
+            minW={isUnder500 ? '100%':'359px'}
+            maxH={'262px'}
+            maxW={'359px'}
             rounded={'lg'}
             pb={'1rem'}
             bg={'var(--grey-color)'}
@@ -221,14 +252,21 @@ const VehicleData = ({ vehicle, onClick }: { vehicle: VehicleDocType; onClick: (
             <Image
                src={vehicle.thumbnail}
                alt="vehicle_image"
+
+               maxWidth={'359.236px'}
+               minW={isUnder500 ? '100%':'359.236px'}
+               minH={'191px'}
+               maxH={'191px'}
+
                height={180}
                width={280}
                quality={100}
-               borderRadius={'var(--chakra-radii-lg)'}
-               style={{ objectFit: 'fill' }}
+               borderTopRadius={'10px'}
             />
-            <Flex p={'0.3rem'} flexDir={'column'}>
-               <Heading fontSize={'md'}>{vehicle.title}</Heading>
+            <Flex p={'17px'} pt= {'13px'} flexDir={'column'}>
+               <Heading fontSize={'17px'} fontWeight={'600'} >
+                 {vehicle.year} {vehicle.title}
+               </Heading>
                <Text fontWeight={'light'} fontSize={'sm'}>
                   {vehicle.owner_data ? vehicle.owner_data.name ?? 'Unknown' : 'Unknown'}
                </Text>

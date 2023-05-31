@@ -35,9 +35,9 @@ const sideBarLinks: Array<SideBarLink> = [
    { text: 'Vehicles', linkTo: ROUTING.vehicles, icon: <IoWalletOutline /> },
    { text: 'Requests', linkTo: ROUTING.requests, icon: <BiUser /> },
    { text: 'Payments', linkTo: ROUTING.payments, icon: <FiSettings /> },
-   { text: 'Waitlist', linkTo: ROUTING.waitList, icon: <FiSettings /> },
-   { text: 'Settings', linkTo: ROUTING.settings, icon: <BsShieldCheck /> },
-   { text: 'Help Centre', linkTo: ROUTING.helpCentre, icon: <BiHelpCircle /> }
+   // { text: 'Waitlist', linkTo: ROUTING.waitList, icon: <FiSettings /> },
+   // { text: 'Settings', linkTo: ROUTING.settings, icon: <BsShieldCheck /> },
+   // { text: 'Help Centre', linkTo: ROUTING.helpCentre, icon: <BiHelpCircle /> }
 ];
 
 export default function SideBar({ useMobStyle }: { useMobStyle: boolean }) {
@@ -116,7 +116,7 @@ export default function SideBar({ useMobStyle }: { useMobStyle: boolean }) {
                })}
             </Flex>
 
-            <Flex p={'0.5rem'} px={'2rem'} alignItems={'center'} cursor={'pointer'}>
+            <Flex p={'0.5rem'} px={'2rem'} alignItems={'center'} cursor={'pointer'} flex={1}>
                <Avatar name="Kent Dodds" src="https://bit.ly/kent-c-dodds" />
                <Stack gap={'0'} px={'0.6rem'} spacing={'-3px'}>
                   <Text fontSize={'xl'}>Ethan Duran</Text>
