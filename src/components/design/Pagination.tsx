@@ -23,7 +23,7 @@ const Pagination = ({
          normalStyles={paginatorStyle.normalStyles}
          separatorStyles={paginatorStyle.separatorStyles}
       >
-         <Container align="center" gap={'0.6rem'}>
+         <Container align="center" gap={'0.6rem'} padding={0} margin={0}>
             <Previous
                bg={'var(--grey-color)'}
                color={'white'}

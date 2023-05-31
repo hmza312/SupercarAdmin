@@ -6,6 +6,7 @@
    --grey-color: rgba(54, 54, 54, 1);
    --white-color: rgb(255, 255, 255);
    --card-bg: linear-gradient(177.23deg, #212121 -13.49%, #2d2d2d 109.75%);
+   --scrollbar-color: rgba(134, 134, 134, 1);
 }
 
 @font-face {
@@ -126,7 +127,7 @@ body {
 }
 
 ::-webkit-scrollbar-thumb {
-   background-color: white;
+   background-color: var(--scrollbar-color);
 }
 
 /* For Firefox */
@@ -136,7 +137,7 @@ body {
 /* If you want a consistent look across browsers, you can skip the Firefox specific styles */
 * {
    scrollbar-width: thin;
-   scrollbar-color: white transparent;
+   scrollbar-color: var(--scrollbar-color) transparent;
 }
 
 /* side bar */

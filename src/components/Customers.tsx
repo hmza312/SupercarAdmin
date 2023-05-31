@@ -7,7 +7,8 @@ import {
    Center,
    Divider,
    useMediaQuery,
-   useDisclosure
+   useDisclosure,
+   Box
 } from '@chakra-ui/react';
 import ContentHeader from './design/ContentHeader';
 import WhiteButton from './design/WhiteButton';
@@ -171,6 +172,7 @@ const CustomersList = ({
          flexDir={'column'}
          gap={'1rem'}
          p={isUnder850 ? '0rem' : '1rem'}
+         overflowY={isUnder850 ? 'auto' : 'hidden'}
          py={0}
       >
          <Flex
@@ -193,7 +195,9 @@ const CustomersList = ({
             })}
          </Flex>
          <Flex flexBasis={'17%'} alignSelf={'flex-end'}>
-            <Pagination pageCounts={pageCounts} handlePageChange={handlePageChange} />
+            <Box>
+               <Pagination pageCounts={pageCounts} handlePageChange={handlePageChange} />
+            </Box>
          </Flex>
       </Flex>
    );

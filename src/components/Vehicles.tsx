@@ -133,7 +133,7 @@ const VehicleDetail = ({
             </Heading>
             {vehicle.owner_data ? (
                <>
-                  <Text>{vehicle.owner_data.name ?? 'unknown'}</Text>
+                  <Text>Owned by {vehicle.owner_data.name ?? 'unknown'}</Text>
                   <Text>{vehicle.owner_data.mobile ?? ''}</Text>
                </>
             ) : (
@@ -193,16 +193,17 @@ const VehiclesList = ({
          <Flex
             flex={isUnder850 ? 1 : 3}
             width={'100%'}
-            height={'100vh'}
+            height={'92vh'}
             maxH={'100vh'}
-            minHeight={'100vh'}
+            minHeight={'92vh'}
             flexDir={'column'}
-            gap={'1rem'}
+            gap={'0rem'}
             py={0}
          >
             <Flex
                flexWrap={'wrap'}
                gap={'0.5rem'}
+               columnGap={'0.5rem'}
                overflowY={'auto'}
                flexBasis={'100%'}
                justifyContent={'center'}

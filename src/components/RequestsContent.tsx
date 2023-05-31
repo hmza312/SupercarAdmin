@@ -146,7 +146,7 @@ const CustomersList = ({
          gap={'1rem'}
          p={isUnder650 ? '0.5rem' : '1rem'}
          py={0}
-         pb={'2rem'}
+         pb={'0rem'}
       >
          <Flex
             flexDir={'column'}
@@ -159,7 +159,9 @@ const CustomersList = ({
             })}
          </Flex>
          <Flex flexBasis={'17%'} alignSelf={'flex-end'}>
-            <Pagination pageCounts={pageCounts} handlePageChange={handlePageChange} />
+            <Box>
+               <Pagination pageCounts={pageCounts} handlePageChange={handlePageChange} />
+            </Box>
          </Flex>
       </Flex>
    );
@@ -194,14 +196,6 @@ const CustomerData = ({ request }: { request: RequestDocType }) => {
          </Stack>
 
          <Flex gap="1rem" marginLeft="auto">
-            {/* {["Vehicles", "Payments", "Referrals"].map((title, idx) => {
-          return (
-            <Stack key={idx} spacing={0} textAlign="center">
-              <Text fontWeight="bold">{title}</Text>
-              <Text fontWeight="bold">20</Text>
-            </Stack>
-          );
-        })} */}
             <OrangeButton>Message</OrangeButton>
             <WhiteButton>Other</WhiteButton>
             <WhiteButton>Close</WhiteButton>

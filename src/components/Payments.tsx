@@ -86,15 +86,17 @@ export default function Payments() {
                <PaymentsTable payments={payments} />
             </Flex>
             <Flex flexBasis={'17%'} alignSelf={'flex-end'}>
-               <Pagination
-                  pageCounts={paginationIndices.length}
-                  handlePageChange={(page) => {
-                     setActiveIdx(page);
-                     (topRef.current as HTMLElement)?.scrollIntoView({
-                        behavior: 'smooth'
-                     });
-                  }}
-               />
+               <Box>
+                  <Pagination
+                     pageCounts={paginationIndices.length}
+                     handlePageChange={(page) => {
+                        setActiveIdx(page);
+                        (topRef.current as HTMLElement)?.scrollIntoView({
+                           behavior: 'smooth'
+                        });
+                     }}
+                  />
+               </Box>
             </Flex>
          </Flex>
       </Flex>
