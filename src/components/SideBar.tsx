@@ -28,6 +28,7 @@ interface SideBarLink {
    icon: React.ReactNode;
 }
 
+
 const sideBarLinks: Array<SideBarLink> = [
    { text: 'Dashboard', linkTo: ROUTING.home, icon: <RxDashboard /> },
    { text: 'Customers', linkTo: ROUTING.customers, icon: <BiStats /> },
@@ -52,8 +53,8 @@ export default function SideBar({ useMobStyle }: { useMobStyle: boolean }) {
 
    const matchRoutePath = (path: string) => {
       const matchingRoute = Object.values(ROUTING).find((route) => {
-         const routeRegex = new RegExp(`^${route}(\/|$)`);
-         return routeRegex.test(path);
+        const routeRegex = new RegExp(`^${route}(\/|$)`);
+        return routeRegex.test(path);
       });
       return matchingRoute || '/';
    };
@@ -121,7 +122,6 @@ export default function SideBar({ useMobStyle }: { useMobStyle: boolean }) {
                   <Text fontSize={'xl'}>Ethan Duran</Text>
                   <Text px={'2px'}>Admin</Text>
                </Stack>
-
                <Icon flexFlow={'1'} justifySelf={'flex-end'} mx={'1rem'}>
                   <ChevronDownIcon />
                </Icon>
