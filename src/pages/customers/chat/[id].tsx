@@ -15,7 +15,10 @@ export default function ChatPage() {
             <link rel="icon" href="/favicon.ico" />
          </Head>
          <MainLayout>
-            <ContentHeader heading='Chatroom' description='Use the chatroom to discuss payments and other client relations'/>
+            <ContentHeader
+               heading="Chatroom"
+               description="Use the chatroom to discuss payments and other client relations"
+            />
             <ChatRoom />
          </MainLayout>
       </>
