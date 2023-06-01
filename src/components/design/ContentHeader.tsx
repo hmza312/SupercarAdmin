@@ -68,7 +68,9 @@ const SearchBar = (props: InputProps) => {
                   pr="0.5rem"
                   width={isUnder500 ? 'xs' : 'md'}
                   placeholder="Search anything...."
-                  background={'var(--grey-color)'}
+                  background={'var(--light-grey-color)'}
+                  border={'none'}
+                  _placeholder={{ color: 'var(--white-color)', fontSize: '12px', transform: 'translateY(-1px)'}}
                   {...props}
                />
                <InputRightElement width="2.5rem">

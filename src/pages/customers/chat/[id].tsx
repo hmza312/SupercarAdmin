@@ -1,5 +1,7 @@
 import Customers from '@/components/Customers';
 import Login from '@/components/Login';
+import ChatRoom from '@/components/chat/ChatRoom';
+import ContentHeader from '@/components/design/ContentHeader';
 import MainLayout from '@/components/design/MainLayout';
 import Head from 'next/head';
 
@@ -13,7 +15,8 @@ export default function ChatPage() {
             <link rel="icon" href="/favicon.ico" />
          </Head>
          <MainLayout>
-            <Login />
+            <ContentHeader heading='Chatroom' description='Use the chatroom to discuss payments and other client relations'/>
+            <ChatRoom />
          </MainLayout>
       </>
    );
