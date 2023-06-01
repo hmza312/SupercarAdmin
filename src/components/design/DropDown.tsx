@@ -1,11 +1,12 @@
 import { ChevronDownIcon } from '@chakra-ui/icons';
-import { Button, Menu, MenuButton, MenuItem, MenuList } from '@chakra-ui/react';
+import { Button, Menu, MenuButton, MenuItem, MenuList, MenuOptionGroup } from '@chakra-ui/react';
 
-import type { MenuListProps } from '@chakra-ui/react';
+import type { MenuItemProps } from '@chakra-ui/react';
 
-interface DropDownProps extends MenuListProps {
+interface DropDownProps extends MenuItemProps {
    menuTitle: string;
    menuItems: Array<string> | Array<React.ReactNode>;
+   onSelected: (selected: string)=> void
 }
 
 const DropDown = (props: DropDownProps) => (
@@ -20,7 +21,7 @@ const DropDown = (props: DropDownProps) => (
       >
          {props.menuTitle}
       </MenuButton>
-      <MenuList bg={'var(--white-color)'} color={'black'} {...props}>
+      <MenuList bg={'var(--white-color)'} color={'black'}  maxH={'60vh'} overflow={'scroll'}>
          {props.menuItems.map((item, idx) => {
             return (
                <MenuItem
@@ -28,6 +29,11 @@ const DropDown = (props: DropDownProps) => (
                   key={idx}
                   fontWeight={'800'}
                   _hover={{ bg: 'var(--orange-color)', color: 'var(--white-color)' }}
+                  value={item as string}
+                  onClick={(e)=> {
+                     props.onSelected(item as string);
+                  }}
+                  {...props}
                >
                   {item}
                </MenuItem>

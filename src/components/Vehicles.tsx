@@ -31,6 +31,12 @@ export default function Vehicles() {
             uid: d.id
          })) as Array<MemberDocType>;
 
+         setFilter({
+            ...filter, customers: users.filter ((user, idx, self)=> {
+               return self.findIndex(val => val.name == user.name) == idx;
+            })
+         });
+
          const docs = (res.docs.map((doc) => doc.data()) as Array<VehicleDocType>).map((d) => ({
             ...d,
             owner_data: users.filter((u) => u.uid == d.owner)[0]
@@ -44,7 +50,13 @@ export default function Vehicles() {
    const [vehicles, setVehicles] = useState<Array<VehicleDocType>>([]);
    const [vehicleCount] = useDocsCount(vehiclesColRef);
    const [selectedVehicle, setSelectedVehicle] = useState<VehicleDocType | null>(null);
-
+   
+   const [filter, setFilter] = useState<VehiclesFilter>({
+      customers: [],
+      input: '',
+      selectedCustomer: null
+   })
+   
    const [isUnder850] = useMediaQuery('(max-width: 850px)');
    const [isUnder1350] = useMediaQuery('(max-width: 1350px)');
    const [isUpper1100] = useMediaQuery('(min-width: 1350px');
@@ -52,10 +64,13 @@ export default function Vehicles() {
    const { isOpen, onOpen, onClose } = useDisclosure();
 
    const [vehiclesToShow, paginationIndices, setActiveIdx] = usePagination<VehicleDocType>(
-      vehicles,
+      vehicles.filter (v => {
+         if (!filter.selectedCustomer) return true;
+         return v.owner_data && v.owner_data.name == filter.selectedCustomer;  
+      }),
       pageQt
    );
-
+   
    const { currentPage, setCurrentPage } = usePaginator({
       total: paginationIndices.length,
       initialState: {
@@ -72,6 +87,8 @@ export default function Vehicles() {
             <ContentHeader
                description="Catalog of all vehicles available in you automation fleet"
                heading={`Vehicles (${vehicleCount})`}
+               value={filter.input}
+               onChange={(e)=> setFilter ({...filter, input: e.target.value})}
             />
             <Flex gap={'0.1rem'}>
                <VehiclesList
@@ -85,6 +102,7 @@ export default function Vehicles() {
                      });
                   }}
                   pageCounts={paginationIndices.length}
+                  filterState={[filter, setFilter]}
                />
                {!isUnder850 && !(isUpper1100 && isUnder1350) ? (
                   <VehicleDetail vehicle={selectedVehicle} renderInDrawer={false} />
@@ -189,16 +207,20 @@ const VehiclesList = ({
    onSelect,
    onDrawerOpen,
    handlePageChange,
-   pageCounts
+   pageCounts, 
+   filterState
 }: {
    vehicles: Array<any>;
    onSelect: Dispatch<SetStateAction<VehicleDocType | null>>;
    onDrawerOpen: () => void;
    handlePageChange: (page: number) => void;
    pageCounts: number;
+   filterState: UseStateProps<VehiclesFilter>
 }) => {
    const [isUnder850] = useMediaQuery('(max-width: 850px)');
+   const [filter, setFilter] = filterState;
 
+   console.log (filter);
    return (
       <>
          <Flex
@@ -213,8 +235,11 @@ const VehiclesList = ({
          >
             <Flex p={'0.5rem'} gap={'1rem'}>
                <DropDown
-                  menuTitle="Select Customers"
-                  menuItems={['Customer X', 'Customer Y', 'Customer Z']}
+                  menuTitle={ filter.selectedCustomer ? filter.selectedCustomer : "Select Customers" }
+                  menuItems={filter.customers.map (c => c.name)}
+                  onSelected={(item)=> {
+                     setFilter ({...filter, selectedCustomer: item});
+                  }}
                />
                <OrangeButton marginLeft={'auto'}>Add New Vehicle</OrangeButton>
             </Flex>
@@ -257,6 +282,8 @@ import usePagination from '@/lib/hooks/usePagination';
 import OrangeButton from './design/OrangeButton';
 import Pagination from './design/Pagination';
 import DropDown from './design/DropDown';
+import { VehiclesFilter } from './types/VehiclesTypes';
+import { UseStateProps } from '@/types/UseStateProps';
 
 const VehicleData = ({ vehicle, onClick }: { vehicle: VehicleDocType; onClick: () => void }) => {
    const [isUnder500] = useMediaQuery('(max-width: 500px)');
