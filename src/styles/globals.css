@@ -7,6 +7,7 @@
    --white-color: rgb(255, 255, 255);
    --card-bg: linear-gradient(177.23deg, #212121 -13.49%, #2d2d2d 109.75%);
    --scrollbar-color: rgba(134, 134, 134, 1);
+   --dropdown-color: rgba(255, 255, 255, 0.53);
 }
 
 @font-face {

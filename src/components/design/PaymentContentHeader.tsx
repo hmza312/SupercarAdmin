@@ -2,6 +2,7 @@ import { SearchIcon } from '@chakra-ui/icons';
 import {
    Flex,
    Heading,
+   Icon,
    Input,
    InputGroup,
    InputRightElement,
@@ -10,13 +11,16 @@ import {
    useMediaQuery
 } from '@chakra-ui/react';
 import type { InputProps } from '@chakra-ui/react';
+import OrangeButton from './OrangeButton';
+import DropDownButton from './DropDownButton';
+import { BsFillCalendarWeekFill } from 'react-icons/bs';
 
 interface ContentHeaderProps extends InputProps {
    heading: string;
    description: string;
 }
 
-export default function ContentHeader(props: ContentHeaderProps) {
+export default function PaymentContentHeader(props: ContentHeaderProps) {
    const [isUnder850] = useMediaQuery('(max-width: 850px)');
 
    return (
@@ -30,7 +34,9 @@ export default function ContentHeader(props: ContentHeaderProps) {
          <Stack spacing={'0.3rem'}>
             {isUnder850 ? (
                <center>
-                  <Heading fontSize={'2xl'}>{props.heading}</Heading>
+                  <Heading fontSize={'2xl'} whiteSpace={'nowrap'}>
+                     {props.heading}
+                  </Heading>
                   <Text color={'rgba(166, 166, 166, 1)'}>{props.description}</Text>
                </center>
             ) : (
@@ -48,6 +54,14 @@ export default function ContentHeader(props: ContentHeaderProps) {
          ) : (
             <SearchBar {...props} />
          )}
+
+         <DropDownButton transform={'translateY(1px)'}>
+            <Icon fontSize={'xl'} mx={'0.3rem'}>
+               <BsFillCalendarWeekFill />
+            </Icon>
+            10 May - 20 May
+         </DropDownButton>
+         <OrangeButton transform={'translateY(1px)'}>Add New Payment</OrangeButton>
       </Flex>
    );
 }

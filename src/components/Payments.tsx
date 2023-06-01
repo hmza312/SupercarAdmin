@@ -15,7 +15,6 @@ import {
    Box
 } from '@chakra-ui/react';
 import WhiteButton from './design/WhiteButton';
-import ContentHeader from './design/ContentHeader';
 import { ViewIcon } from '@chakra-ui/icons';
 import { useDocsCount } from '@/lib/hooks/useDocsCount';
 import { membersColRef, paymentsColRef } from '@/lib/firebase';
@@ -25,6 +24,7 @@ import { getDocs } from 'firebase/firestore';
 import Pagination from './design/Pagination';
 import { usePaginator } from 'chakra-paginator';
 import usePagination from '@/lib/hooks/usePagination';
+import PaymentContentHeader from './design/PaymentContentHeader';
 
 const pageQt = 15;
 
@@ -70,7 +70,7 @@ export default function Payments() {
 
    return (
       <Flex width="100%" flexDir="column" gap="1rem" height="100%" pb={'2rem'} ref={topRef}>
-         <ContentHeader heading={`All Payments (${paymentsCount})`} description="" />
+         <PaymentContentHeader heading={`All Payments (${paymentsCount})`} description="" />
          <Flex
             flex={3}
             width={'100%'}

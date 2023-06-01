@@ -12,7 +12,8 @@ import {
    useMediaQuery,
    useDisclosure,
    Center,
-   Divider
+   Divider,
+   Select
 } from '@chakra-ui/react';
 import ContentHeader from './design/ContentHeader';
 import WhiteButton from './design/WhiteButton';
@@ -109,10 +110,10 @@ const VehicleDetail = ({
 
    return (
       <Flex
-         flex={1}
+         flex={1.3}
          bg={renderInDrawer ? 'var(--bg-color)' : 'var(--grey-color)'}
          rounded="lg"
-         height={'auto'}
+         height={'90%'}
          flexDir={'column'}
          gap={'1rem'}
          overflowY={'auto'}
@@ -163,6 +164,16 @@ const VehicleDetail = ({
             <Center px={'25%'} py={'0.5rem'}>
                <Divider borderColor={'var(--white-color)'} borderWidth={'1px'} />
             </Center>
+
+            <Center>
+               <Text fontWeight={'500'}>{'Mileage'}</Text>
+            </Center>
+            <Center>
+               <Text>{5624}</Text>
+            </Center>
+            <Center px={'25%'} py={'0.5rem'}>
+               <Divider borderColor={'var(--white-color)'} borderWidth={'1px'} />
+            </Center>
          </Flex>
 
          <Flex gap={'1rem'} justifyContent={'center'} flexWrap={'wrap'} p={'0.3rem'}>
@@ -193,13 +204,20 @@ const VehiclesList = ({
          <Flex
             flex={isUnder850 ? 1 : 3}
             width={'100%'}
-            height={'92vh'}
+            height={'99vh'}
             maxH={'100vh'}
-            minHeight={'92vh'}
+            minHeight={'99vh'}
             flexDir={'column'}
             gap={'0rem'}
             py={0}
          >
+            <Flex p={'0.5rem'} gap={'1rem'}>
+               <DropDown
+                  menuTitle="Select Customers"
+                  menuItems={['Customer X', 'Customer Y', 'Customer Z']}
+               />
+               <OrangeButton marginLeft={'auto'}>Add New Vehicle</OrangeButton>
+            </Flex>
             <Flex
                flexWrap={'wrap'}
                gap={'0.5rem'}
@@ -223,7 +241,9 @@ const VehiclesList = ({
                })}
             </Flex>
             <Flex flexBasis={'17%'} alignSelf={'flex-end'} px={'0.5rem'}>
-               <Pagination pageCounts={pageCounts} handlePageChange={handlePageChange} />
+               <Box>
+                  <Pagination pageCounts={pageCounts} handlePageChange={handlePageChange} />
+               </Box>
             </Flex>
          </Flex>
       </>
@@ -236,6 +256,7 @@ import { useDocsCount } from '@/lib/hooks/useDocsCount';
 import usePagination from '@/lib/hooks/usePagination';
 import OrangeButton from './design/OrangeButton';
 import Pagination from './design/Pagination';
+import DropDown from './design/DropDown';
 
 const VehicleData = ({ vehicle, onClick }: { vehicle: VehicleDocType; onClick: () => void }) => {
    const [isUnder500] = useMediaQuery('(max-width: 500px)');
