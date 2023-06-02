@@ -10,8 +10,10 @@ import {
    Input,
    InputGroup,
    InputRightElement,
+   Spinner,
    Stack,
    Text,
+   useDisclosure,
    useMediaQuery
 } from '@chakra-ui/react';
 import Link from 'next/link';
@@ -20,42 +22,66 @@ import { BsEmojiSmile, BsSend } from 'react-icons/bs';
 import { ImAttachment } from 'react-icons/im';
 import WhiteButton from '../design/WhiteButton';
 import { useRouter } from 'next/router';
-import { useEffect } from 'react';
-import { getDocs } from 'firebase/firestore';
-import { conversationsColRef } from '@/lib/firebase';
+import { useEffect, useState } from 'react';
+import { doc, getDoc, getDocs } from 'firebase/firestore';
+import { conversationsColRef, membersColRef } from '@/lib/firebase';
+import ModalWrapper, { ModalDropDown } from '../design/ModalWrapper';
+import { UseDisclosureProp } from '@/types/UserDisclosureProp';
 
-const ChatRoom = () =>{ 
-   
+const ChatRoom = () => {
    const router = useRouter();
+   const [customer, setCustomer] = useState<MemberDocType | null>(null);
 
-   useEffect(()=> {
+   useEffect(() => {
       const customerId = router.asPath.split('/').at(-1);
 
-      const getConversations = async ()=> {
+      const getConversations = async () => {
+         const customerDocRef = doc(membersColRef, customerId);
+         const customerDoc = (await getDoc(customerDocRef)).data();
+         setCustomer(customerDoc as MemberDocType);
          const conversationDocs = await getDocs(conversationsColRef);
-         console.log (conversationDocs.docs.map (d=>d.data()), customerId)
 
+         console.log(conversationDocs.docs.map((d) => d.data()));
       };
 
       getConversations();
    }, []);
 
-return (
-   <Flex width={'100%'} height={'100%'} gap={'0.5rem'} flexDir={'column'}>
-      <BackBtn />
+   const { isOpen, onOpen, onClose } = useDisclosure();
 
-      <Flex flex={''} gap={'1rem'} height={'85%'}>
-         {/* Chatroom */}
-         <Flex height={'100%'} width={'100%'} flex={2} gap={'1rem'} flexDir={'column'}>
-            <Box width={'100%'}>
-               <ChatHeader avatar="" customerName="" />
-            </Box>
-            <ChatContainer />
+   return (
+      <>
+         <Flex width={'100%'} height={'100%'} gap={'0.5rem'} flexDir={'column'}>
+            <BackBtn />
+
+            <Flex flex={''} gap={'1rem'} height={'85%'}>
+               {/* Chatroom */}
+               <Flex height={'100%'} width={'100%'} flex={2} gap={'1rem'} flexDir={'column'}>
+                  <Box width={'100%'}>
+                     {customer ? (
+                        <>
+                           <ChatHeader
+                              avatar={customer.photo || ''}
+                              customerName={customer.name}
+                              occupation={customer.occupation}
+                           />
+                        </>
+                     ) : (
+                        <>
+                           <Spinner />
+                        </>
+                     )}
+                  </Box>
+                  <ChatContainer />
+               </Flex>
+               <SideBar newDocUploadHanlde={{ isOpen, onOpen, onClose }} />
+            </Flex>
          </Flex>
-         <SideBar />
-      </Flex>
-   </Flex>
-);}
+
+         <NewDocumentUpload handler={{ isOpen, onOpen, onClose }} />
+      </>
+   );
+};
 
 const BackBtn = () => (
    <Link href={ROUTING.customers}>
@@ -66,15 +92,23 @@ const BackBtn = () => (
    </Link>
 );
 
-const ChatHeader = ({ customerName, avatar }: { customerName: string; avatar: string }) => (
+const ChatHeader = ({
+   customerName,
+   avatar,
+   occupation
+}: {
+   customerName: string;
+   avatar: string;
+   occupation: string;
+}) => (
    <Flex width={'100%'} p={'1rem'} bg={'var(--grey-color)'} rounded={'lg'} gap={'1rem'}>
-      <Avatar />
+      <Avatar src={avatar} />
       <Stack spacing={'-0.1rem'} color={'var(--info-text-color)'}>
          <Heading fontSize={'xl'} fontWeight={'600'}>
-            Customer Name
+            {customerName}
          </Heading>
          <Text fontSize={'small'} fontWeight={'500'}>
-            web Designer
+            {occupation}
          </Text>
       </Stack>
    </Flex>
@@ -82,7 +116,7 @@ const ChatHeader = ({ customerName, avatar }: { customerName: string; avatar: st
 
 const ChatContainer = () => {
    const [isUnder500] = useMediaQuery('(max-width: 500px)');
-   
+
    return (
       <Flex
          height={'100%'}
@@ -154,7 +188,7 @@ const ChatContainer = () => {
    );
 };
 
-const SideBar = () => {
+const SideBar = ({ newDocUploadHanlde }: { newDocUploadHanlde: UseDisclosureProp }) => {
    const [isUnder500] = useMediaQuery('(max-width: 500px)');
 
    return (
@@ -191,22 +225,44 @@ const SideBar = () => {
             </InputRightElement>
          </InputGroup>
 
-         <Flex width={'100%'} flexDir = {'column'} minH={'50%'} maxH={'60%'} overflowY={'auto'} gap={'0.6rem'}>
-            {(new Array(10)).fill ('').map ((_,idx)=> {
-               return  <Flex key = {idx} p = {'1rem'} bg = {'var(--card-bg)'} rounded={'xl'} flexDir={'column'} gap={'0.2rem'}>
-                  <Flex gap={'0.3rem'}>
-                     <Text fontWeight={'600'} fontSize={'16px'}>Service Agreement</Text>
-                     <Text ml = {'auto'} fontWeight={'400'}>PDF</Text>
+         <Flex
+            width={'100%'}
+            flexDir={'column'}
+            minH={'50%'}
+            maxH={'60%'}
+            overflowY={'auto'}
+            gap={'0.6rem'}
+         >
+            {new Array(10).fill('').map((_, idx) => {
+               return (
+                  <Flex
+                     key={idx}
+                     p={'1rem'}
+                     bg={'var(--card-bg)'}
+                     rounded={'xl'}
+                     flexDir={'column'}
+                     gap={'0.2rem'}
+                  >
+                     <Flex gap={'0.3rem'}>
+                        <Text fontWeight={'600'} fontSize={'16px'}>
+                           Service Agreement
+                        </Text>
+                        <Text ml={'auto'} fontWeight={'400'}>
+                           PDF
+                        </Text>
+                     </Flex>
+                     <Text fontWeight={'400'} fontSize={'13px'}>
+                        This is the mandatory service agreement documents for all users
+                     </Text>
+                     <WhiteButton width={'8rem'} rounded={'xl'} fontSize={'14px'}>
+                        Send Document
+                     </WhiteButton>
                   </Flex>
-                  <Text fontWeight={'400'} fontSize={'13px'}>
-                  This is the mandatory service agreement documents for all users
-                  </Text>
-                  <WhiteButton width={'8rem'} rounded={'xl'} fontSize={'14px'}>Send Document</WhiteButton>
-               </Flex> 
+               );
             })}
          </Flex>
 
-         <OrangeButton>Add New Document</OrangeButton>
+         <OrangeButton onClick={newDocUploadHanlde.onOpen}>Add New Document</OrangeButton>
       </Flex>
    );
 };
@@ -245,6 +301,35 @@ const ChatMessage = ({ messagePos }: { messagePos: 'right' | 'left' }) => {
    );
 };
 
+import { ModalInput } from '../design/ModalWrapper';
+import { MemberDocType } from '@/lib/firebase_docstype';
+
+const NewDocumentUpload = ({ handler }: { handler: UseDisclosureProp }) => (
+   <>
+      <ModalWrapper {...handler}>
+         <Flex alignItems={'center'} flexDir={'column'} color={'black'} gap={'1rem'}>
+            <Heading fontSize={'20px'} fontWeight={'700'}>
+               Upload New Document
+            </Heading>
+            <Flex flexDir={'column'} width={'100%'} gap={'0.5rem'}>
+               <ModalInput labelValue="Document Name" placeholder="e.g. Service Agreement" />
+               <ModalInput
+                  labelValue="Description (Optional)"
+                  isOptional={true}
+                  placeholder="e.g. Mandatory for all customers"
+               />
+               {/* <ModalInput labelValue='Selected File'/>*/}
+               <ModalDropDown
+                  labelValue=""
+                  menuTitle="Selected File"
+                  menuItems={['XYZ', 'XYZ']}
+                  onSelected={(s) => {}}
+               />
+            </Flex>
+            <OrangeButton width={'100%'}>Upload Now</OrangeButton>
+         </Flex>
+      </ModalWrapper>
+   </>
+);
+
 export default ChatRoom;
-
-

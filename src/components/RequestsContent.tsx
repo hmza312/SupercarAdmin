@@ -9,7 +9,8 @@ import {
    Box,
    Center,
    Divider,
-   useMediaQuery
+   useMediaQuery,
+   useDisclosure
 } from '@chakra-ui/react';
 import ContentHeader from './design/ContentHeader';
 import WhiteButton from './design/WhiteButton';
@@ -63,25 +64,29 @@ export default function RequestsContent() {
    });
 
    const topRef = useRef<any>(null);
+   const { isOpen, onOpen, onClose } = useDisclosure();
 
    return (
-      <Flex width="100%" flexDir="column" gap="1rem" height="100%" ref={topRef}>
-         <ContentHeader
-            description="Use the chatroom to discuss payments and other client relations"
-            heading={`Help Requests (${requestsCount})`}
-         />
-         <Flex gap="0.3rem">
-            <CustomersList
-               requests={requestsToShow}
-               pageCounts={paginationIndices.length}
-               handlePageChange={(i) => {
-                  setActiveIdx(i);
-                  (topRef.current as HTMLElement)?.scrollIntoView({
-                     behavior: 'smooth'
-                  });
-               }}
+      <>
+         <ScheduleMeetingModal handler={{ isOpen, onOpen, onClose }} />
+         <Flex width="100%" flexDir="column" gap="1rem" height="100%" ref={topRef}>
+            <ContentHeader
+               description="Use the chatroom to discuss payments and other client relations"
+               heading={`Help Requests (${requestsCount})`}
             />
-            {/* <Flex
+            <Flex gap="0.3rem">
+               <CustomersList
+                  handleModal={{ isOpen, onOpen, onClose }}
+                  requests={requestsToShow}
+                  pageCounts={paginationIndices.length}
+                  handlePageChange={(i) => {
+                     setActiveIdx(i);
+                     (topRef.current as HTMLElement)?.scrollIntoView({
+                        behavior: 'smooth'
+                     });
+                  }}
+               />
+               {/* <Flex
           flex={1}
           bg="var(--grey-color)"
           rounded="lg"
@@ -121,19 +126,22 @@ export default function RequestsContent() {
             </Center>
           </Flex>
         </Flex> */}
+            </Flex>
          </Flex>
-      </Flex>
+      </>
    );
 }
 
 const CustomersList = ({
    requests,
    pageCounts,
-   handlePageChange
+   handlePageChange,
+   handleModal
 }: {
    requests: Array<RequestDocType>;
    pageCounts: number;
    handlePageChange: (page: number) => void;
+   handleModal: UseDisclosureProp;
 }) => {
    const [isUnder650] = useMediaQuery('(max-width: 650px)');
 
@@ -157,7 +165,7 @@ const CustomersList = ({
             flexBasis={isUnder650 ? '100%' : '90%'}
          >
             {requests.map((req, idx) => {
-               return <CustomerData key={idx} request={req} />;
+               return <CustomerData key={idx} request={req} modalHandle={handleModal} />;
             })}
          </Flex>
          <Flex flexBasis={'17%'} alignSelf={'flex-end'}>
@@ -169,7 +177,13 @@ const CustomersList = ({
    );
 };
 
-const CustomerData = ({ request }: { request: RequestDocType }) => {
+const CustomerData = ({
+   request,
+   modalHandle
+}: {
+   request: RequestDocType;
+   modalHandle: UseDisclosureProp;
+}) => {
    const [isUnder650] = useMediaQuery('(max-width: 650px)');
 
    return (
@@ -201,9 +215,40 @@ const CustomerData = ({ request }: { request: RequestDocType }) => {
             <Link href={`${ROUTING.customers}/chat/${request.user_data?.uid}`}>
                <OrangeButton>Message</OrangeButton>
             </Link>
-            <WhiteButton>Other</WhiteButton>
+            <WhiteButton onClick={modalHandle.onOpen}>Other</WhiteButton>
             <WhiteButton>Close</WhiteButton>
          </Flex>
       </Flex>
    );
 };
+
+import ModalWrapper, { ModalDropDown, ModalInput } from './design/ModalWrapper';
+import { UseDisclosureProp } from '@/types/UserDisclosureProp';
+
+const ScheduleMeetingModal = ({ handler }: { handler: UseDisclosureProp }) => (
+   <>
+      <ModalWrapper {...handler}>
+         <Flex alignItems={'center'} flexDir={'column'} color={'black'} gap={'1rem'}>
+            <Heading fontSize={'20px'} fontWeight={'700'}>
+               Schedule Meeting
+            </Heading>
+            <Flex flexDir={'column'} width={'100%'} gap={'0.5rem'}>
+               <ModalDropDown
+                  labelValue="Contact Type"
+                  menuItems={['XYZ']}
+                  menuTitle="Please Select"
+                  onSelected={(s) => {}}
+               />
+               <ModalInput labelValue="ID/Username" />
+               <ModalInput
+                  labelValue="Password (Optional)"
+                  placeholder="e.g. Mandatory for all cusotmers"
+                  isOptional={true}
+               />
+               <ModalInput labelValue="Scheduled Time" placeholder="e.g. 05/23/23 12:30PM" />
+            </Flex>
+            <OrangeButton width={'100%'}>Schedule Now</OrangeButton>
+         </Flex>
+      </ModalWrapper>
+   </>
+);
