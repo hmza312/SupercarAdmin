@@ -4,6 +4,7 @@ import {
    Avatar,
    Box,
    Button,
+   Center,
    Flex,
    Heading,
    Icon,
@@ -31,6 +32,7 @@ import { UseDisclosureProp } from '@/types/UserDisclosureProp';
 const ChatRoom = () => {
    const router = useRouter();
    const [customer, setCustomer] = useState<MemberDocType | null>(null);
+   const [isUnder850] = useMediaQuery("(max-width: 850px)");
 
    useEffect(() => {
       const customerId = router.asPath.split('/').at(-1);
@@ -48,6 +50,7 @@ const ChatRoom = () => {
    }, []);
 
    const { isOpen, onOpen, onClose } = useDisclosure();
+   const sideBarHandle = useDisclosure(); 
 
    return (
       <>
@@ -74,7 +77,12 @@ const ChatRoom = () => {
                   </Box>
                   <ChatContainer />
                </Flex>
-               <SideBar newDocUploadHanlde={{ isOpen, onOpen, onClose }} />
+               {isUnder850 ? <>
+                  <DrawerWrapper isOpen={sideBarHandle.isOpen} onClose={sideBarHandle.onClose}>
+                     <SideBar newDocUploadHandle={{ isOpen, onOpen, onClose }} />
+                  </DrawerWrapper>
+               </>:
+               <SideBar newDocUploadHandle={{ isOpen, onOpen, onClose }} />}
             </Flex>
          </Flex>
 
@@ -130,13 +138,14 @@ const ChatContainer = () => {
       >
          {/* chat container */}
          <Flex flex={1} width={'100%'} overflowY={'auto'} maxH={'100%'} flexDir={'column'}>
-            <ChatMessage messagePos="left" />
+            <Center color={'var(--white-color)'}>No Conversation So far</Center>
+            {/* <ChatMessage messagePos="left" />
             <ChatMessage messagePos="right" />
             <ChatMessage messagePos="left" />
             <ChatMessage messagePos="right" />
             <ChatMessage messagePos="left" />
             <ChatMessage messagePos="left" />
-            <ChatMessage messagePos="left" />
+            <ChatMessage messagePos="left" /> */}
          </Flex>
 
          {/* search box */}
@@ -156,9 +165,9 @@ const ChatContainer = () => {
                   }}
                   rounded={'full'}
                />
-               <InputRightElement height={'100%'} width={'15%'}>
+               <InputRightElement height={'100%'} width={'30%'}>
                   {' '}
-                  <Flex alignItems={'center'} gap={'0.4rem'}>
+                  <Flex alignItems={'center'} gap={'0.4rem'} ml={'auto'} pr={'0.3rem'}>
                      <Icon fontSize={'xl'}>
                         <ImAttachment />
                      </Icon>
@@ -188,7 +197,7 @@ const ChatContainer = () => {
    );
 };
 
-const SideBar = ({ newDocUploadHanlde }: { newDocUploadHanlde: UseDisclosureProp }) => {
+const SideBar = ({ newDocUploadHandle: newDocUploadHandle }: { newDocUploadHandle: UseDisclosureProp }) => {
    const [isUnder500] = useMediaQuery('(max-width: 500px)');
 
    return (
@@ -262,7 +271,7 @@ const SideBar = ({ newDocUploadHanlde }: { newDocUploadHanlde: UseDisclosureProp
             })}
          </Flex>
 
-         <OrangeButton onClick={newDocUploadHanlde.onOpen}>Add New Document</OrangeButton>
+         <OrangeButton onClick={newDocUploadHandle.onOpen}>Add New Document</OrangeButton>
       </Flex>
    );
 };
@@ -270,7 +279,9 @@ const SideBar = ({ newDocUploadHanlde }: { newDocUploadHanlde: UseDisclosureProp
 const ChatMessage = ({ messagePos }: { messagePos: 'right' | 'left' }) => {
    const isRight = messagePos == 'right';
    const isLeft = messagePos == 'left';
-   const padding = '40%';
+   const [isUnder850] = useMediaQuery("(max-width: 850px)");
+   const padding = isUnder850 ? '10%' : '40%';
+
    return (
       <Flex
          width={'100%'}
@@ -303,6 +314,7 @@ const ChatMessage = ({ messagePos }: { messagePos: 'right' | 'left' }) => {
 
 import { ModalInput } from '../design/ModalWrapper';
 import { MemberDocType } from '@/lib/firebase_docstype';
+import DrawerWrapper from '../design/Drawer';
 
 const NewDocumentUpload = ({ handler }: { handler: UseDisclosureProp }) => (
    <>

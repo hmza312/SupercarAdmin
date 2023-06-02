@@ -185,7 +185,7 @@ const CustomerData = ({
    modalHandle: UseDisclosureProp;
 }) => {
    const [isUnder650] = useMediaQuery('(max-width: 650px)');
-
+   
    return (
       <Flex
          background="var(--grey-color)"
