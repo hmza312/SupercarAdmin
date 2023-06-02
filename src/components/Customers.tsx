@@ -21,6 +21,8 @@ import DrawerWrapper from './design/Drawer';
 import usePagination from '@/lib/hooks/usePagination';
 import { usePaginator } from 'chakra-paginator';
 import Pagination from './design/Pagination';
+import Link from 'next/link';
+import { ROUTING } from '@/util/constant';
 
 const pageQt = 15;
 
@@ -139,7 +141,9 @@ const CustomerProfile = ({ customer }: { customer: MemberDocType | null }) => {
             </Center>
 
             <Center gap={'1rem'} flexWrap={'wrap'}>
-               <WhiteButton>Message</WhiteButton>
+               <Link href={`${ROUTING.customers}/chat/${customer.uid}`}>
+                  <WhiteButton>Message</WhiteButton>
+               </Link>
                <WhiteButton>Edit</WhiteButton>
                <WhiteButton>Documents</WhiteButton>
             </Center>

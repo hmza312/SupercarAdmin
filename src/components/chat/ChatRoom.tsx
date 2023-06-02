@@ -18,8 +18,29 @@ import Link from 'next/link';
 import OrangeButton from '../design/OrangeButton';
 import { BsEmojiSmile, BsSend } from 'react-icons/bs';
 import { ImAttachment } from 'react-icons/im';
+import WhiteButton from '../design/WhiteButton';
+import { useRouter } from 'next/router';
+import { useEffect } from 'react';
+import { getDocs } from 'firebase/firestore';
+import { conversationsColRef } from '@/lib/firebase';
 
-const ChatRoom = () => (
+const ChatRoom = () =>{ 
+   
+   const router = useRouter();
+
+   useEffect(()=> {
+      const customerId = router.asPath.split('/').at(-1);
+
+      const getConversations = async ()=> {
+         const conversationDocs = await getDocs(conversationsColRef);
+         console.log (conversationDocs.docs.map (d=>d.data()), customerId)
+
+      };
+
+      getConversations();
+   }, []);
+
+return (
    <Flex width={'100%'} height={'100%'} gap={'0.5rem'} flexDir={'column'}>
       <BackBtn />
 
@@ -34,7 +55,7 @@ const ChatRoom = () => (
          <SideBar />
       </Flex>
    </Flex>
-);
+);}
 
 const BackBtn = () => (
    <Link href={ROUTING.customers}>
@@ -61,7 +82,7 @@ const ChatHeader = ({ customerName, avatar }: { customerName: string; avatar: st
 
 const ChatContainer = () => {
    const [isUnder500] = useMediaQuery('(max-width: 500px)');
-
+   
    return (
       <Flex
          height={'100%'}
@@ -86,7 +107,7 @@ const ChatContainer = () => {
 
          {/* search box */}
          <Flex width={'100%'} marginTop={'auto'}>
-            <InputGroup size={'md'} colorScheme="gray">
+            <InputGroup size={'md'} colorScheme="gray" rounded={'full'}>
                <Input
                   pr="0.5rem"
                   width={'100%'}
@@ -99,6 +120,7 @@ const ChatContainer = () => {
                      fontSize: '12px',
                      transform: 'translateY(-1px)'
                   }}
+                  rounded={'full'}
                />
                <InputRightElement height={'100%'} width={'15%'}>
                   {' '}
@@ -140,7 +162,8 @@ const SideBar = () => {
          height={'100%'}
          bg={'var(--grey-color)'}
          rounded={'xl'}
-         flex={1.2}
+         // flex={1.2}
+         width={'30%'}
          p={'1rem'}
          flexDir={'column'}
          gap={'0.5rem'}
@@ -167,6 +190,21 @@ const SideBar = () => {
                <SearchIcon />{' '}
             </InputRightElement>
          </InputGroup>
+
+         <Flex width={'100%'} flexDir = {'column'} minH={'50%'} maxH={'60%'} overflowY={'auto'} gap={'0.6rem'}>
+            {(new Array(10)).fill ('').map ((_,idx)=> {
+               return  <Flex key = {idx} p = {'1rem'} bg = {'var(--card-bg)'} rounded={'xl'} flexDir={'column'} gap={'0.2rem'}>
+                  <Flex gap={'0.3rem'}>
+                     <Text fontWeight={'600'} fontSize={'16px'}>Service Agreement</Text>
+                     <Text ml = {'auto'} fontWeight={'400'}>PDF</Text>
+                  </Flex>
+                  <Text fontWeight={'400'} fontSize={'13px'}>
+                  This is the mandatory service agreement documents for all users
+                  </Text>
+                  <WhiteButton width={'8rem'} rounded={'xl'} fontSize={'14px'}>Send Document</WhiteButton>
+               </Flex> 
+            })}
+         </Flex>
 
          <OrangeButton>Add New Document</OrangeButton>
       </Flex>
@@ -208,3 +246,5 @@ const ChatMessage = ({ messagePos }: { messagePos: 'right' | 'left' }) => {
 };
 
 export default ChatRoom;
+
+

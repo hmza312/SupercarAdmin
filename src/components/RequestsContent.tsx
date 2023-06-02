@@ -22,6 +22,8 @@ import { MemberDocType, RequestDocType } from '@/lib/firebase_docstype';
 import Pagination from './design/Pagination';
 import { usePaginator } from 'chakra-paginator';
 import usePagination from '@/lib/hooks/usePagination';
+import { ROUTING } from '@/util/constant';
+import Link from 'next/link';
 
 const pageQt = 15;
 
@@ -196,7 +198,9 @@ const CustomerData = ({ request }: { request: RequestDocType }) => {
          </Stack>
 
          <Flex gap="1rem" marginLeft="auto">
-            <OrangeButton>Message</OrangeButton>
+            <Link href={`${ROUTING.customers}/chat/${request.user_data?.uid}`}>
+               <OrangeButton>Message</OrangeButton>
+            </Link>
             <WhiteButton>Other</WhiteButton>
             <WhiteButton>Close</WhiteButton>
          </Flex>
