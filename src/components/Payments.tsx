@@ -17,7 +17,7 @@ import {
 import WhiteButton from './design/WhiteButton';
 import { ViewIcon } from '@chakra-ui/icons';
 import { useDocsCount } from '@/lib/hooks/useDocsCount';
-import { membersColRef, paymentsColRef } from '@/lib/firebase';
+import { getDocData, membersColRef, paymentsColRef, vehiclesColRef } from '@/lib/firebase';
 import { MemberDocType, PaymentDocType } from '@/lib/firebase_docstype';
 import { useEffect, useRef, useState } from 'react';
 import { getDocs } from 'firebase/firestore';
@@ -33,19 +33,25 @@ export default function Payments() {
    const [payments, setPayments] = useState<Array<PaymentDocType>>([]);
 
    useEffect(() => {
+
+      
       const fetchPayments = async () => {
          const paymentsDocs = await getDocs(paymentsColRef);
-         const users = (await getDocs(membersColRef)).docs.map((d) => ({
-            ...d.data(),
-            uid: d.id
-         })) as Array<MemberDocType>;
+         
+         const data = await Promise.all((paymentsDocs.docs.map (d=> d.data()) as Array<PaymentDocType>)
+         .map(async (p) => {
+            const userPromise = getDocData(membersColRef, p.recipient);
+            const vehiclePromise = getDocData(vehiclesColRef, p.vehicle);
+            const [user_data, vehicle_data] = await Promise.all([userPromise, vehiclePromise]);
 
-         setPayments(
-            paymentsDocs.docs.map((d) => ({
-               ...d.data(),
-               user_data: users.filter((u) => u.uid == (d.data() as PaymentDocType).recipient)[0]
-            })) as Array<PaymentDocType>
-         );
+            return ({...p, 
+               user_data,
+               vehicle_data
+            })
+         }));
+         
+
+         setPayments(data as Array<PaymentDocType>);
       };
 
       fetchPayments();
@@ -67,7 +73,7 @@ export default function Payments() {
    });
 
    const topRef = useRef<any>(null);
-
+   
    return (
       <Flex width="100%" flexDir="column" gap="1rem" height="100%" pb={'2rem'} ref={topRef}>
          <PaymentContentHeader heading={`All Payments (${paymentsCount})`} description="" />
@@ -83,7 +89,7 @@ export default function Payments() {
             rounded={'lg'}
          >
             <Flex flexDir={'column'} gap={'1rem'} overflowY={'auto'} flexBasis={'90%'}>
-               <PaymentsTable payments={payments} />
+               <PaymentsTable payments={requestsToShow} />
             </Flex>
             <Flex flexBasis={'17%'} alignSelf={'flex-end'}>
                <Box>
@@ -145,7 +151,7 @@ const PaymentsTable = ({ payments }: { payments: Array<PaymentDocType> }) => {
                            </Flex>
                         </Td>
                         <Td>{new Date(payment.timestamp * 1000).toDateString()}</Td>
-                        <Td>2021 Lamborghini Urus</Td>
+                        {payment.vehicle_data ? <Td>{payment.vehicle_data.title}</Td> : <Td>UnKnown</Td>}  
                         <Td>${payment.amount}</Td>
                         <Td>
                            <Badge colorScheme="green">Deposited</Badge>

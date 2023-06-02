@@ -15,20 +15,9 @@ const Login = () => {
 
    const loginUser = () => {
       const auth = firebase.firebaseAuth;
-      const recaptchaVerifier = new RecaptchaVerifier(
-         'sign-in-button',
-         {
-            size: 'invisible',
-            callback: (response: any) => {
-               console.log(response);
-               // reCAPTCHA solved, allow signInWithPhoneNumber.
-               onSignInSubmit();
-            }
-         },
-         auth
-      );
+      // signInWithPhoneNumber(auth, input, )
    };
-
+   
    return (
       <>
          <Text>Enter Phone Number</Text>

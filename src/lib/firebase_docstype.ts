@@ -22,7 +22,9 @@ export type PaymentDocType = {
    sender: string;
    status: boolean;
    timestamp: number;
+   vehicle: string;
    user_data: MemberDocType | null;
+   vehicle_data: VehicleDocType | null;
 };
 
 export type MemberDocType = {

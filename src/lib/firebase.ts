@@ -2,11 +2,11 @@
 
 import { initializeApp } from 'firebase/app';
 import { getAuth } from 'firebase/auth';
-import { collection, getFirestore } from 'firebase/firestore';
+import { collection, doc, getDoc, getFirestore } from 'firebase/firestore';
 
 import type { FirebaseApp } from 'firebase/app';
 import type { Auth } from 'firebase/auth';
-import type { Firestore } from 'firebase/firestore';
+import type { CollectionReference, DocumentData, Firestore } from 'firebase/firestore';
 
 const firebaseConfig = {
    apiKey: process.env.NEXT_PUBLIC_apiKey,
@@ -50,3 +50,12 @@ export const tempMembersColRef = collection(firebase.firebaseStore, 'temp_member
 export const vehiclesColRef = collection(firebase.firebaseStore, 'vehicles');
 export const paymentsColRef = collection(firebase.firebaseStore, 'payments');
 export const conversationsColRef = collection(firebase.firebaseStore, 'conversations');
+
+
+export const getDocData = async (colRef: CollectionReference<DocumentData>, docId: string) => {
+  if (!docId) return null;
+   const docRef = doc(colRef, docId);
+   return (await getDoc(docRef)).data();
+};
+
+
