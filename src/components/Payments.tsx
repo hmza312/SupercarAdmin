@@ -18,19 +18,35 @@ import WhiteButton from './design/WhiteButton';
 import { ViewIcon } from '@chakra-ui/icons';
 import { useDocsCount } from '@/lib/hooks/useDocsCount';
 import { getDocData, membersColRef, paymentsColRef, vehiclesColRef } from '@/lib/firebase';
-import { MemberDocType, PaymentDocType } from '@/lib/firebase_docstype';
+import { PaymentDocType } from '@/lib/firebase_docstype';
 import { useEffect, useRef, useState } from 'react';
 import { getDocs } from 'firebase/firestore';
 import Pagination from './design/Pagination';
 import { usePaginator } from 'chakra-paginator';
 import usePagination from '@/lib/hooks/usePagination';
 import PaymentContentHeader from './design/PaymentContentHeader';
+import DropDown from './design/DropDown';
 
 const pageQt = 15;
+
+interface PaymentStatus
+{
+   title: string;
+   status: number
+}
+
+const paymentStatus: Array<PaymentStatus> = [
+   { title: "Pending", status: 0 },
+   { title: "confirmed", status: 1 },
+   { title: "Deposited", status: 2 },
+   { title: "Denied", status: 3 },
+   { title: "all", status: 4}
+]
 
 export default function Payments() {
    const [paymentsCount] = useDocsCount(paymentsColRef);
    const [payments, setPayments] = useState<Array<PaymentDocType>>([]);
+   const [selectedStatus, setSelectedStatus] = useState<PaymentStatus | null>(null)
 
    useEffect(() => {
 
@@ -50,20 +66,22 @@ export default function Payments() {
             })
          }));
          
-
          setPayments(data as Array<PaymentDocType>);
       };
-
+      
       fetchPayments();
    }, []);
 
    const [under800] = useMediaQuery('(max-width: 800px)');
 
    const [requestsToShow, paginationIndices, setActiveIdx] = usePagination<PaymentDocType>(
-      payments,
+      payments.filter (p=> {
+         if (selectedStatus == null) return true;
+         return p.status == selectedStatus.status;
+      }),
       pageQt
    );
-
+   
    const { currentPage, setCurrentPage } = usePaginator({
       total: paginationIndices.length,
       initialState: {
@@ -73,10 +91,22 @@ export default function Payments() {
    });
 
    const topRef = useRef<any>(null);
-   
+
    return (
       <Flex width="100%" flexDir="column" gap="1rem" height="100%" pb={'2rem'} ref={topRef}>
          <PaymentContentHeader heading={`All Payments (${paymentsCount})`} description="" />
+         <Flex p={'0.5rem'} gap={'1rem'} width={'100%'}>
+            <Box ml={'auto'}>
+               <DropDown
+                  menuTitle={selectedStatus == null ? 'Select Payment Status' : selectedStatus.title}
+                  menuItems={paymentStatus.map(p=> p.title)}
+                  onSelected={(item) => {
+                     if (item === "all") setSelectedStatus(null);
+                     else setSelectedStatus(paymentStatus.filter (p => p.title == item)[0])
+                  }}
+               />
+            </Box>
+         </Flex>
          <Flex
             flex={3}
             width={'100%'}
@@ -154,7 +184,10 @@ const PaymentsTable = ({ payments }: { payments: Array<PaymentDocType> }) => {
                         {payment.vehicle_data ? <Td>{payment.vehicle_data.title}</Td> : <Td>UnKnown</Td>}  
                         <Td>${payment.amount}</Td>
                         <Td>
-                           <Badge colorScheme="green">Deposited</Badge>
+                           {payment.status == 0 && <Badge colorScheme="yellow">Pending</Badge>}
+                           {payment.status == 1 && <Badge colorScheme="green">confirmed</Badge>}
+                           {payment.status == 2 && <Badge colorScheme="green">Deposited</Badge>}
+                           {payment.status == 3 && <Badge colorScheme="red">Denied</Badge>}
                         </Td>
                         <Td>
                            <WhiteButton size={'sm'}>

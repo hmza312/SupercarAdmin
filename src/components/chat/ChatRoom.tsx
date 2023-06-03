@@ -27,7 +27,7 @@ import { useEffect, useState } from 'react';
 import { doc, getDoc, getDocs } from 'firebase/firestore';
 import { conversationsColRef, membersColRef } from '@/lib/firebase';
 import ModalWrapper, { ModalDropDown } from '../design/ModalWrapper';
-import { UseDisclosureProp } from '@/types/UserDisclosureProp';
+import { UseDisclosureProp } from '@/types/UseDisclosureProp';
 
 const ChatRoom = () => {
    const router = useRouter();
@@ -45,7 +45,7 @@ const ChatRoom = () => {
 
          console.log(conversationDocs.docs.map((d) => d.data()));
       };
-
+      
       getConversations();
    }, []);
 

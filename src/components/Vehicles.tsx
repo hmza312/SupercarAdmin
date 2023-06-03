@@ -149,7 +149,7 @@ const VehicleDetail = ({
          />
          <Flex alignItems={'center'} flexDir={'column'} justifyContent={'center'} gap={'0.1rem'}>
             <Heading textAlign={'center'} fontSize={'2xl'}>
-               {vehicle.title}
+              {vehicle.year} {vehicle.title}
             </Heading>
             {vehicle.owner_data ? (
                <>

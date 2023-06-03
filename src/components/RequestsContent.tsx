@@ -10,15 +10,16 @@ import {
    Center,
    Divider,
    useMediaQuery,
-   useDisclosure
+   useDisclosure,
+   useToast
 } from '@chakra-ui/react';
 import ContentHeader from './design/ContentHeader';
 import WhiteButton from './design/WhiteButton';
 import OrangeButton from './design/OrangeButton';
 import { useDocsCount } from '@/lib/hooks/useDocsCount';
-import { callsColRef, membersColRef, vehiclesColRef } from '@/lib/firebase';
+import { callsColRef, membersColRef, paymentsColRef, vehiclesColRef } from '@/lib/firebase';
 import { useEffect, useRef, useState } from 'react';
-import { getDocs } from 'firebase/firestore';
+import { doc, getDocs, setDoc, updateDoc } from 'firebase/firestore';
 import { MemberDocType, RequestDocType } from '@/lib/firebase_docstype';
 import Pagination from './design/Pagination';
 import { usePaginator } from 'chakra-paginator';
@@ -42,19 +43,21 @@ export default function RequestsContent() {
 
          setRequests(
             (requestDocs.docs.map((d) => d.data()) as Array<RequestDocType>).map((d) => {
-               return { ...d, user_data: users.filter((u) => u.uid == d.user)[0] };
+               return { ...d, user_data: users.filter((u) => u.uid == d.user)[0], id: d.id };
             })
+            .filter(req => req.status == 1 || req.status == 0)
          );
       };
 
       fetchRequests();
    }, []);
-
+   
+   
    const [requestsToShow, paginationIndices, setActiveIdx] = usePagination<RequestDocType>(
       requests,
       pageQt
    );
-
+   
    const { currentPage, setCurrentPage } = usePaginator({
       total: paginationIndices.length,
       initialState: {
@@ -186,6 +189,9 @@ const CustomerData = ({
 }) => {
    const [isUnder650] = useMediaQuery('(max-width: 650px)');
    
+   const cancelModalHandler = useDisclosure();
+   const toast = useToast();
+
    return (
       <Flex
          background="var(--grey-color)"
@@ -197,33 +203,59 @@ const CustomerData = ({
          overflowX={isUnder650 ? 'auto' : 'initial'}
       >
          {request.user_data && request.user_data.photo && (
-            <Avatar size="md" name="Kent Dodds" src={request.user_data.photo} />
+            <Avatar size="md" name={`${request.user_data.name}`} src={request.user_data.photo} />
          )}
 
          {!request.user_data && <Avatar size={'md'} border={'1px solid white'} showBorder={true} />}
 
          <Stack spacing={0}>
             <Text fontSize="lg" whiteSpace="nowrap">
-               {request.user_name}
+               {request.user_data ? request.user_data.name : (request.user_name || "Unknown")}
             </Text>
             <Text fontSize="xs" whiteSpace="nowrap">
-               {request.user_mobile}
+               {request.user_data ? request.user_data.mobile : request.user_mobile}
             </Text>
          </Stack>
+         
+         {/* Modal */}
+
+         <ConfirmModal 
+            handle={cancelModalHandler} 
+            title='Close Request' 
+            question={`Are you sure to cancel '${request.user_data ? request.user_data.name : (request.user_name || "Unknown")}' request? `} 
+            onConfirm={()=>{
+               const paymentDocRef = doc(callsColRef, request.id);
+               updateDoc(paymentDocRef, { status: 3}).then(()=>{
+                  toast({
+                     title: `Request has been canceled`,
+                     status: "success",
+                     isClosable: true,
+                  })
+               }).catch((e)=>{
+                  toast({
+                     title: `Something Went Gone Please,Try Again`,
+                     status: "error",
+                     isClosable: true,
+                  })
+               });
+            }}
+         />
 
          <Flex gap="1rem" marginLeft="auto">
             <Link href={`${ROUTING.customers}/chat/${request.user_data?.uid}`}>
                <OrangeButton>Message</OrangeButton>
             </Link>
             <WhiteButton onClick={modalHandle.onOpen}>Other</WhiteButton>
-            <WhiteButton>Close</WhiteButton>
+            <WhiteButton onClick={cancelModalHandler.onOpen}>Close</WhiteButton>
          </Flex>
       </Flex>
    );
 };
 
 import ModalWrapper, { ModalDropDown, ModalInput } from './design/ModalWrapper';
-import { UseDisclosureProp } from '@/types/UserDisclosureProp';
+import { UseDisclosureProp } from '@/types/UseDisclosureProp';
+import ConfirmModal from './design/ConfirmModal';
+import DropDown from './design/DropDown';
 
 const ScheduleMeetingModal = ({ handler }: { handler: UseDisclosureProp }) => (
    <>

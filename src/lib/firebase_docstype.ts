@@ -20,7 +20,7 @@ export type PaymentDocType = {
    id: string;
    recipient: string;
    sender: string;
-   status: boolean;
+   status: number;
    timestamp: number;
    vehicle: string;
    user_data: MemberDocType | null;
