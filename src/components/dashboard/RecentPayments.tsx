@@ -65,7 +65,7 @@ const UsersPaymentTables = ({ payments }: { payments: Array<PaymentDocType> }) =
                </Thead>
                <Tbody>
                   {payments.map((payment, idx) => {
-                     console.log(payment.timestamp);
+                     
                      return (
                         <Tr key={idx}>
                            <Td>{payment.sender}</Td>

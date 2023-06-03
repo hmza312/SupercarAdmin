@@ -25,14 +25,15 @@ import WhiteButton from '../design/WhiteButton';
 import { useRouter } from 'next/router';
 import { useEffect, useState } from 'react';
 import { doc, getDoc, getDocs } from 'firebase/firestore';
-import { conversationsColRef, membersColRef } from '@/lib/firebase';
+import { conversationsColRef, firebase, membersColRef } from '@/lib/firebase';
 import ModalWrapper, { ModalDropDown } from '../design/ModalWrapper';
 import { UseDisclosureProp } from '@/types/UseDisclosureProp';
+import { useAuthState } from 'react-firebase-hooks/auth';
 
 const ChatRoom = () => {
    const router = useRouter();
    const [customer, setCustomer] = useState<MemberDocType | null>(null);
-   const [isUnder850] = useMediaQuery("(max-width: 850px)");
+   const [isUnder850] = useMediaQuery('(max-width: 850px)');
 
    useEffect(() => {
       const customerId = router.asPath.split('/').at(-1);
@@ -45,12 +46,17 @@ const ChatRoom = () => {
 
          console.log(conversationDocs.docs.map((d) => d.data()));
       };
-      
+
       getConversations();
    }, []);
 
    const { isOpen, onOpen, onClose } = useDisclosure();
-   const sideBarHandle = useDisclosure(); 
+   const sideBarHandle = useDisclosure();
+   const [user] = useAuthState(firebase.firebaseAuth);
+
+   useEffect(() => {
+      console.log(user);
+   }, [user]);
 
    return (
       <>
@@ -77,12 +83,15 @@ const ChatRoom = () => {
                   </Box>
                   <ChatContainer />
                </Flex>
-               {isUnder850 ? <>
-                  <DrawerWrapper isOpen={sideBarHandle.isOpen} onClose={sideBarHandle.onClose}>
-                     <SideBar newDocUploadHandle={{ isOpen, onOpen, onClose }} />
-                  </DrawerWrapper>
-               </>:
-               <SideBar newDocUploadHandle={{ isOpen, onOpen, onClose }} />}
+               {isUnder850 ? (
+                  <>
+                     <DrawerWrapper isOpen={sideBarHandle.isOpen} onClose={sideBarHandle.onClose}>
+                        <SideBar newDocUploadHandle={{ isOpen, onOpen, onClose }} />
+                     </DrawerWrapper>
+                  </>
+               ) : (
+                  <SideBar newDocUploadHandle={{ isOpen, onOpen, onClose }} />
+               )}
             </Flex>
          </Flex>
 
@@ -197,7 +206,11 @@ const ChatContainer = () => {
    );
 };
 
-const SideBar = ({ newDocUploadHandle: newDocUploadHandle }: { newDocUploadHandle: UseDisclosureProp }) => {
+const SideBar = ({
+   newDocUploadHandle: newDocUploadHandle
+}: {
+   newDocUploadHandle: UseDisclosureProp;
+}) => {
    const [isUnder500] = useMediaQuery('(max-width: 500px)');
 
    return (
@@ -214,7 +227,7 @@ const SideBar = ({ newDocUploadHandle: newDocUploadHandle }: { newDocUploadHandl
          <Heading fontSize={'xl'} fontWeight={'600'}>
             Documents
          </Heading>
-
+         
          <InputGroup size={isUnder500 ? 'sm' : 'md'} colorScheme="gray">
             <Input
                pr="0.5rem"
@@ -279,7 +292,7 @@ const SideBar = ({ newDocUploadHandle: newDocUploadHandle }: { newDocUploadHandl
 const ChatMessage = ({ messagePos }: { messagePos: 'right' | 'left' }) => {
    const isRight = messagePos == 'right';
    const isLeft = messagePos == 'left';
-   const [isUnder850] = useMediaQuery("(max-width: 850px)");
+   const [isUnder850] = useMediaQuery('(max-width: 850px)');
    const padding = isUnder850 ? '10%' : '40%';
 
    return (

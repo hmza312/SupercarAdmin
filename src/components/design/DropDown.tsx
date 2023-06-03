@@ -5,7 +5,7 @@ import type { MenuItemProps } from '@chakra-ui/react';
 
 interface DropDownProps extends MenuItemProps {
    menuTitle: string;
-   menuItems: Array<string> | Array<React.ReactNode>;
+   menuitems: Array<string> | Array<React.ReactNode>;
    onSelected: (selected: string) => void;
 }
 
@@ -22,7 +22,7 @@ const DropDown = (props: DropDownProps) => (
          {props.menuTitle}
       </MenuButton>
       <MenuList bg={'var(--white-color)'} color={'black'} maxH={'60vh'} overflow={'scroll'}>
-         {props.menuItems.map((item, idx) => {
+         {props.menuitems.map((item, idx) => {
             return (
                <MenuItem
                   bg={'var(--white-color)'}

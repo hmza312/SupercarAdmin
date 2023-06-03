@@ -42,6 +42,7 @@ export type MemberDocType = {
    authenticated: string;
    deleted: boolean | undefined;
    uid: string;
+   isAdmin: boolean;
    payments: Array<PaymentDocType> | null;
    vehicles: Array<VehicleDocType> | null;
 };

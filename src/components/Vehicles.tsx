@@ -149,7 +149,7 @@ const VehicleDetail = ({
          />
          <Flex alignItems={'center'} flexDir={'column'} justifyContent={'center'} gap={'0.1rem'}>
             <Heading textAlign={'center'} fontSize={'2xl'}>
-              {vehicle.year} {vehicle.title}
+               {vehicle.year} {vehicle.title}
             </Heading>
             {vehicle.owner_data ? (
                <>
@@ -237,7 +237,7 @@ const VehiclesList = ({
             <Flex p={'0.5rem'} gap={'1rem'}>
                <DropDown
                   menuTitle={filter.selectedCustomer ? filter.selectedCustomer : 'Select Customers'}
-                  menuItems={filter.customers.map((c) => c.name)}
+                  menuitems={filter.customers.map((c) => c.name)}
                   onSelected={(item) => {
                      setFilter({ ...filter, selectedCustomer: item });
                   }}

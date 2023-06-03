@@ -7,7 +7,13 @@ import {
    Stack,
    Box,
    Center,
-   useOutsideClick
+   useOutsideClick,
+   Menu,
+   MenuButton,
+   MenuList,
+   MenuItem,
+   Button,
+   useDisclosure
 } from '@chakra-ui/react';
 import { ChevronDownIcon, HamburgerIcon } from '@chakra-ui/icons';
 
@@ -20,7 +26,10 @@ import Link from 'next/link';
 
 import { useRouter } from 'next/router';
 import { ROUTING } from '@/util/constant';
-import React, { useRef, useState } from 'react';
+import React, { useContext, useRef, useState } from 'react';
+import CredentialsProvider from '@/lib/CredentialsProvider';
+import { signOut } from 'firebase/auth';
+import { firebase } from '@/lib/firebase';
 
 interface SideBarLink {
    text: string;
@@ -49,6 +58,8 @@ export default function SideBar({ useMobStyle }: { useMobStyle: boolean }) {
       ref: navBarRef,
       handler: () => setIsOpen(false)
    });
+
+   const [user, setUser] = useContext(CredentialsProvider);
 
    const matchRoutePath = (path: string) => {
       const matchingRoute = Object.values(ROUTING).find((route) => {
@@ -116,14 +127,16 @@ export default function SideBar({ useMobStyle }: { useMobStyle: boolean }) {
             </Flex>
 
             <Flex p={'0.5rem'} px={'2rem'} alignItems={'center'} cursor={'pointer'} flex={1}>
-               <Avatar name="Kent Dodds" src="https://bit.ly/kent-c-dodds" />
-               <Stack gap={'0'} px={'0.6rem'} spacing={'-3px'}>
-                  <Text fontSize={'xl'}>Ethan Duran</Text>
-                  <Text px={'2px'}>Admin</Text>
-               </Stack>
-               <Icon flexFlow={'1'} justifySelf={'flex-end'} mx={'1rem'}>
-                  <ChevronDownIcon />
-               </Icon>
+               {!user ?<>
+                  <Text color='red'>Fail to load User Profile</Text>
+               </>: <>
+                  <Avatar name={`${user.name} avatar`} src={user.photo || ""} />
+                  <Stack gap={'0'} px={'0.6rem'} spacing={'-3px'}>
+                     <Text fontSize={'xl'}>{user.name}</Text>
+                     <Text px={'2px'}>{user.authenticated}</Text>
+                  </Stack>
+                  <ProfileDropDown /> 
+               </>}
             </Flex>
          </Flex>
       </>
@@ -180,3 +193,25 @@ const SideBarLinks = ({
       </>
    );
 };
+
+
+const ProfileDropDown = ()=> {
+
+   const { isOpen, onOpen, onClose } = useDisclosure()
+
+   return <Menu>
+          <MenuButton isActive={isOpen} as={Button} onClick={onOpen} color={'white'} p = {'0'} 
+            bg={'transparent'}
+            _hover={{bg:'transparent'}}
+            _active={{bg:'transparent'}}
+          >
+            <ChevronDownIcon /> 
+          </MenuButton>
+          <MenuList bg={'var(--white-color)'} color={'black'} >
+            <MenuItem _hover={{bg: 'var(--orange-color)', color: 'var(--white-color)'}}  bg={'var(--white-color)'}
+               onClick={()=>{signOut(firebase.firebaseAuth)}}
+            >Logout</MenuItem>
+          </MenuList>
+   </Menu>
+}
+

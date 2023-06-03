@@ -29,58 +29,53 @@ import DropDown from './design/DropDown';
 
 const pageQt = 15;
 
-interface PaymentStatus
-{
+interface PaymentStatus {
    title: string;
-   status: number
+   status: number;
 }
 
 const paymentStatus: Array<PaymentStatus> = [
-   { title: "Pending", status: 0 },
-   { title: "confirmed", status: 1 },
-   { title: "Deposited", status: 2 },
-   { title: "Denied", status: 3 },
-   { title: "all", status: 4}
-]
+   { title: 'Pending', status: 0 },
+   { title: 'confirmed', status: 1 },
+   { title: 'Deposited', status: 2 },
+   { title: 'Denied', status: 3 },
+   { title: 'all', status: 4 }
+];
 
 export default function Payments() {
    const [paymentsCount] = useDocsCount(paymentsColRef);
    const [payments, setPayments] = useState<Array<PaymentDocType>>([]);
-   const [selectedStatus, setSelectedStatus] = useState<PaymentStatus | null>(null)
+   const [selectedStatus, setSelectedStatus] = useState<PaymentStatus | null>(null);
 
    useEffect(() => {
-
-      
       const fetchPayments = async () => {
          const paymentsDocs = await getDocs(paymentsColRef);
-         
-         const data = await Promise.all((paymentsDocs.docs.map (d=> d.data()) as Array<PaymentDocType>)
-         .map(async (p) => {
-            const userPromise = getDocData(membersColRef, p.recipient);
-            const vehiclePromise = getDocData(vehiclesColRef, p.vehicle);
-            const [user_data, vehicle_data] = await Promise.all([userPromise, vehiclePromise]);
 
-            return ({...p, 
-               user_data,
-               vehicle_data
+         const data = await Promise.all(
+            (paymentsDocs.docs.map((d) => d.data()) as Array<PaymentDocType>).map(async (p) => {
+               const userPromise = getDocData(membersColRef, p.recipient);
+               const vehiclePromise = getDocData(vehiclesColRef, p.vehicle);
+               const [user_data, vehicle_data] = await Promise.all([userPromise, vehiclePromise]);
+                  
+               return { ...p, user_data, vehicle_data };
             })
-         }));
-         
+         );
+
          setPayments(data as Array<PaymentDocType>);
       };
-      
+
       fetchPayments();
    }, []);
 
    const [under800] = useMediaQuery('(max-width: 800px)');
 
    const [requestsToShow, paginationIndices, setActiveIdx] = usePagination<PaymentDocType>(
-      payments.filter (p=> {
+      payments.filter((p) => {
          return selectedStatus == null ? true : p.status == selectedStatus.status;
       }),
       pageQt
    );
-   
+
    const { currentPage, setCurrentPage } = usePaginator({
       total: paginationIndices.length,
       initialState: {
@@ -93,18 +88,24 @@ export default function Payments() {
 
    return (
       <Flex width="100%" flexDir="column" gap="1rem" height="100%" pb={'2rem'} ref={topRef}>
-         <PaymentContentHeader 
-            heading={`All Payments (${payments.filter (p=> selectedStatus == null ? true : p.status == selectedStatus.status).length})`} 
-            description="" 
+         <PaymentContentHeader
+            heading={`All Payments (${
+               payments.filter((p) =>
+                  selectedStatus == null ? true : p.status == selectedStatus.status
+               ).length
+            })`}
+            description=""
          />
          <Flex p={'0.5rem'} gap={'1rem'} width={'100%'}>
             <Box ml={'auto'}>
                <DropDown
-                  menuTitle={selectedStatus == null ? 'Select Payment Status' : selectedStatus.title}
-                  menuItems={paymentStatus.map(p=> p.title)}
+                  menuTitle={
+                     selectedStatus == null ? 'Select Payment Status' : selectedStatus.title
+                  }
+                  menuitems={paymentStatus.map((p) => p.title)}
                   onSelected={(item) => {
-                     if (item === "all") setSelectedStatus(null);
-                     else setSelectedStatus(paymentStatus.filter (p => p.title == item)[0])
+                     if (item === 'all') setSelectedStatus(null);
+                     else setSelectedStatus(paymentStatus.filter((p) => p.title == item)[0]);
                   }}
                />
             </Box>
@@ -183,7 +184,11 @@ const PaymentsTable = ({ payments }: { payments: Array<PaymentDocType> }) => {
                            </Flex>
                         </Td>
                         <Td>{new Date(payment.timestamp * 1000).toDateString()}</Td>
-                        {payment.vehicle_data ? <Td>{payment.vehicle_data.title}</Td> : <Td>UnKnown</Td>}  
+                        {payment.vehicle_data ? (
+                           <Td>{payment.vehicle_data.title}</Td>
+                        ) : (
+                           <Td>UnKnown</Td>
+                        )}
                         <Td>${payment.amount}</Td>
                         <Td>
                            {payment.status == 0 && <Badge colorScheme="yellow">Pending</Badge>}

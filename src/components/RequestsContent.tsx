@@ -31,16 +31,16 @@ const pageQt = 15;
 
 interface RequestStatus {
    title: string;
-   status: number
+   status: number;
 }
 
 const paymentStatus: Array<RequestStatus> = [
-   { title: "Requested", status: 0 },
-   { title: "confirmed", status: 1 },
-   { title: "Completed", status: 2 },
-   { title: "Cancelled", status: 3 },
-   { title: "Reset", status: 4}
-]
+   { title: 'Requested', status: 0 },
+   { title: 'confirmed', status: 1 },
+   { title: 'Completed', status: 2 },
+   { title: 'Cancelled', status: 3 },
+   { title: 'Reset', status: 4 }
+];
 
 export default function RequestsContent() {
    const [requestsCount] = useDocsCount(callsColRef);
@@ -64,15 +64,16 @@ export default function RequestsContent() {
 
       fetchRequests();
    }, []);
-   
-   
+
    const [requestsToShow, paginationIndices, setActiveIdx] = usePagination<RequestDocType>(
-      requests.filter (r => {
-         return  selectedStatus == null ? (r.status == 0 || r.status == 1) : r.status == selectedStatus.status;
+      requests.filter((r) => {
+         return selectedStatus == null
+            ? r.status == 0 || r.status == 1
+            : r.status == selectedStatus.status;
       }),
       pageQt
    );
-   
+
    const { currentPage, setCurrentPage } = usePaginator({
       total: paginationIndices.length,
       initialState: {
@@ -80,7 +81,7 @@ export default function RequestsContent() {
          currentPage: 1
       }
    });
-   
+
    const topRef = useRef<any>(null);
    const { isOpen, onOpen, onClose } = useDisclosure();
 
@@ -90,18 +91,24 @@ export default function RequestsContent() {
          <Flex width="100%" flexDir="column" gap="1rem" height="100%" ref={topRef}>
             <ContentHeader
                description="Use the chatroom to discuss payments and other client relations"
-               heading={`Help Requests (${requests.filter (r => {
-                  return  selectedStatus == null ? (r.status == 0 || r.status == 1) : r.status == selectedStatus.status;
-               }).length})`}
+               heading={`Help Requests (${
+                  requests.filter((r) => {
+                     return selectedStatus == null
+                        ? r.status == 0 || r.status == 1
+                        : r.status == selectedStatus.status;
+                  }).length
+               })`}
             />
             <Flex p={'0.5rem'} gap={'1rem'} width={'100%'}>
                <Box ml={'auto'}>
                   <DropDown
-                     menuTitle={selectedStatus == null ? 'Select Request Status' : selectedStatus.title}
-                     menuItems={paymentStatus.map(p=> p.title)}
+                     menuTitle={
+                        selectedStatus == null ? 'Select Request Status' : selectedStatus.title
+                     }
+                     menuitems={paymentStatus.map((p) => p.title)}
                      onSelected={(item) => {
-                        if (item === "all") setSelectedStatus(null);
-                        else setSelectedStatus(paymentStatus.filter (p => p.title == item)[0])
+                        if (item === 'all') setSelectedStatus(null);
+                        else setSelectedStatus(paymentStatus.filter((p) => p.title == item)[0]);
                      }}
                   />
                </Box>
@@ -217,7 +224,7 @@ const CustomerData = ({
    modalHandle: UseDisclosureProp;
 }) => {
    const [isUnder650] = useMediaQuery('(max-width: 650px)');
-   
+
    const cancelModalHandler = useDisclosure();
    const toast = useToast();
 
@@ -239,34 +246,38 @@ const CustomerData = ({
 
          <Stack spacing={0}>
             <Text fontSize="lg" whiteSpace="nowrap">
-               {request.user_data ? request.user_data.name : (request.user_name || "Unknown")}
+               {request.user_data ? request.user_data.name : request.user_name || 'Unknown'}
             </Text>
             <Text fontSize="xs" whiteSpace="nowrap">
                {request.user_data ? request.user_data.mobile : request.user_mobile}
             </Text>
          </Stack>
-         
+
          {/* Modal */}
 
-         <ConfirmModal 
-            handle={cancelModalHandler} 
-            title='Close Request' 
-            question={`Are you sure to cancel '${request.user_data ? request.user_data.name : (request.user_name || "Unknown")}' request? `} 
-            onConfirm={()=>{
+         <ConfirmModal
+            handle={cancelModalHandler}
+            title="Close Request"
+            question={`Are you sure to cancel '${
+               request.user_data ? request.user_data.name : request.user_name || 'Unknown'
+            }' request? `}
+            onConfirm={() => {
                const paymentDocRef = doc(callsColRef, request.id);
-               updateDoc(paymentDocRef, { status: 3}).then(()=>{
-                  toast({
-                     title: `Request has been canceled`,
-                     status: "success",
-                     isClosable: true,
+               updateDoc(paymentDocRef, { status: 3 })
+                  .then(() => {
+                     toast({
+                        title: `Request has been canceled`,
+                        status: 'success',
+                        isClosable: true
+                     });
                   })
-               }).catch((e)=>{
-                  toast({
-                     title: `Something Went Gone Please,Try Again`,
-                     status: "error",
-                     isClosable: true,
-                  })
-               });
+                  .catch((e) => {
+                     toast({
+                        title: `Something Went Gone Please,Try Again`,
+                        status: 'error',
+                        isClosable: true
+                     });
+                  });
             }}
          />
 
