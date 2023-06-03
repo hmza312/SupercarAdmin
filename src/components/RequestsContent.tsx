@@ -35,10 +35,10 @@ interface RequestStatus {
 }
 
 const paymentStatus: Array<RequestStatus> = [
-   { title: "Pending", status: 0 },
+   { title: "Requested", status: 0 },
    { title: "confirmed", status: 1 },
    { title: "Completed", status: 2 },
-   { title: "Denied", status: 3 },
+   { title: "Cancelled", status: 3 },
    { title: "all", status: 4}
 ]
 
