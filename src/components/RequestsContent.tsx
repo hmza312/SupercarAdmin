@@ -68,8 +68,7 @@ export default function RequestsContent() {
    
    const [requestsToShow, paginationIndices, setActiveIdx] = usePagination<RequestDocType>(
       requests.filter (r => {
-         if (selectedStatus == null) return true;
-         return r.status == selectedStatus.status;
+         return  selectedStatus == null ? true : r.status == selectedStatus.status;
       }),
       pageQt
    );
@@ -81,7 +80,7 @@ export default function RequestsContent() {
          currentPage: 1
       }
    });
-
+   
    const topRef = useRef<any>(null);
    const { isOpen, onOpen, onClose } = useDisclosure();
 
@@ -91,7 +90,9 @@ export default function RequestsContent() {
          <Flex width="100%" flexDir="column" gap="1rem" height="100%" ref={topRef}>
             <ContentHeader
                description="Use the chatroom to discuss payments and other client relations"
-               heading={`Help Requests (${requestsCount})`}
+               heading={`Help Requests (${requests.filter (r => {
+                  return  selectedStatus == null ? true : r.status == selectedStatus.status;
+               }).length})`}
             />
             <Flex p={'0.5rem'} gap={'1rem'} width={'100%'}>
                <Box ml={'auto'}>

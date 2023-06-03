@@ -76,8 +76,7 @@ export default function Payments() {
 
    const [requestsToShow, paginationIndices, setActiveIdx] = usePagination<PaymentDocType>(
       payments.filter (p=> {
-         if (selectedStatus == null) return true;
-         return p.status == selectedStatus.status;
+         return selectedStatus == null ? true : p.status == selectedStatus.status;
       }),
       pageQt
    );
@@ -94,7 +93,10 @@ export default function Payments() {
 
    return (
       <Flex width="100%" flexDir="column" gap="1rem" height="100%" pb={'2rem'} ref={topRef}>
-         <PaymentContentHeader heading={`All Payments (${paymentsCount})`} description="" />
+         <PaymentContentHeader 
+            heading={`All Payments (${payments.filter (p=> selectedStatus == null ? true : p.status == selectedStatus.status).length})`} 
+            description="" 
+         />
          <Flex p={'0.5rem'} gap={'1rem'} width={'100%'}>
             <Box ml={'auto'}>
                <DropDown
