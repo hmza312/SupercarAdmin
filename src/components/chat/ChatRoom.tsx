@@ -23,8 +23,8 @@ import { BsEmojiSmile, BsSend } from 'react-icons/bs';
 import { ImAttachment } from 'react-icons/im';
 import WhiteButton from '../design/WhiteButton';
 import { useRouter } from 'next/router';
-import { useEffect, useState } from 'react';
-import { doc, getDoc, getDocs } from 'firebase/firestore';
+import { useContext, useEffect, useState } from 'react';
+import { collection, doc, getDoc, getDocs } from 'firebase/firestore';
 import { conversationsColRef, firebase, membersColRef } from '@/lib/firebase';
 import ModalWrapper, { ModalDropDown } from '../design/ModalWrapper';
 import { UseDisclosureProp } from '@/types/UseDisclosureProp';
@@ -34,6 +34,8 @@ const ChatRoom = () => {
    const router = useRouter();
    const [customer, setCustomer] = useState<MemberDocType | null>(null);
    const [isUnder850] = useMediaQuery('(max-width: 850px)');
+   const [chatMessages, setChatMessages] = useState<Array<MessageDocType>>([]);
+   const [user, setUser]= useContext(CredentialsProvider);
 
    useEffect(() => {
       const customerId = router.asPath.split('/').at(-1);
@@ -42,9 +44,20 @@ const ChatRoom = () => {
          const customerDocRef = doc(membersColRef, customerId);
          const customerDoc = (await getDoc(customerDocRef)).data();
          setCustomer(customerDoc as MemberDocType);
-         const conversationDocs = await getDocs(conversationsColRef);
 
-         console.log(conversationDocs.docs.map((d) => d.data()));
+         const convDocs = (await getDocs (conversationsColRef)).docs.map(d=>d.data());
+
+         const conversationDocRef = doc(conversationsColRef, convDocs[0].id);
+         const conversationDocSnapshot = await getDoc(conversationDocRef);
+         
+         const conversationDocData = conversationDocSnapshot.data();
+         const messagesColRef = collection(conversationDocRef, 'Messages');
+         const messagesSnapshot = await getDocs(messagesColRef);
+         
+         const messagesData = messagesSnapshot.docs.map((doc) => {
+            return ({...doc.data(), avatar: doc.data().sender == user?.uid ? user?.photo : customer?.photo }) as MessageDocType;
+         });
+         setChatMessages(messagesData as Array<MessageDocType>);
       };
 
       getConversations();
@@ -52,11 +65,8 @@ const ChatRoom = () => {
 
    const { isOpen, onOpen, onClose } = useDisclosure();
    const sideBarHandle = useDisclosure();
-   const [user] = useAuthState(firebase.firebaseAuth);
 
-   useEffect(() => {
-      console.log(user);
-   }, [user]);
+   
 
    return (
       <>
@@ -81,7 +91,10 @@ const ChatRoom = () => {
                         </>
                      )}
                   </Box>
-                  <ChatContainer />
+                  <ChatContainer 
+                     chat = {chatMessages}
+                     adminId = {user?.uid as string}
+                  />
                </Flex>
                {isUnder850 ? (
                   <>
@@ -131,7 +144,7 @@ const ChatHeader = ({
    </Flex>
 );
 
-const ChatContainer = () => {
+const ChatContainer = ({ chat, adminId } : { chat: Array<MessageDocType>, adminId: string }) => {
    const [isUnder500] = useMediaQuery('(max-width: 500px)');
 
    return (
@@ -147,14 +160,10 @@ const ChatContainer = () => {
       >
          {/* chat container */}
          <Flex flex={1} width={'100%'} overflowY={'auto'} maxH={'100%'} flexDir={'column'}>
-            <Center color={'var(--white-color)'}>No Conversation So far</Center>
-            {/* <ChatMessage messagePos="left" />
-            <ChatMessage messagePos="right" />
-            <ChatMessage messagePos="left" />
-            <ChatMessage messagePos="right" />
-            <ChatMessage messagePos="left" />
-            <ChatMessage messagePos="left" />
-            <ChatMessage messagePos="left" /> */}
+            {chat.length == 0 && <Center color={'var(--white-color)'}>No Conversation So far</Center>}
+            {chat.map ((c,i)=>{
+               return <ChatMessage avatar={c.avatar} key={i} messagePos={c.sender == adminId ? 'right' : 'left'} msg={c} />
+            })}
          </Flex>
 
          {/* search box */}
@@ -227,7 +236,7 @@ const SideBar = ({
          <Heading fontSize={'xl'} fontWeight={'600'}>
             Documents
          </Heading>
-         
+
          <InputGroup size={isUnder500 ? 'sm' : 'md'} colorScheme="gray">
             <Input
                pr="0.5rem"
@@ -289,7 +298,7 @@ const SideBar = ({
    );
 };
 
-const ChatMessage = ({ messagePos }: { messagePos: 'right' | 'left' }) => {
+const ChatMessage = ({ messagePos, msg, avatar }: { avatar: string, msg: MessageDocType, messagePos: 'right' | 'left' }) => {
    const isRight = messagePos == 'right';
    const isLeft = messagePos == 'left';
    const [isUnder850] = useMediaQuery('(max-width: 850px)');
@@ -304,7 +313,7 @@ const ChatMessage = ({ messagePos }: { messagePos: 'right' | 'left' }) => {
          flexDir={isRight ? 'row-reverse' : 'row'}
       >
          <Flex height={'100%'} gap={'0.5rem'} flexDir={isRight ? 'row-reverse' : 'row'}>
-            <Avatar></Avatar>
+            <Avatar src={msg.avatar || ''} />
 
             <Flex flexDir={'column'} fontWeight={'400'} fontSize={'11px'} gap={'0.1rem'}>
                <Box
@@ -312,12 +321,10 @@ const ChatMessage = ({ messagePos }: { messagePos: 'right' | 'left' }) => {
                   rounded={'0.55rem'}
                   p={'0.5rem'}
                >
-                  Lorem ipsumdolor sit amet, consectetur adipisicing elit. Cupiditate error a nemo
-                  iste corporis tempore, recusandae perferendis repudiandae nulla doloremque. Iure
-                  atque maiores rem, blanditiis eveniet nisi molestias praesentium! Error.
+                  {msg.contents}
                </Box>
                <Text color={'var(--info-text-color)'} marginLeft={isRight ? 'auto' : 'initial'}>
-                  May 22 @ 10:15 pm
+                  {new Date(msg.timestamp * 1000).toDateString()} @ {new Date(msg.timestamp * 1000).toTimeString()}
                </Text>
             </Flex>
          </Flex>
@@ -326,8 +333,9 @@ const ChatMessage = ({ messagePos }: { messagePos: 'right' | 'left' }) => {
 };
 
 import { ModalInput } from '../design/ModalWrapper';
-import { MemberDocType } from '@/lib/firebase_docstype';
+import { MemberDocType, MessageDocType } from '@/lib/firebase_docstype';
 import DrawerWrapper from '../design/Drawer';
+import CredentialsProvider from '@/lib/CredentialsProvider';
 
 const NewDocumentUpload = ({ handler }: { handler: UseDisclosureProp }) => (
    <>

@@ -59,3 +59,12 @@ export type RequestDocType = {
    user_name: string;
    user_data: MemberDocType | null;
 };
+
+
+export type MessageDocType = {
+   contents: string;
+   id: string;
+   sender: string;
+   timeStamp: number;
+   type: number;
+}

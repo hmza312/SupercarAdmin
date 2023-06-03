@@ -30,7 +30,7 @@ export default function App({ Component, pageProps }: AppProps) {
             where("mobile", "==", loggedInUser.phoneNumber?.slice(2, loggedInUser.phoneNumber.length)) ,
             where("admin", "==", true)
          );
-         const potentialUsers = (await getDocs(q)).docs.map (d=>d.data()) as Array<MemberDocType>;
+         const potentialUsers = (await getDocs(q)).docs.map (d=>({...d.data(), uid: d.id})) as Array<MemberDocType>;
          setUser(potentialUsers[0]);
       };
 
