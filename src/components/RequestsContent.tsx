@@ -29,9 +29,23 @@ import Link from 'next/link';
 
 const pageQt = 15;
 
+interface RequestStatus {
+   title: string;
+   status: number
+}
+
+const paymentStatus: Array<RequestStatus> = [
+   { title: "Pending", status: 0 },
+   { title: "confirmed", status: 1 },
+   { title: "Completed", status: 2 },
+   { title: "Denied", status: 3 },
+   { title: "all", status: 4}
+]
+
 export default function RequestsContent() {
    const [requestsCount] = useDocsCount(callsColRef);
    const [requests, setRequests] = useState<Array<RequestDocType>>([]);
+   const [selectedStatus, setSelectedStatus] = useState<RequestStatus | null>(null);
 
    useEffect(() => {
       const fetchRequests = async () => {
@@ -45,7 +59,6 @@ export default function RequestsContent() {
             (requestDocs.docs.map((d) => d.data()) as Array<RequestDocType>).map((d) => {
                return { ...d, user_data: users.filter((u) => u.uid == d.user)[0], id: d.id };
             })
-            .filter(req => req.status == 1 || req.status == 0)
          );
       };
 
@@ -54,7 +67,10 @@ export default function RequestsContent() {
    
    
    const [requestsToShow, paginationIndices, setActiveIdx] = usePagination<RequestDocType>(
-      requests,
+      requests.filter (r => {
+         if (selectedStatus == null) return true;
+         return r.status == selectedStatus.status;
+      }),
       pageQt
    );
    
@@ -77,6 +93,18 @@ export default function RequestsContent() {
                description="Use the chatroom to discuss payments and other client relations"
                heading={`Help Requests (${requestsCount})`}
             />
+            <Flex p={'0.5rem'} gap={'1rem'} width={'100%'}>
+               <Box ml={'auto'}>
+                  <DropDown
+                     menuTitle={selectedStatus == null ? 'Select Request Status' : selectedStatus.title}
+                     menuItems={paymentStatus.map(p=> p.title)}
+                     onSelected={(item) => {
+                        if (item === "all") setSelectedStatus(null);
+                        else setSelectedStatus(paymentStatus.filter (p => p.title == item)[0])
+                     }}
+                  />
+               </Box>
+            </Flex>
             <Flex gap="0.3rem">
                <CustomersList
                   handleModal={{ isOpen, onOpen, onClose }}
