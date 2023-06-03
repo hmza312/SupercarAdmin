@@ -39,7 +39,7 @@ const paymentStatus: Array<RequestStatus> = [
    { title: "confirmed", status: 1 },
    { title: "Completed", status: 2 },
    { title: "Cancelled", status: 3 },
-   { title: "all", status: 4}
+   { title: "Reset", status: 4}
 ]
 
 export default function RequestsContent() {
@@ -68,7 +68,7 @@ export default function RequestsContent() {
    
    const [requestsToShow, paginationIndices, setActiveIdx] = usePagination<RequestDocType>(
       requests.filter (r => {
-         return  selectedStatus == null ? true : r.status == selectedStatus.status;
+         return  selectedStatus == null ? (r.status == 0 || r.status == 1) : r.status == selectedStatus.status;
       }),
       pageQt
    );
@@ -91,7 +91,7 @@ export default function RequestsContent() {
             <ContentHeader
                description="Use the chatroom to discuss payments and other client relations"
                heading={`Help Requests (${requests.filter (r => {
-                  return  selectedStatus == null ? true : r.status == selectedStatus.status;
+                  return  selectedStatus == null ? (r.status == 0 || r.status == 1) : r.status == selectedStatus.status;
                }).length})`}
             />
             <Flex p={'0.5rem'} gap={'1rem'} width={'100%'}>
