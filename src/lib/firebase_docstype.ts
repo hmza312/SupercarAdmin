@@ -69,3 +69,12 @@ export type MessageDocType = {
    avatar?: string | undefined;
 };
 
+
+
+export type ConversationDocType = {
+   recipient: string;
+   status: 1;
+   last_updated: number;
+   id: string;
+   description: string;
+}

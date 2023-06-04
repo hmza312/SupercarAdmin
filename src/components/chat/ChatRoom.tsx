@@ -15,7 +15,8 @@ import {
    Stack,
    Text,
    useDisclosure,
-   useMediaQuery
+   useMediaQuery,
+   useToast
 } from '@chakra-ui/react';
 import Link from 'next/link';
 import OrangeButton from '../design/OrangeButton';
@@ -23,12 +24,13 @@ import { BsEmojiSmile, BsSend } from 'react-icons/bs';
 import { ImAttachment } from 'react-icons/im';
 import WhiteButton from '../design/WhiteButton';
 import { useRouter } from 'next/router';
-import { useContext, useEffect, useState } from 'react';
-import { collection, doc, getDoc, getDocs } from 'firebase/firestore';
+import { MutableRefObject, useContext, useEffect, useRef, useState } from 'react';
+import { addDoc, collection, doc, getDoc, getDocs, onSnapshot, orderBy, query, where } from 'firebase/firestore';
 import { conversationsColRef, firebase, membersColRef } from '@/lib/firebase';
 import ModalWrapper, { ModalDropDown } from '../design/ModalWrapper';
 import { UseDisclosureProp } from '@/types/UseDisclosureProp';
-import { useAuthState } from 'react-firebase-hooks/auth';
+import { useCallback } from "react"
+
 
 const ChatRoom = () => {
    const router = useRouter();
@@ -36,38 +38,87 @@ const ChatRoom = () => {
    const [isUnder850] = useMediaQuery('(max-width: 850px)');
    const [chatMessages, setChatMessages] = useState<Array<MessageDocType>>([]);
    const [user, setUser] = useContext(CredentialsProvider);
+   const [convId, setConvId] = useState<string | null>(null);
+
 
    useEffect(() => {
       const customerId = router.asPath.split('/').at(-1);
+      let unSub = ()=> {};
 
       const getConversations = async () => {
          const customerDocRef = doc(membersColRef, customerId);
-         const customerDoc = (await getDoc(customerDocRef)).data();
-         setCustomer(customerDoc as MemberDocType);
+         const customerDoc = await getDoc(customerDocRef);  
+         setCustomer(customerDoc.data() as MemberDocType);
 
-         const convDocs = (await getDocs(conversationsColRef)).docs.map((d) => d.data());
-
+         const conversationQuery = query(conversationsColRef, 
+            where("recipient", "==", customerDoc.id)   
+         );
+         
+         const convDocs = (await getDocs(conversationQuery)).docs.map(d => ({...d.data(), id: d.id}));
+         if (convDocs.length == 0) return; // no conversation so far
+         
+         setConvId(convDocs[0].id);
+         
          const conversationDocRef = doc(conversationsColRef, convDocs[0].id);
-         const conversationDocSnapshot = await getDoc(conversationDocRef);
-
-         const conversationDocData = conversationDocSnapshot.data();
          const messagesColRef = collection(conversationDocRef, 'Messages');
-         const messagesSnapshot = await getDocs(messagesColRef);
-
-         const messagesData = messagesSnapshot.docs.map((doc) => {
-            return {
-               ...doc.data(),
-               avatar: doc.data().sender == user?.uid ? user?.photo : customer?.photo
-            } as MessageDocType;
+         
+         const unSubSnapShot = onSnapshot(query(messagesColRef, orderBy("timestamp", 'asc')), (data)=> {
+            const messagesData = data.docs.map((doc) => {
+               return {
+                  ...doc.data(),
+                  avatar: doc.data().sender == user?.uid ? user?.photo : customer?.photo
+               } as MessageDocType;
+            });
+            
+            setChatMessages(messagesData as Array<MessageDocType>);
+            (containerRef.current as HTMLDivElement).scrollIntoView({ behavior: 'smooth' });
          });
-         setChatMessages(messagesData as Array<MessageDocType>);
+
+         unSub = ()=> { unSubSnapShot(); };
       };
 
       getConversations();
+
+      return ()=> { unSub(); };
    }, []);
 
    const { isOpen, onOpen, onClose } = useDisclosure();
    const sideBarHandle = useDisclosure();
+   const toast = useToast();
+   const [input, setInput] = useState<string> ('');
+   const containerRef = useRef<any>(null);
+   
+
+   const sendNewMessage = useCallback (async ()=> {
+      if (!convId || input.length == 0) {  return; }
+      const conversationDocRef = doc(conversationsColRef, convId);
+      const messagesColRef = collection(conversationDocRef, 'Messages');
+
+      const newMsgDoc = doc(messagesColRef);
+
+      let isValid = user?.uid;
+      
+      if (!isValid) {
+         toast({
+            'title': 'Message fail',
+            'description': 'Something Went Wrong!',
+            'status': 'error'
+         })
+         return;
+      }
+
+      
+      addDoc(messagesColRef, {
+         contents: input,
+         id: newMsgDoc.id,
+         type: 1,
+         timestamp: localTimeStamp(),
+         sender: user?.uid
+      } as MessageDocType);
+
+      setInput('');
+   }, [convId, user, toast, input]);
+
 
    return (
       <>
@@ -92,7 +143,13 @@ const ChatRoom = () => {
                         </>
                      )}
                   </Box>
-                  <ChatContainer chat={chatMessages} adminId={user?.uid as string} />
+                     <ChatContainer sendMessage={()=> {
+                        sendNewMessage();
+                     }} canSend={input.length != 0 && convId != null} 
+                     inputState={[input, setInput]} chat={chatMessages} 
+                     containerRef = {containerRef}
+                     adminId={user?.uid as string} 
+                  />
                </Flex>
                {isUnder850 ? (
                   <>
@@ -142,22 +199,25 @@ const ChatHeader = ({
    </Flex>
 );
 
-const ChatContainer = ({ chat, adminId }: { chat: Array<MessageDocType>; adminId: string }) => {
+const ChatContainer = ({  chat, adminId, inputState, canSend, sendMessage, containerRef }: { containerRef: MutableRefObject<any>,  canSend: boolean, chat: Array<MessageDocType>; adminId: string, inputState: UseStateProps<string>, sendMessage: ()=> void }) => {
    const [isUnder500] = useMediaQuery('(max-width: 500px)');
+   const [input, setInput] = inputState;
 
    return (
       <Flex
          height={'100%'}
          width={'100%'}
          bg={'var(--grey-color)'}
-         overflow={'auto'}
+         overflowY={'auto'}
          p={'0.5rem'}
          rounded={'lg'}
          flexDir={'column'}
          gap={'0.5rem'}
       >
          {/* chat container */}
-         <Flex flex={1} width={'100%'} overflowY={'auto'} maxH={'100%'} flexDir={'column'}>
+         <Flex flex={1} width={'100%'} overflowY={'auto'}  maxH={'100%'} flexDir={'column'}
+            
+         >
             {chat.length == 0 && (
                <Center color={'var(--white-color)'}>No Conversation So far</Center>
             )}
@@ -171,6 +231,8 @@ const ChatContainer = ({ chat, adminId }: { chat: Array<MessageDocType>; adminId
                   />
                );
             })}
+
+            <div ref = {containerRef} style={{ marginBottom: '3rem' }}></div>
          </Flex>
 
          {/* search box */}
@@ -189,6 +251,10 @@ const ChatContainer = ({ chat, adminId }: { chat: Array<MessageDocType>; adminId
                      transform: 'translateY(-1px)'
                   }}
                   rounded={'full'}
+                  value={input}
+                  onChange={(e)=> {
+                     setInput(e.target.value);
+                  }}
                />
                <InputRightElement height={'100%'} width={'30%'}>
                   {' '}
@@ -201,6 +267,7 @@ const ChatContainer = ({ chat, adminId }: { chat: Array<MessageDocType>; adminId
                         <BsEmojiSmile />
                      </Icon>
 
+                     {canSend && 
                      <Button
                         colorScheme="whatsapp"
                         rounded={'50%'}
@@ -209,11 +276,12 @@ const ChatContainer = ({ chat, adminId }: { chat: Array<MessageDocType>; adminId
                         maxH={'37px'}
                         maxW={'37px'}
                         marginLeft={'auto'}
+                        onClick={sendMessage}
                      >
                         <Icon fontSize={'xl'} transform={'translateY(1.5px)'}>
                            <BsSend />
                         </Icon>
-                     </Button>
+                     </Button>}
                   </Flex>{' '}
                </InputRightElement>
             </InputGroup>
@@ -339,8 +407,7 @@ const ChatMessage = ({
                   {msg.contents}
                </Box>
                <Text color={'var(--info-text-color)'} marginLeft={isRight ? 'auto' : 'initial'}>
-                  {new Date(msg.timestamp * 1000).toDateString()} @{' '}
-                  {new Date(msg.timestamp * 1000).toTimeString()}
+                  {formatChatDate(new Date(msg.timestamp * 1000))}
                </Text>
             </Flex>
          </Flex>
@@ -352,6 +419,8 @@ import { ModalInput } from '../design/ModalWrapper';
 import { MemberDocType, MessageDocType } from '@/lib/firebase_docstype';
 import DrawerWrapper from '../design/Drawer';
 import CredentialsProvider from '@/lib/CredentialsProvider';
+import { UseStateProps } from '@/types/UseStateProps';
+import { formatChatDate, localTimeStamp } from '@/util/helpers';
 
 const NewDocumentUpload = ({ handler }: { handler: UseDisclosureProp }) => (
    <>
