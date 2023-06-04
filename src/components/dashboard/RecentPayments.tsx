@@ -65,7 +65,6 @@ const UsersPaymentTables = ({ payments }: { payments: Array<PaymentDocType> }) =
                </Thead>
                <Tbody>
                   {payments.map((payment, idx) => {
-                     
                      return (
                         <Tr key={idx}>
                            <Td>{payment.sender}</Td>

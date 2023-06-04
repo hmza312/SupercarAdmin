@@ -60,11 +60,12 @@ export type RequestDocType = {
    user_data: MemberDocType | null;
 };
 
-
 export type MessageDocType = {
    contents: string;
    id: string;
    sender: string;
-   timeStamp: number;
+   timestamp: number;
    type: number;
-}
+   avatar?: string | undefined;
+};
+

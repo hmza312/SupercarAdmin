@@ -35,7 +35,7 @@ const ChatRoom = () => {
    const [customer, setCustomer] = useState<MemberDocType | null>(null);
    const [isUnder850] = useMediaQuery('(max-width: 850px)');
    const [chatMessages, setChatMessages] = useState<Array<MessageDocType>>([]);
-   const [user, setUser]= useContext(CredentialsProvider);
+   const [user, setUser] = useContext(CredentialsProvider);
 
    useEffect(() => {
       const customerId = router.asPath.split('/').at(-1);
@@ -45,17 +45,20 @@ const ChatRoom = () => {
          const customerDoc = (await getDoc(customerDocRef)).data();
          setCustomer(customerDoc as MemberDocType);
 
-         const convDocs = (await getDocs (conversationsColRef)).docs.map(d=>d.data());
+         const convDocs = (await getDocs(conversationsColRef)).docs.map((d) => d.data());
 
          const conversationDocRef = doc(conversationsColRef, convDocs[0].id);
          const conversationDocSnapshot = await getDoc(conversationDocRef);
-         
+
          const conversationDocData = conversationDocSnapshot.data();
          const messagesColRef = collection(conversationDocRef, 'Messages');
          const messagesSnapshot = await getDocs(messagesColRef);
-         
+
          const messagesData = messagesSnapshot.docs.map((doc) => {
-            return ({...doc.data(), avatar: doc.data().sender == user?.uid ? user?.photo : customer?.photo }) as MessageDocType;
+            return {
+               ...doc.data(),
+               avatar: doc.data().sender == user?.uid ? user?.photo : customer?.photo
+            } as MessageDocType;
          });
          setChatMessages(messagesData as Array<MessageDocType>);
       };
@@ -65,8 +68,6 @@ const ChatRoom = () => {
 
    const { isOpen, onOpen, onClose } = useDisclosure();
    const sideBarHandle = useDisclosure();
-
-   
 
    return (
       <>
@@ -91,10 +92,7 @@ const ChatRoom = () => {
                         </>
                      )}
                   </Box>
-                  <ChatContainer 
-                     chat = {chatMessages}
-                     adminId = {user?.uid as string}
-                  />
+                  <ChatContainer chat={chatMessages} adminId={user?.uid as string} />
                </Flex>
                {isUnder850 ? (
                   <>
@@ -144,7 +142,7 @@ const ChatHeader = ({
    </Flex>
 );
 
-const ChatContainer = ({ chat, adminId } : { chat: Array<MessageDocType>, adminId: string }) => {
+const ChatContainer = ({ chat, adminId }: { chat: Array<MessageDocType>; adminId: string }) => {
    const [isUnder500] = useMediaQuery('(max-width: 500px)');
 
    return (
@@ -160,9 +158,18 @@ const ChatContainer = ({ chat, adminId } : { chat: Array<MessageDocType>, adminI
       >
          {/* chat container */}
          <Flex flex={1} width={'100%'} overflowY={'auto'} maxH={'100%'} flexDir={'column'}>
-            {chat.length == 0 && <Center color={'var(--white-color)'}>No Conversation So far</Center>}
-            {chat.map ((c,i)=>{
-               return <ChatMessage avatar={c.avatar} key={i} messagePos={c.sender == adminId ? 'right' : 'left'} msg={c} />
+            {chat.length == 0 && (
+               <Center color={'var(--white-color)'}>No Conversation So far</Center>
+            )}
+            {chat.map((c, i) => {
+               return (
+                  <ChatMessage
+                     avatar={c.avatar as string}
+                     key={i}
+                     messagePos={c.sender == adminId ? 'right' : 'left'}
+                     msg={c}
+                  />
+               );
             })}
          </Flex>
 
@@ -298,7 +305,15 @@ const SideBar = ({
    );
 };
 
-const ChatMessage = ({ messagePos, msg, avatar }: { avatar: string, msg: MessageDocType, messagePos: 'right' | 'left' }) => {
+const ChatMessage = ({
+   messagePos,
+   msg,
+   avatar
+}: {
+   avatar: string | undefined;
+   msg: MessageDocType;
+   messagePos: 'right' | 'left';
+}) => {
    const isRight = messagePos == 'right';
    const isLeft = messagePos == 'left';
    const [isUnder850] = useMediaQuery('(max-width: 850px)');
@@ -324,7 +339,8 @@ const ChatMessage = ({ messagePos, msg, avatar }: { avatar: string, msg: Message
                   {msg.contents}
                </Box>
                <Text color={'var(--info-text-color)'} marginLeft={isRight ? 'auto' : 'initial'}>
-                  {new Date(msg.timestamp * 1000).toDateString()} @ {new Date(msg.timestamp * 1000).toTimeString()}
+                  {new Date(msg.timestamp * 1000).toDateString()} @{' '}
+                  {new Date(msg.timestamp * 1000).toTimeString()}
                </Text>
             </Flex>
          </Flex>

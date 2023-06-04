@@ -127,16 +127,20 @@ export default function SideBar({ useMobStyle }: { useMobStyle: boolean }) {
             </Flex>
 
             <Flex p={'0.5rem'} px={'2rem'} alignItems={'center'} cursor={'pointer'} flex={1}>
-               {!user ?<>
-                  <Text color='red'>Fail to load User Profile</Text>
-               </>: <>
-                  <Avatar name={`${user.name} avatar`} src={user.photo || ""} />
-                  <Stack gap={'0'} px={'0.6rem'} spacing={'-3px'}>
-                     <Text fontSize={'xl'}>{user.name}</Text>
-                     <Text px={'2px'}>{user.authenticated}</Text>
-                  </Stack>
-                  <ProfileDropDown /> 
-               </>}
+               {!user ? (
+                  <>
+                     <Text color="red">Fail to load User Profile</Text>
+                  </>
+               ) : (
+                  <>
+                     <Avatar name={`${user.name} avatar`} src={user.photo || ''} />
+                     <Stack gap={'0'} px={'0.6rem'} spacing={'-3px'}>
+                        <Text fontSize={'xl'}>{user.name}</Text>
+                        <Text px={'2px'}>{user.authenticated}</Text>
+                     </Stack>
+                     <ProfileDropDown />
+                  </>
+               )}
             </Flex>
          </Flex>
       </>
@@ -194,24 +198,34 @@ const SideBarLinks = ({
    );
 };
 
+const ProfileDropDown = () => {
+   const { isOpen, onOpen, onClose } = useDisclosure();
 
-const ProfileDropDown = ()=> {
-
-   const { isOpen, onOpen, onClose } = useDisclosure()
-
-   return <Menu>
-          <MenuButton isActive={isOpen} as={Button} onClick={onOpen} color={'white'} p = {'0'} 
+   return (
+      <Menu>
+         <MenuButton
+            isActive={isOpen}
+            as={Button}
+            onClick={onOpen}
+            color={'white'}
+            p={'0'}
             bg={'transparent'}
-            _hover={{bg:'transparent'}}
-            _active={{bg:'transparent'}}
-          >
-            <ChevronDownIcon /> 
-          </MenuButton>
-          <MenuList bg={'var(--white-color)'} color={'black'} >
-            <MenuItem _hover={{bg: 'var(--orange-color)', color: 'var(--white-color)'}}  bg={'var(--white-color)'}
-               onClick={()=>{signOut(firebase.firebaseAuth)}}
-            >Logout</MenuItem>
-          </MenuList>
-   </Menu>
-}
-
+            _hover={{ bg: 'transparent' }}
+            _active={{ bg: 'transparent' }}
+         >
+            <ChevronDownIcon />
+         </MenuButton>
+         <MenuList bg={'var(--white-color)'} color={'black'}>
+            <MenuItem
+               _hover={{ bg: 'var(--orange-color)', color: 'var(--white-color)' }}
+               bg={'var(--white-color)'}
+               onClick={() => {
+                  signOut(firebase.firebaseAuth);
+               }}
+            >
+               Logout
+            </MenuItem>
+         </MenuList>
+      </Menu>
+   );
+};

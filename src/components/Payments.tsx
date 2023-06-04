@@ -56,7 +56,7 @@ export default function Payments() {
                const userPromise = getDocData(membersColRef, p.recipient);
                const vehiclePromise = getDocData(vehiclesColRef, p.vehicle);
                const [user_data, vehicle_data] = await Promise.all([userPromise, vehiclePromise]);
-                  
+
                return { ...p, user_data, vehicle_data };
             })
          );
