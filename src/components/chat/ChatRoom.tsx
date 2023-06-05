@@ -25,12 +25,21 @@ import { ImAttachment } from 'react-icons/im';
 import WhiteButton from '../design/WhiteButton';
 import { useRouter } from 'next/router';
 import { MutableRefObject, useContext, useEffect, useRef, useState } from 'react';
-import { addDoc, collection, doc, getDoc, getDocs, onSnapshot, orderBy, query, where } from 'firebase/firestore';
+import {
+   addDoc,
+   collection,
+   doc,
+   getDoc,
+   getDocs,
+   onSnapshot,
+   orderBy,
+   query,
+   where
+} from 'firebase/firestore';
 import { conversationsColRef, firebase, membersColRef } from '@/lib/firebase';
 import ModalWrapper, { ModalDropDown } from '../design/ModalWrapper';
 import { UseDisclosureProp } from '@/types/UseDisclosureProp';
-import { useCallback } from "react"
-
+import { useCallback } from 'react';
 
 const ChatRoom = () => {
    const router = useRouter();
@@ -40,74 +49,84 @@ const ChatRoom = () => {
    const [user, setUser] = useContext(CredentialsProvider);
    const [convId, setConvId] = useState<string | null>(null);
 
-
    useEffect(() => {
       const customerId = router.asPath.split('/').at(-1);
-      let unSub = ()=> {};
+      let unSub = () => {};
 
       const getConversations = async () => {
          const customerDocRef = doc(membersColRef, customerId);
-         const customerDoc = await getDoc(customerDocRef);  
+         const customerDoc = await getDoc(customerDocRef);
          setCustomer(customerDoc.data() as MemberDocType);
 
-         const conversationQuery = query(conversationsColRef, 
-            where("recipient", "==", customerDoc.id)   
+         const conversationQuery = query(
+            conversationsColRef,
+            where('recipient', '==', customerDoc.id)
          );
-         
-         const convDocs = (await getDocs(conversationQuery)).docs.map(d => ({...d.data(), id: d.id}));
+
+         const convDocs = (await getDocs(conversationQuery)).docs.map((d) => ({
+            ...d.data(),
+            id: d.id
+         }));
          if (convDocs.length == 0) return; // no conversation so far
-         
+
          setConvId(convDocs[0].id);
-         
+
          const conversationDocRef = doc(conversationsColRef, convDocs[0].id);
          const messagesColRef = collection(conversationDocRef, 'Messages');
-         
-         const unSubSnapShot = onSnapshot(query(messagesColRef, orderBy("timestamp", 'asc')), (data)=> {
-            const messagesData = data.docs.map((doc) => {
-               return {
-                  ...doc.data(),
-                  avatar: doc.data().sender == user?.uid ? user?.photo : customer?.photo
-               } as MessageDocType;
-            });
-            
-            setChatMessages(messagesData as Array<MessageDocType>);
-            (containerRef.current as HTMLDivElement).scrollIntoView({ behavior: 'smooth' });
-         });
 
-         unSub = ()=> { unSubSnapShot(); };
+         const unSubSnapShot = onSnapshot(
+            query(messagesColRef, orderBy('timestamp', 'asc')),
+            (data) => {
+               const messagesData = data.docs.map((doc) => {
+                  return {
+                     ...doc.data(),
+                     avatar: doc.data().sender == user?.uid ? user?.photo : customer?.photo
+                  } as MessageDocType;
+               });
+
+               setChatMessages(messagesData as Array<MessageDocType>);
+               (containerRef.current as HTMLDivElement).scrollIntoView({ behavior: 'smooth' });
+            }
+         );
+
+         unSub = () => {
+            unSubSnapShot();
+         };
       };
 
       getConversations();
 
-      return ()=> { unSub(); };
+      return () => {
+         unSub();
+      };
    }, []);
 
    const { isOpen, onOpen, onClose } = useDisclosure();
    const sideBarHandle = useDisclosure();
    const toast = useToast();
-   const [input, setInput] = useState<string> ('');
+   const [input, setInput] = useState<string>('');
    const containerRef = useRef<any>(null);
-   
 
-   const sendNewMessage = useCallback (async ()=> {
-      if (!convId || input.length == 0) {  return; }
+   const sendNewMessage = useCallback(async () => {
+      if (!convId || input.length == 0) {
+         return;
+      }
       const conversationDocRef = doc(conversationsColRef, convId);
       const messagesColRef = collection(conversationDocRef, 'Messages');
 
       const newMsgDoc = doc(messagesColRef);
 
       let isValid = user?.uid;
-      
+
       if (!isValid) {
          toast({
-            'title': 'Message fail',
-            'description': 'Something Went Wrong!',
-            'status': 'error'
-         })
+            title: 'Message fail',
+            description: 'Something Went Wrong!',
+            status: 'error'
+         });
          return;
       }
 
-      
       addDoc(messagesColRef, {
          contents: input,
          id: newMsgDoc.id,
@@ -118,7 +137,6 @@ const ChatRoom = () => {
 
       setInput('');
    }, [convId, user, toast, input]);
-
 
    return (
       <>
@@ -143,12 +161,15 @@ const ChatRoom = () => {
                         </>
                      )}
                   </Box>
-                     <ChatContainer sendMessage={()=> {
+                  <ChatContainer
+                     sendMessage={() => {
                         sendNewMessage();
-                     }} canSend={input.length != 0 && convId != null} 
-                     inputState={[input, setInput]} chat={chatMessages} 
-                     containerRef = {containerRef}
-                     adminId={user?.uid as string} 
+                     }}
+                     canSend={input.length != 0 && convId != null}
+                     inputState={[input, setInput]}
+                     chat={chatMessages}
+                     containerRef={containerRef}
+                     adminId={user?.uid as string}
                   />
                </Flex>
                {isUnder850 ? (
@@ -199,7 +220,21 @@ const ChatHeader = ({
    </Flex>
 );
 
-const ChatContainer = ({  chat, adminId, inputState, canSend, sendMessage, containerRef }: { containerRef: MutableRefObject<any>,  canSend: boolean, chat: Array<MessageDocType>; adminId: string, inputState: UseStateProps<string>, sendMessage: ()=> void }) => {
+const ChatContainer = ({
+   chat,
+   adminId,
+   inputState,
+   canSend,
+   sendMessage,
+   containerRef
+}: {
+   containerRef: MutableRefObject<any>;
+   canSend: boolean;
+   chat: Array<MessageDocType>;
+   adminId: string;
+   inputState: UseStateProps<string>;
+   sendMessage: () => void;
+}) => {
    const [isUnder500] = useMediaQuery('(max-width: 500px)');
    const [input, setInput] = inputState;
 
@@ -215,9 +250,7 @@ const ChatContainer = ({  chat, adminId, inputState, canSend, sendMessage, conta
          gap={'0.5rem'}
       >
          {/* chat container */}
-         <Flex flex={1} width={'100%'} overflowY={'auto'}  maxH={'100%'} flexDir={'column'}
-            
-         >
+         <Flex flex={1} width={'100%'} overflowY={'auto'} maxH={'100%'} flexDir={'column'}>
             {chat.length == 0 && (
                <Center color={'var(--white-color)'}>No Conversation So far</Center>
             )}
@@ -232,7 +265,7 @@ const ChatContainer = ({  chat, adminId, inputState, canSend, sendMessage, conta
                );
             })}
 
-            <div ref = {containerRef} style={{ marginBottom: '3rem' }}></div>
+            <div ref={containerRef} style={{ marginBottom: '3rem' }}></div>
          </Flex>
 
          {/* search box */}
@@ -252,7 +285,7 @@ const ChatContainer = ({  chat, adminId, inputState, canSend, sendMessage, conta
                   }}
                   rounded={'full'}
                   value={input}
-                  onChange={(e)=> {
+                  onChange={(e) => {
                      setInput(e.target.value);
                   }}
                />
@@ -267,21 +300,22 @@ const ChatContainer = ({  chat, adminId, inputState, canSend, sendMessage, conta
                         <BsEmojiSmile />
                      </Icon>
 
-                     {canSend && 
-                     <Button
-                        colorScheme="whatsapp"
-                        rounded={'50%'}
-                        minH={'37px'}
-                        minW={'37px'}
-                        maxH={'37px'}
-                        maxW={'37px'}
-                        marginLeft={'auto'}
-                        onClick={sendMessage}
-                     >
-                        <Icon fontSize={'xl'} transform={'translateY(1.5px)'}>
-                           <BsSend />
-                        </Icon>
-                     </Button>}
+                     {canSend && (
+                        <Button
+                           colorScheme="whatsapp"
+                           rounded={'50%'}
+                           minH={'37px'}
+                           minW={'37px'}
+                           maxH={'37px'}
+                           maxW={'37px'}
+                           marginLeft={'auto'}
+                           onClick={sendMessage}
+                        >
+                           <Icon fontSize={'xl'} transform={'translateY(1.5px)'}>
+                              <BsSend />
+                           </Icon>
+                        </Button>
+                     )}
                   </Flex>{' '}
                </InputRightElement>
             </InputGroup>

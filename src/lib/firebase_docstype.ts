@@ -49,7 +49,6 @@ export type MemberDocType = {
 
 export type RequestDocType = {
    call_type: string;
-   created: number;
    id: string;
    status: number;
    title: string;
@@ -58,6 +57,11 @@ export type RequestDocType = {
    user_mobile: string;
    user_name: string;
    user_data: MemberDocType | null;
+   call_meetingid: string;
+   call_meetingpassword: string;
+   call_meetingurl: string;
+   created: number;
+   scheduled: number;
 };
 
 export type MessageDocType = {
@@ -69,12 +73,10 @@ export type MessageDocType = {
    avatar?: string | undefined;
 };
 
-
-
 export type ConversationDocType = {
    recipient: string;
    status: 1;
    last_updated: number;
    id: string;
    description: string;
-}
+};

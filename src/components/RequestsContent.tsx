@@ -1,14 +1,9 @@
 import {
    Flex,
-   Heading,
-   Input,
-   InputGroup,
    Stack,
    Text,
    Avatar,
    Box,
-   Center,
-   Divider,
    useMediaQuery,
    useDisclosure,
    useToast
@@ -26,6 +21,10 @@ import { usePaginator } from 'chakra-paginator';
 import usePagination from '@/lib/hooks/usePagination';
 import { ROUTING } from '@/util/constant';
 import Link from 'next/link';
+import ConfirmModal from './design/ConfirmModal';
+import { UseDisclosureProp } from '@/types/UseDisclosureProp';
+import { ScheduleMeetingModal } from './form/ScheduleMeetingModal';
+import DropDown from './design/DropDown';
 
 const pageQt = 15;
 
@@ -87,7 +86,6 @@ export default function RequestsContent() {
 
    return (
       <>
-         <ScheduleMeetingModal handler={{ isOpen, onOpen, onClose }} />
          <Flex width="100%" flexDir="column" gap="1rem" height="100%" ref={topRef}>
             <ContentHeader
                description="Use the chatroom to discuss payments and other client relations"
@@ -204,7 +202,17 @@ const CustomersList = ({
             flexBasis={isUnder650 ? '100%' : '90%'}
          >
             {requests.map((req, idx) => {
-               return <CustomerData key={idx} request={req} modalHandle={handleModal} />;
+               return (
+                  <>
+                     <ScheduleMeetingModal
+                        docId={req.id}
+                        userName={req.user_data?.name || ''}
+                        userId={req.user_data?.uid || ''}
+                        handler={handleModal}
+                     />
+                     <CustomerData key={idx} request={req} modalHandle={handleModal} />
+                  </>
+               );
             })}
          </Flex>
          <Flex flexBasis={'17%'} alignSelf={'flex-end'}>
@@ -291,36 +299,3 @@ const CustomerData = ({
       </Flex>
    );
 };
-
-import ModalWrapper, { ModalDropDown, ModalInput } from './design/ModalWrapper';
-import { UseDisclosureProp } from '@/types/UseDisclosureProp';
-import ConfirmModal from './design/ConfirmModal';
-import DropDown from './design/DropDown';
-
-const ScheduleMeetingModal = ({ handler }: { handler: UseDisclosureProp }) => (
-   <>
-      <ModalWrapper {...handler}>
-         <Flex alignItems={'center'} flexDir={'column'} color={'black'} gap={'1rem'}>
-            <Heading fontSize={'20px'} fontWeight={'700'}>
-               Schedule Meeting
-            </Heading>
-            <Flex flexDir={'column'} width={'100%'} gap={'0.5rem'}>
-               <ModalDropDown
-                  labelValue="Contact Type"
-                  menuItems={['XYZ']}
-                  menuTitle="Please Select"
-                  onSelected={(s) => {}}
-               />
-               <ModalInput labelValue="ID/Username" />
-               <ModalInput
-                  labelValue="Password (Optional)"
-                  placeholder="e.g. Mandatory for all cusotmers"
-                  isOptional={true}
-               />
-               <ModalInput labelValue="Scheduled Time" placeholder="e.g. 05/23/23 12:30PM" />
-            </Flex>
-            <OrangeButton width={'100%'}>Schedule Now</OrangeButton>
-         </Flex>
-      </ModalWrapper>
-   </>
-);

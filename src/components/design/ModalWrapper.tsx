@@ -31,6 +31,7 @@ const ModalWrapper = (props: ModalWrapperProps) => (
 interface ModalInputProps extends InputProps {
    labelValue: string;
    isOptional?: boolean;
+   error?: null | string;
 }
 
 export const ModalInput = (props: ModalInputProps) => (
@@ -54,6 +55,12 @@ export const ModalInput = (props: ModalInputProps) => (
          }}
          {...props}
       />
+
+      {props.error && (
+         <Text mb="2px" fontWeight={'600'} fontSize={'13px'} color={'red.400'}>
+            {props.error}
+         </Text>
+      )}
    </Box>
 );
 
@@ -62,6 +69,7 @@ interface ModalDropDownProps extends MenuItemProps {
    menuTitle: string;
    menuItems: Array<string> | Array<React.ReactNode>;
    onSelected: (selected: string) => void;
+   error?: null | string;
 }
 
 export const ModalDropDown = (props: ModalDropDownProps) => (
@@ -111,6 +119,12 @@ export const ModalDropDown = (props: ModalDropDownProps) => (
             })}
          </MenuList>
       </Menu>
+
+      {props.error && (
+         <Text mb="2px" fontWeight={'600'} color={'red.400'} fontSize={'13px'}>
+            {props.error}
+         </Text>
+      )}
    </Box>
 );
 

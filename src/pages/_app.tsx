@@ -1,5 +1,6 @@
 import SideBar from '@/components/SideBar';
 import '@/styles/globals.css';
+import 'react-datepicker/dist/react-datepicker.css';
 import type { AppProps } from 'next/app';
 
 import { ChakraProvider, Flex, useMediaQuery } from '@chakra-ui/react';
