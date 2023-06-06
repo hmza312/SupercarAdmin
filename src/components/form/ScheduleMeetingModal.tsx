@@ -3,7 +3,7 @@ import DatePicker from 'react-datepicker';
 import ModalWrapper, { ModalDropDown, ModalInput } from '../design/ModalWrapper';
 import { Flex, Heading, Text, useToast } from '@chakra-ui/react';
 import OrangeButton from '../design/OrangeButton';
-import { useState } from 'react';
+import { useCallback, useState } from 'react';
 import { ValidateType } from '@/types/ValidateType';
 import { callsColRef } from '@/lib/firebase';
 import { doc, updateDoc } from 'firebase/firestore';
@@ -36,63 +36,64 @@ export const ScheduleMeetingModal = ({
 
    const toast = useToast();
 
-   const handleScheduleNow = () => {
+   const handleScheduleNow = useCallback(()=> {
       // Validate Contact Type
       setContactType((prev) => ({
          ...prev,
-         error: prev.value ? null : 'Please select a contact type'
-      }));
-
-      // Validate Username
-      setUId((prev) => ({
+         error: prev.value.length > 0 ? null : 'Please select a contact type'
+       }));
+     
+       // Validate Username
+       setUId((prev) => {
+         const error = prev.value.length > 0 ? null : 'Invalid user id';
+         return { ...prev, error };
+       });
+     
+       // Validate Scheduled Time
+       const currentTime = new Date();
+       setDate((prev) => ({
          ...prev,
-         error: prev.value.length > 0 ? null : 'Invalid user id'
-      }));
-
-      // Validate Scheduled Time
-      const currentTime = new Date();
-      setDate((prev) => ({
-         ...prev,
-         error:
-            prev.value && prev.value <= currentTime ? 'Scheduled time must be in the future' : null
-      }));
-
-      // Clear password error (optional field)
-      setPassword((prev) => ({
+         error: prev.value && prev.value < currentTime ? 'Scheduled time must be in the future' : null
+       }));
+     
+       // Clear password error (optional field)
+       setPassword((prev) => ({
          ...prev,
          error: null
-      }));
-
-      // Submit the form or perform any further actions
-      if (contactType.error == null && uid.error == null && date.error == null) {
-         resetState();
-
+       }));
+     
+       // state is not updating immediately
+       if ((date.value && date.value < currentTime) && uid.value.length > 0 && contactType.value.length > 0) {
+         
          const docRef = doc(callsColRef, docId);
          updateDoc(docRef, {
-            call_meetingpassword: password.value,
-            call_type: contactType.value,
-            user_name: userName,
-            user: uid.value,
-            scheduled: localTimeStampFromDate(date.value || new Date())
+           call_meetingpassword: password.value,
+           call_type: contactType.value,
+           user_name: userName,
+           user: uid.value,
+           scheduled: localTimeStampFromDate(date.value || new Date())
          })
-            .then(() => {
-               toast({
-                  title: 'Succeed',
-                  description: 'Meeting has been Secluded',
-                  position: 'bottom',
-                  status: 'success'
-               });
-            })
-            .catch(() => {
-               toast({
-                  title: 'Upload Fail',
-                  description: 'Something Went Wrong!',
-                  position: 'bottom',
-                  status: 'error'
-               });
-            });
-      }
-   };
+         .then(() => {
+           toast({
+             title: 'Succeed',
+             description: 'Meeting has been Scheduled',
+             position: 'bottom',
+             status: 'success'
+           });
+         })
+         .catch(() => {
+           toast({
+             title: 'Upload Fail',
+             description: 'Something Went Wrong!',
+             position: 'bottom',
+             status: 'error'
+           });
+         });
+
+           resetState();
+       }
+   }, [uid, contactType, password, userName, docId, date, toast, resetState]);
+    
 
    return (
       <>
