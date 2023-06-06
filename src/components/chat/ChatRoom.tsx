@@ -34,10 +34,11 @@ import {
    onSnapshot,
    orderBy,
    query,
+   setDoc,
    where
 } from 'firebase/firestore';
-import { conversationsColRef, firebase, membersColRef } from '@/lib/firebase';
-import ModalWrapper, { ModalDropDown } from '../design/ModalWrapper';
+import { agreementsColRef, conversationsColRef, firebase, membersColRef } from '@/lib/firebase';
+import ModalWrapper, { ModalDropDown, ModalFileInput } from '../design/ModalWrapper';
 import { UseDisclosureProp } from '@/types/UseDisclosureProp';
 import { useCallback } from 'react';
 
@@ -331,6 +332,16 @@ const SideBar = ({
 }) => {
    const [isUnder500] = useMediaQuery('(max-width: 500px)');
 
+   const [docs, setDocs] = useState<Array<AgreementDocType>>([])
+   const [input, setInput] = useState<string>('')
+
+
+   useEffect(()=> {
+      onSnapshot(agreementsColRef, (data)=> {
+         setDocs(data.docs.map(doc => doc.data()) as Array<AgreementDocType>);
+      });
+   }, [])
+
    return (
       <Flex
          height={'100%'}
@@ -358,6 +369,10 @@ const SideBar = ({
                   fontSize: '12px',
                   transform: 'translateY(-1px)'
                }}
+               value={input}
+               onChange={(e)=>{
+                  setInput(e.target.value)
+               }}
             />
             <InputRightElement width="2.5rem">
                {' '}
@@ -373,7 +388,7 @@ const SideBar = ({
             overflowY={'auto'}
             gap={'0.6rem'}
          >
-            {new Array(10).fill('').map((_, idx) => {
+            {docs.filter(d => d.title.toLocaleLowerCase().includes(input.toLocaleLowerCase())).map((_doc, idx) => {
                return (
                   <Flex
                      key={idx}
@@ -385,14 +400,14 @@ const SideBar = ({
                   >
                      <Flex gap={'0.3rem'}>
                         <Text fontWeight={'600'} fontSize={'16px'}>
-                           Service Agreement
+                           {_doc.title}
                         </Text>
                         <Text ml={'auto'} fontWeight={'400'}>
-                           PDF
+                           {_doc.extension}
                         </Text>
                      </Flex>
                      <Text fontWeight={'400'} fontSize={'13px'}>
-                        This is the mandatory service agreement documents for all users
+                        {_doc.description}
                      </Text>
                      <WhiteButton width={'8rem'} rounded={'xl'} fontSize={'14px'}>
                         Send Document
@@ -450,13 +465,56 @@ const ChatMessage = ({
 };
 
 import { ModalInput } from '../design/ModalWrapper';
-import { MemberDocType, MessageDocType } from '@/lib/firebase_docstype';
+import { AgreementDocType, MemberDocType, MessageDocType } from '@/lib/firebase_docstype';
 import DrawerWrapper from '../design/Drawer';
 import CredentialsProvider from '@/lib/CredentialsProvider';
 import { UseStateProps } from '@/types/UseStateProps';
-import { formatChatDate, localTimeStamp } from '@/util/helpers';
+import { formatChatDate, getFileNameAndExtension, localTimeStamp } from '@/util/helpers';
+import { ValidateType } from '@/types/ValidateType';
 
-const NewDocumentUpload = ({ handler }: { handler: UseDisclosureProp }) => (
+const NewDocumentUpload = ({ handler }: { handler: UseDisclosureProp }) => 
+{
+
+   const [title, setTitle] = useState<ValidateType<string>>({value: '', error: null });
+   const [description, setDescription] = useState<ValidateType<string>>({value: '', error: null });
+   const [file, setFile] = useState<ValidateType<File | null>>({ value: null, error: null});
+
+   const handleFileInput = (e: React.ChangeEvent<HTMLInputElement>) => {
+      const selectedFile = e.target.files?.[0];
+
+      if (selectedFile)
+      {
+         setFile({ value: selectedFile, error: null });
+      }
+   }
+
+   const handleUpload = async () => {
+      setTitle({...title, error: title.value.length > 0 ? null : 'Document name is empty'});
+      setFile({...file, error: file.value ? null : 'select valid file'});
+
+      if (title.value.length > 0 && file.value) {
+
+         const newDoc = doc(agreementsColRef);
+         const blobFile = new Blob([file.value], { type: file.value.type });
+
+         const fileName = file.value.name;
+
+         setDoc(newDoc, {
+            id: newDoc.id,
+            filename: fileName.substring(0, fileName.lastIndexOf('.')),
+            description: description.value,
+            extension: fileName.split('.').pop(),
+            title: title.value,
+            url: URL.createObjectURL(blobFile)
+         });
+
+         setTitle({ value: '', error: null });
+         setDescription({ value: '', error: null });
+         setFile({ value: null, error: null });
+      }
+   };
+   
+   return (
    <>
       <ModalWrapper {...handler}>
          <Flex alignItems={'center'} flexDir={'column'} color={'black'} gap={'1rem'}>
@@ -464,24 +522,36 @@ const NewDocumentUpload = ({ handler }: { handler: UseDisclosureProp }) => (
                Upload New Document
             </Heading>
             <Flex flexDir={'column'} width={'100%'} gap={'0.5rem'}>
-               <ModalInput labelValue="Document Name" placeholder="e.g. Service Agreement" />
+               <ModalInput labelValue="Document Name" placeholder="e.g. Service Agreement" 
+                  value={title.value}
+                  error={title.error}
+                  onChange={(e)=> {
+                     setTitle({...title, value: e.target.value})
+                  }}
+               />
                <ModalInput
                   labelValue="Description (Optional)"
                   isOptional={true}
                   placeholder="e.g. Mandatory for all customers"
+                  value={description.value}
+                  error={description.error}
+                  onChange={(e)=> {
+                     setDescription({ ...description, value: e.target.value })
+                  }}
                />
                {/* <ModalInput labelValue='Selected File'/>*/}
-               <ModalDropDown
-                  labelValue=""
-                  menuTitle="Selected File"
-                  menuItems={['XYZ', 'XYZ']}
-                  onSelected={(s) => {}}
+               <ModalFileInput
+                  labelValue="Select file"
+                  type='file'
+                  error = {file.error}
+                  onChange={handleFileInput}
+                  accept=".doc, .docx, .pdf, .txt"
                />
             </Flex>
-            <OrangeButton width={'100%'}>Upload Now</OrangeButton>
+            <OrangeButton width={'100%'} onClick={handleUpload}>Upload Now</OrangeButton>
          </Flex>
       </ModalWrapper>
    </>
-);
+)};
 
 export default ChatRoom;

@@ -50,6 +50,7 @@ export const tempMembersColRef = collection(firebase.firebaseStore, 'temp_member
 export const vehiclesColRef = collection(firebase.firebaseStore, 'vehicles');
 export const paymentsColRef = collection(firebase.firebaseStore, 'payments');
 export const conversationsColRef = collection(firebase.firebaseStore, 'conversations');
+export const agreementsColRef = collection(firebase.firebaseStore, "agreements");
 
 export const getDocData = async (colRef: CollectionReference<DocumentData>, docId: string) => {
    if (!docId) return null;

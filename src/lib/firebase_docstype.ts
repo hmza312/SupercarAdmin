@@ -80,3 +80,15 @@ export type ConversationDocType = {
    id: string;
    description: string;
 };
+
+
+export type AgreementDocType = {
+   extension: string;
+   filename: string;
+   id: string;
+   title: string;
+   description: string;
+   url: string;
+}
+
+

@@ -41,3 +41,14 @@ export function formatChatDate(date: Date): string {
       return `${month} ${day} @ ${hours % 12 || 12}:${minutes.toString().padStart(2, '0')} ${ampm}`;
    }
 }
+
+
+export function getFileNameAndExtension(file: Blob): { name: string, extension: string } {
+   const filePath = file.name;
+   const fileName = filePath.split('/').pop() || '';
+   const fileParts = fileName.split('.');
+   const name = fileParts[0];
+   const extension = fileParts.length > 1 ? fileParts[fileParts.length - 1] : '';
+ 
+   return { name, extension };
+}
