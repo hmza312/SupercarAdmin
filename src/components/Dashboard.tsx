@@ -22,7 +22,7 @@ import { AiFillCar } from 'react-icons/ai';
 import StatSection from './dashboard/StatSection';
 import Analytics from './dashboard/Analytics';
 import { useEffect, useState } from 'react';
-import { membersColRef, paymentsColRef, vehiclesColRef } from '@/lib/firebase';
+import { getDocData, membersColRef, paymentsColRef, vehiclesColRef } from '@/lib/firebase';
 import { getDocs } from 'firebase/firestore';
 import RecentPayments from './dashboard/RecentPayments';
 import { PaymentDocType } from '@/lib/firebase_docstype';
@@ -38,9 +38,19 @@ const DashBoardContent = () => {
 
    useEffect(() => {
       const fetchRecentPayments = async () => {
-         const paymentDocs = await getDocs(paymentsColRef);
-         const res = paymentDocs.docs.map((d) => d.data()) as Array<PaymentDocType>;
-         setPayments(res);
+         const paymentsDocs = await getDocs(paymentsColRef);
+
+         const data = await Promise.all(
+            (paymentsDocs.docs.map((d) => d.data()) as Array<PaymentDocType>).map(async (p) => {
+               const userPromise = getDocData(membersColRef, p.recipient);
+               const vehiclePromise = getDocData(vehiclesColRef, p.vehicle);
+               const [user_data, vehicle_data] = await Promise.all([userPromise, vehiclePromise]);
+
+               return { ...p, user_data, vehicle_data };
+            })
+         );
+
+         setPayments(data as Array<PaymentDocType>);
       };
 
       fetchRecentPayments();

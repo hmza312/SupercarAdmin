@@ -67,7 +67,7 @@ const UsersPaymentTables = ({ payments }: { payments: Array<PaymentDocType> }) =
                   {payments.map((payment, idx) => {
                      return (
                         <Tr key={idx}>
-                           <Td>{payment.sender}</Td>
+                           <Td>{payment.user_data?.name || 'Unknown'}</Td>
                            <Td>{new Date(payment.timestamp * 10000).toDateString()}</Td>
                            <Td>${payment.amount}</Td>
                            <Td>

@@ -238,14 +238,16 @@ const VehiclesList = ({
             <Flex p={'0.5rem'} gap={'1rem'}>
                <DropDown
                   menuTitle={filter.selectedCustomer ? filter.selectedCustomer : 'Select Customers'}
-                  menuitems={filter.customers.map((c) => c.name)}
+                  menuitems={filter.customers.map((c) => c.name).sort()}
                   onSelected={(item) => {
                      setFilter({ ...filter, selectedCustomer: item });
                   }}
                />
-               <OrangeButton marginLeft={'auto'} onClick={onOpen}>Add New Vehicle</OrangeButton>
+               <OrangeButton marginLeft={'auto'} onClick={()=> {
+                  onOpen()
+               }}>Add New Vehicle</OrangeButton>
+               <VehicleUploadForm customers={filter.customers} handler={{ onClose, onOpen, isOpen }} />
             </Flex>
-            <VehicleUploadForm handler={{ onClose, onOpen, isOpen }}/>
             <Flex
                flexWrap={'wrap'}
                gap={'0.5rem'}
