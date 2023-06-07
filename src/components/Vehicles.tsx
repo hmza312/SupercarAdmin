@@ -220,8 +220,9 @@ const VehiclesList = ({
 }) => {
    const [isUnder850] = useMediaQuery('(max-width: 850px)');
    const [filter, setFilter] = filterState;
+   
+   const { onClose, onOpen, isOpen } = useDisclosure();
 
-   console.log(filter);
    return (
       <>
          <Flex
@@ -242,8 +243,9 @@ const VehiclesList = ({
                      setFilter({ ...filter, selectedCustomer: item });
                   }}
                />
-               <OrangeButton marginLeft={'auto'}>Add New Vehicle</OrangeButton>
+               <OrangeButton marginLeft={'auto'} onClick={onOpen}>Add New Vehicle</OrangeButton>
             </Flex>
+            <VehicleUploadForm handler={{ onClose, onOpen, isOpen }}/>
             <Flex
                flexWrap={'wrap'}
                gap={'0.5rem'}
@@ -255,6 +257,7 @@ const VehiclesList = ({
             >
                {vehicles.map((vehicle, idx) => {
                   return (
+                     <>
                      <VehicleData
                         vehicle={vehicle}
                         key={idx}
@@ -262,7 +265,8 @@ const VehiclesList = ({
                            onSelect(vehicle);
                            onDrawerOpen();
                         }}
-                     />
+                        />
+                     </>
                   );
                })}
             </Flex>
@@ -285,6 +289,7 @@ import Pagination from './design/Pagination';
 import DropDown from './design/DropDown';
 import { VehiclesFilter } from './types/VehiclesTypes';
 import { UseStateProps } from '@/types/UseStateProps';
+import VehicleUploadForm from './form/VehicleUploadForm';
 
 const VehicleData = ({ vehicle, onClick }: { vehicle: VehicleDocType; onClick: () => void }) => {
    const [isUnder500] = useMediaQuery('(max-width: 500px)');

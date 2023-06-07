@@ -120,7 +120,7 @@ export const ScheduleMeetingModal = ({
                   />
                   <ModalInput
                      labelValue="Password (Optional)"
-                     placeholder="e.g. Mandatory for all cusotmers"
+                     placeholder="e.g. Mandatory for all customers"
                      isOptional={true}
                      value={password.value}
                      onChange={(e) => {
