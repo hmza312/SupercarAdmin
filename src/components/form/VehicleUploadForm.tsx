@@ -133,7 +133,7 @@ const VehicleUploadForm = (
       
             <ModalDropDown
               labelValue="Make"
-              menuItems={['BMW']}
+              menuItems={['BMW', 'Audi', 'Acura', 'Ferrari']}
               menuTitle="Please Select"
               onSelected={(s) => handleInputChange('make', s)}
               error={errors.make}
