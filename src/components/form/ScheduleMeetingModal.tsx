@@ -97,7 +97,7 @@ export const ScheduleMeetingModal = ({
 
    return (
       <>
-         <ModalWrapper {...handler}>
+         <ModalWrapper {...handler} blockScrollOnMount={false}>
             <Flex alignItems={'center'} flexDir={'column'} color={'black'} gap={'1rem'}>
                <Heading fontSize={'20px'} fontWeight={'700'}>
                   Schedule Meeting
@@ -129,6 +129,19 @@ export const ScheduleMeetingModal = ({
                      error={password.error}
                   />
                   <Flex flexDir={'column'}>
+                     {/* <ModalInput
+                        labelValue="Scheduled Time"
+                        placeholder="Pick Date"
+                        isOptional={true}
+                        value={date.value?.toDateString()}
+                        onChange={(e) => {
+                           console.log(e.target.value);
+                           // setPassword({ ...password, value: e.target.value });
+                        }}
+                        error={date.error}
+                        type="datetime-local"
+                        colorScheme='facebook'
+                     /> */}
                      <Text mb="2px" fontWeight={'600'} fontSize={'15px'}>
                         {'Scheduled Time'}
                      </Text>
@@ -137,6 +150,8 @@ export const ScheduleMeetingModal = ({
                         onChange={(e) => {
                            setDate({ ...date, value: e });
                         }}
+                        showTimeSelect
+                        dateFormat="Pp"
                      />
                      {date.error && <Text color={'red.400'}>{date.error}</Text>}
                   </Flex>
