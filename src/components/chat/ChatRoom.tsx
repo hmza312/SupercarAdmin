@@ -49,32 +49,13 @@ const ChatRoom = () => {
    const [chatMessages, setChatMessages] = useState<Array<MessageDocType>>([]);
    const [user, setUser] = useContext(CredentialsProvider);
    const [convId, setConvId] = useState<string | null>(null);
+    
+   const [cleanUp, setCleanUp] = useState<()=> void>(()=> {});
 
-   useEffect(() => {
-      const customerId = router.asPath.split('/').at(-1);
-      let unSub = () => {};
-
-      const getConversations = async () => {
-         const customerDocRef = doc(membersColRef, customerId);
-         const customerDoc = await getDoc(customerDocRef);
-         setCustomer(customerDoc.data() as MemberDocType);
-
-         const conversationQuery = query(
-            conversationsColRef,
-            where('recipient', '==', customerDoc.id)
-         );
-
-         const convDocs = (await getDocs(conversationQuery)).docs.map((d) => ({
-            ...d.data(),
-            id: d.id
-         }));
-         if (convDocs.length == 0) return; // no conversation so far
-
-         setConvId(convDocs[0].id);
-
-         const conversationDocRef = doc(conversationsColRef, convDocs[0].id);
+    const subscribeSnapShots = (docId: string)=> {
+         const conversationDocRef = doc(conversationsColRef, docId);
          const messagesColRef = collection(conversationDocRef, 'Messages');
-
+         
          const unSubSnapShot = onSnapshot(
             query(messagesColRef, orderBy('timestamp', 'asc')),
             (data) => {
@@ -86,36 +67,113 @@ const ChatRoom = () => {
                });
 
                setChatMessages(messagesData as Array<MessageDocType>);
-               (containerRef.current as HTMLDivElement).scrollIntoView({ behavior: 'smooth' });
             }
          );
+            
+         setCleanUp(()=> unSubSnapShot);
+    };
 
-         unSub = () => {
-            unSubSnapShot();
-         };
+   useEffect(() => {
+      const customerId = router.asPath.split('/').at(-1);
+
+      const getConversations = async () => {
+         const customerDocRef = doc(membersColRef, customerId);
+         const customerDoc = await getDoc(customerDocRef);
+         setCustomer(({...customerDoc.data(), uid: customerDoc.id}) as MemberDocType);
+
+         const conversationQuery = query(
+            conversationsColRef,
+            where('recipient', '==', customerDoc.id)
+         );
+
+         const convDocs = (await getDocs(conversationQuery)).docs.map((d) => ({
+            ...d.data(),
+            id: d.id
+         }));
+         
+         if (convDocs.length == 0) return; // no conversation so far
+
+         setConvId(convDocs[0].id);
+         subscribeSnapShots(convDocs[0].id);
       };
 
       getConversations();
 
       return () => {
-         unSub();
+        if (cleanUp) cleanUp();
       };
    }, []);
+
+   const containerRef = useRef<any>(null);
+
+   useEffect(()=> {
+    if (!containerRef) return;
+    (containerRef.current as HTMLDivElement).scrollIntoView({ behavior: 'smooth' });
+   }, [containerRef, chatMessages]);
 
    const { isOpen, onOpen, onClose } = useDisclosure();
    const sideBarHandle = useDisclosure();
    const toast = useToast();
    const [input, setInput] = useState<string>('');
-   const containerRef = useRef<any>(null);
+   const [loading, setLoading] = useState<boolean>(false);
 
    const sendNewMessage = useCallback(async () => {
-      if (!convId || input.length == 0) {
+      if (input.length == 0) return;
+      
+      // user has no conversation create new one 
+      if (!convId) {
+        setLoading(true);
+        const customerId = router.asPath.split('/').at(-1);
+        const conversationQuery = query(
+            conversationsColRef,
+            where('recipient', '==', customer?.uid || customerId)
+        );
+         
+        const docsRef = (await getDocs(conversationQuery)).docs.map(d=>d.data());
+        
+        if (docsRef.length > 0)
+        {
+            setConvId(docsRef[0].id);
+            return;
+        }
+        
+        // create new conversation doc
+         const newConvDoc = doc(conversationsColRef);
+         await setDoc(newConvDoc, {
+            description: '',
+            id: newConvDoc.id,
+            last_updated: localTimeStamp(),
+            recipient: customer?.uid || customerId,
+            status: 1
+         } as ConversationDocType);
+
+         setConvId(newConvDoc.id);
+         
+         const conversationDocRef = doc(conversationsColRef, newConvDoc.id);
+         const messagesColRef = collection(conversationDocRef, 'Messages');
+         const newMsgDoc = doc(messagesColRef);
+
+         addDoc(messagesColRef, {
+            contents: input,
+            id: newMsgDoc.id,
+            type: 1,
+            timestamp: localTimeStamp(),
+            sender: user?.uid
+         } as MessageDocType);
+
+         setInput("");
+        // subscribe to snapshots 
+         subscribeSnapShots(newConvDoc.id);
+         setLoading(false);
          return;
       }
+
+      setLoading(true);
       const conversationDocRef = doc(conversationsColRef, convId);
       const messagesColRef = collection(conversationDocRef, 'Messages');
 
       const newMsgDoc = doc(messagesColRef);
+
 
       let isValid = user?.uid;
 
@@ -135,7 +193,8 @@ const ChatRoom = () => {
          timestamp: localTimeStamp(),
          sender: user?.uid
       } as MessageDocType);
-
+      
+      setLoading(false);
       setInput('');
    }, [convId, user, toast, input]);
 
@@ -166,11 +225,12 @@ const ChatRoom = () => {
                      sendMessage={() => {
                         sendNewMessage();
                      }}
-                     canSend={input.length != 0 && convId != null}
+                     canSend={input.length != 0}
                      inputState={[input, setInput]}
                      chat={chatMessages}
                      containerRef={containerRef}
                      adminId={user?.uid as string}
+                     loading={loading}
                   />
                </Flex>
                {isUnder850 ? (
@@ -227,7 +287,8 @@ const ChatContainer = ({
    inputState,
    canSend,
    sendMessage,
-   containerRef
+   containerRef, 
+   loading
 }: {
    containerRef: MutableRefObject<any>;
    canSend: boolean;
@@ -235,6 +296,7 @@ const ChatContainer = ({
    adminId: string;
    inputState: UseStateProps<string>;
    sendMessage: () => void;
+   loading: boolean
 }) => {
    const [isUnder500] = useMediaQuery('(max-width: 500px)');
    const [input, setInput] = inputState;
@@ -311,6 +373,7 @@ const ChatContainer = ({
                            maxW={'37px'}
                            marginLeft={'auto'}
                            onClick={sendMessage}
+                           isLoading={loading}
                         >
                            <Icon fontSize={'xl'} transform={'translateY(1.5px)'}>
                               <BsSend />
@@ -431,7 +494,7 @@ const ChatMessage = ({
    msg: MessageDocType;
    messagePos: 'right' | 'left';
 }) => {
-   const isRight = messagePos == 'right';
+    const isRight = messagePos == 'right';
    const isLeft = messagePos == 'left';
    const [isUnder850] = useMediaQuery('(max-width: 850px)');
    const padding = isUnder850 ? '10%' : '40%';
@@ -465,7 +528,7 @@ const ChatMessage = ({
 };
 
 import { ModalInput } from '../design/ModalWrapper';
-import { AgreementDocType, MemberDocType, MessageDocType } from '@/lib/firebase_docstype';
+import { AgreementDocType, ConversationDocType, MemberDocType, MessageDocType } from '@/lib/firebase_docstype';
 import DrawerWrapper from '../design/Drawer';
 import CredentialsProvider from '@/lib/CredentialsProvider';
 import { UseStateProps } from '@/types/UseStateProps';

@@ -13,6 +13,7 @@ export type VehicleDocType = {
    vin: string;
    year: string;
    owner_data: MemberDocType | null;
+   timestamp: number;
 };
 
 export type PaymentDocType = {
@@ -37,7 +38,7 @@ export type MemberDocType = {
    mobile: string;
    name: string;
    occupation: string;
-   permitted: boolean;
+   permitted: boolean | null;
    photo: string | undefined;
    authenticated: string;
    deleted: boolean | undefined;
@@ -80,7 +81,6 @@ export type ConversationDocType = {
    id: string;
    description: string;
 };
-
 
 export type AgreementDocType = {
    extension: string;

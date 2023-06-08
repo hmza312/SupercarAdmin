@@ -25,36 +25,59 @@ import { useEffect, useState } from 'react';
 import { getDocData, membersColRef, paymentsColRef, vehiclesColRef } from '@/lib/firebase';
 import { getDocs } from 'firebase/firestore';
 import RecentPayments from './dashboard/RecentPayments';
-import { PaymentDocType } from '@/lib/firebase_docstype';
+import { MemberDocType, PaymentDocType, VehicleDocType } from '@/lib/firebase_docstype';
 import Activity from './dashboard/Activity';
 import ContentHeader from './design/ContentHeader';
 import { useDocsCount } from '@/lib/hooks/useDocsCount';
 import { ROUTING } from '@/util/constant';
+import { calculatePercentageChange } from '@/util/helpers';
+import { AsyncType } from '@/types/AsyncType';
+import WaitList from './dashboard/WaitList';
+
 
 const DashBoardContent = () => {
    const [totalCustomers] = useDocsCount(membersColRef);
    const [totalVehicles] = useDocsCount(vehiclesColRef);
    const [payments, setPayments] = useState<Array<PaymentDocType>>([]);
+   
+   const [users, setUsers] = useState<AsyncType<MemberDocType[]>> ({ loading: true, value: [] });
+   const [vehicles, setVehicles] = useState<AsyncType<VehicleDocType[]>> ({ loading: true, value: [] });
+
+   const [percentage, setPercentage] = useState({
+      vehicles: 0, user: 0
+   });
+
 
    useEffect(() => {
       const fetchRecentPayments = async () => {
-         const paymentsDocs = await getDocs(paymentsColRef);
 
-         const data = await Promise.all(
-            (paymentsDocs.docs.map((d) => d.data()) as Array<PaymentDocType>).map(async (p) => {
-               const userPromise = getDocData(membersColRef, p.recipient);
-               const vehiclePromise = getDocData(vehiclesColRef, p.vehicle);
-               const [user_data, vehicle_data] = await Promise.all([userPromise, vehiclePromise]);
+          const [paymentsDocs, userDocs, vehicleDocs] = await Promise.all ([
+            getDocs(paymentsColRef),
+            getDocs(membersColRef), 
+            getDocs(vehiclesColRef)
+          ]);
+           
+          setUsers({value: (userDocs.docs.map((d)=> ({...d.data(), uid: d.id } as MemberDocType))) as MemberDocType[], loading: false });
+          setVehicles({value: (vehicleDocs.docs.map(d=> ({...d.data(), id: d.id } as VehicleDocType))) as VehicleDocType[], loading: false });
 
-               return { ...p, user_data, vehicle_data };
-            })
-         );
-
-         setPayments(data as Array<PaymentDocType>);
+         // const userDocs = await 
+          const data = (paymentsDocs.docs.map((d) => d.data()) as Array<PaymentDocType>).map((p) => {
+            const user_data = userDocs.docs.map (d=>d.data()).filter (d => d.id == p.recipient)[0] as MemberDocType;
+            const vehicle_data = vehicleDocs.docs.map(d=>d.data()).filter(d => d.id == p.vehicle)[0] as VehicleDocType; 
+            return { ...p, user_data, vehicle_data };
+          });
+          
+         //  calculatePercentageChange()
+          setPayments(data as Array<PaymentDocType>);
       };
 
       fetchRecentPayments();
    }, []);
+
+   useEffect(()=> {
+      const percentageChange = calculatePercentageChange(users.value, vehicles.value);
+      setPercentage({ user: percentageChange [0], vehicles: percentageChange[1] });
+   }, [users, vehicles])
 
    const [isUnder850] = useMediaQuery('(max-width: 850px)');
 
@@ -64,6 +87,8 @@ const DashBoardContent = () => {
             totalCustomers={totalCustomers}
             totalVehicles={totalVehicles}
             payments={payments}
+            vehicles={vehicles.value}
+            users={users.value}
          />
       );
 
@@ -84,9 +109,9 @@ const DashBoardContent = () => {
          >
             <StatSection
                title="Total Customers"
-               badgeStatus="green"
+               badgeStatus={percentage.user > 0? "green" : "red"}
                count={totalCustomers}
-               percentage="+12.9%"
+               percentage={`${(percentage.user > 0 ? `+${percentage.user}` : `${percentage.user}`)}%`}
                routeTo={ROUTING.customers}
             >
                <IoIosPeople style={{ fontSize: '2rem' }} />
@@ -102,9 +127,9 @@ const DashBoardContent = () => {
             <StatSection
                routeTo={ROUTING.vehicles}
                title="Total Vehicles"
-               badgeStatus="red"
+               badgeStatus={percentage.user > 0? "green" : "red"}
                count={totalVehicles}
-               percentage="+12.9%"
+               percentage={`${(percentage.vehicles > 0 ? `+${percentage.vehicles}` : `${percentage.vehicles}`)}%`}
             >
                <AiFillCar style={{ fontSize: '2rem' }} />
             </StatSection>
@@ -116,7 +141,7 @@ const DashBoardContent = () => {
             bg="var(--grey-color)"
             rounded={'xl'}
          >
-            <Analytics />
+            <Analytics vehicles={vehicles.value}/>
          </GridItem>
 
          <GridItem
@@ -129,7 +154,7 @@ const DashBoardContent = () => {
          </GridItem>
 
          <GridItem gridColumn="5 / 7" gridRow="1 / span 5" bg="var(--grey-color)" rounded={'xl'}>
-            <WaitList />
+            <WaitList users={users.value}/>
          </GridItem>
 
          <GridItem gridColumn="5 / 7" gridRow="6 / span 7" bg="var(--grey-color)" rounded={'xl'}>
@@ -142,11 +167,15 @@ const DashBoardContent = () => {
 const FlexBoxLayout = ({
    totalCustomers,
    totalVehicles,
-   payments
+   payments,
+   vehicles,
+   users
 }: {
    totalCustomers: number;
    totalVehicles: number;
    payments: Array<PaymentDocType>;
+   vehicles: VehicleDocType[],
+   users: MemberDocType[]
 }) => {
    const [isUnder550] = useMediaQuery('(max-width: 550px)');
    const [isUnder850] = useMediaQuery('(max-width: 850px');
@@ -186,7 +215,7 @@ const FlexBoxLayout = ({
 
          {/* graph */}
          <Flex width={'100%'} bg="var(--grey-color)" rounded={'xl'}>
-            <Analytics />
+            <Analytics vehicles={vehicles}/>
          </Flex>
 
          {/*  recent payments */}
@@ -197,7 +226,7 @@ const FlexBoxLayout = ({
          {/* side bar */}
          <Flex width={'100%'} gap={'0.5rem'} flexDir={isUnder550 ? 'column' : 'row'}>
             <Flex bg="var(--grey-color)" rounded={'xl'} flex={1}>
-               <WaitList useMobStyle={isUnder850} />
+               <WaitList useMobStyle={isUnder850} users={users}/>
             </Flex>
             <Flex bg="var(--grey-color)" rounded={'xl'} flex={1}>
                <Activity />
@@ -208,67 +237,3 @@ const FlexBoxLayout = ({
       </Flex>
    );
 };
-
-const WaitListPayment = () => {
-   return (
-      <>
-         <Flex
-            background={'var(--card-bg)'}
-            rounded={'md'}
-            p={'1rem'}
-            flexDir={'column'}
-            gap={'0.5rem'}
-         >
-            <Flex width={'100%'}>
-               <Heading fontSize={'lg'}>Bruce Thomas</Heading>
-               <Text fontSize={'sm'} marginLeft={'auto'}>{`${new Date().toDateString()}`}</Text>
-            </Flex>
-            <Box justifySelf={'flex-start'}>
-               <Button background={'white'} color={'black'} size={'sm'}>
-                  View Application
-               </Button>
-            </Box>
-         </Flex>
-      </>
-   );
-};
-
-const WaitList = ({ useMobStyle }: { useMobStyle?: boolean } = { useMobStyle: false }) => (
-   <Flex flexDir={'column'} width={'100%'} height={'100%'} gap={'1rem'} p={'1rem'}>
-      <Heading fontSize={'2xl'}>Waitlist</Heading>
-
-      <Box flexDir={'column'}>
-         <Text>Pending Users</Text>
-         <Text>10</Text>
-      </Box>
-
-      <Flex
-         overflowY={'scroll'}
-         flex={1}
-         flexDir={'column'}
-         gap={'0.5rem'}
-         maxH={useMobStyle ? '20rem' : 'initial'}
-      >
-         <WaitListPayment />
-         <WaitListPayment />
-         <WaitListPayment />
-         <WaitListPayment />
-         <WaitListPayment />
-         <WaitListPayment />
-         <WaitListPayment />
-         <WaitListPayment />
-         <WaitListPayment />
-         <WaitListPayment />
-         <WaitListPayment />
-         <WaitListPayment />
-      </Flex>
-
-      <Button
-         color={'black'}
-         background={'var(--white-color)'}
-         _hover={{ background: 'var(--white-color)' }}
-      >
-         See Full User Waitlist
-      </Button>
-   </Flex>
-);

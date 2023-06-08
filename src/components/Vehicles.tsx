@@ -42,6 +42,7 @@ export default function Vehicles() {
             ...d,
             owner_data: users.filter((u) => u.uid == d.owner)[0]
          }));
+
          setVehicles(docs);
       };
 
