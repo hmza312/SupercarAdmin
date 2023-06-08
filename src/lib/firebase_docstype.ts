@@ -72,6 +72,7 @@ export type MessageDocType = {
    timestamp: number;
    type: number;
    avatar?: string | undefined;
+   multimedia: MultiMediaDocType[] | null
 };
 
 export type ConversationDocType = {
@@ -92,3 +93,12 @@ export type AgreementDocType = {
 }
 
 
+
+export type MultiMediaDocType = {
+   extension: string;
+   order: 0
+   thumbnail: ""
+   title: string
+   type: string
+   url: string
+}

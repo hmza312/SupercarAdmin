@@ -49,7 +49,7 @@ const ChatRoom = () => {
    const [chatMessages, setChatMessages] = useState<Array<MessageDocType>>([]);
    const [user, setUser] = useContext(CredentialsProvider);
    const [convId, setConvId] = useState<string | null>(null);
-    
+
    const [cleanUp, setCleanUp] = useState<()=> void>(()=> {});
 
     const subscribeSnapShots = (docId: string)=> {
@@ -109,6 +109,7 @@ const ChatRoom = () => {
    useEffect(()=> {
     if (!containerRef) return;
     (containerRef.current as HTMLDivElement).scrollIntoView({ behavior: 'smooth' });
+    console.log(chatMessages);
    }, [containerRef, chatMessages]);
 
    const { isOpen, onOpen, onClose } = useDisclosure();
@@ -319,12 +320,21 @@ const ChatContainer = ({
             )}
             {chat.map((c, i) => {
                return (
+                <>
                   <ChatMessage
                      avatar={c.avatar as string}
                      key={i}
                      messagePos={c.sender == adminId ? 'right' : 'left'}
                      msg={c}
-                  />
+                     />
+
+                  {c.multimedia && c.multimedia.map((multiMedia, idx) => <MultiMedia 
+                        avatar={c.avatar as string}
+                        key={idx}
+                        messagePos={c.sender == adminId ? 'right' : 'left'}
+                        multimedia={multiMedia}
+                  />)}
+                </>
                );
             })}
 
@@ -527,8 +537,62 @@ const ChatMessage = ({
    );
 };
 
+const MultiMedia = ({
+    messagePos,
+    multimedia,
+    avatar
+ }: {
+    avatar: string | undefined;
+    multimedia: MultiMediaDocType;
+    messagePos: 'right' | 'left';
+ }) => {
+     const isRight = messagePos == 'right';
+    const isLeft = messagePos == 'left';
+    const [isUnder850] = useMediaQuery('(max-width: 850px)');
+    const padding = isUnder850 ? '10%' : '40%';
+    
+    return (
+       <Flex
+          width={'100%'}
+          py={'0.5rem'}
+          pr={isLeft ? padding : '0%'}
+          pl={isRight ? padding : '0%'}
+          flexDir={isRight ? 'row-reverse' : 'row'}
+       >
+          <Flex height={'100%'} gap={'0.5rem'} flexDir={isRight ? 'row-reverse' : 'row'}>
+             {/* <Avatar src={msg.avatar || ''} /> */}
+             
+            {multimedia.type == "image" && 
+                <Flex p={'0.5rem'} rounded={'lg'} flexDir={'column'} gap={'0.1rem'}>
+                    <img src={multimedia.url} style={{  borderRadius: '0.5rem', maxWidth: '300px', objectFit: 'contain' }} alt={`${multimedia.title}`} />
+                </Flex> 
+            }
+
+            {multimedia.type == "document" && 
+                <Flex p={'0.5rem'} rounded={'lg'} flexDir={'column'} gap={'0.1rem'}>
+                    <img src={multimedia.url} style={{  borderRadius: '0.5rem', maxWidth: '300px', objectFit: 'contain' }} />
+                </Flex> 
+            }
+             {/* <Flex flexDir={'column'} fontWeight={'400'} fontSize={'11px'} gap={'0.1rem'}>
+                <Box
+                   bg={isLeft ? 'var(--chat-left-msg-color)' : 'var(--orange-color)'}
+                   rounded={'0.55rem'}
+                   p={'0.5rem'}
+                >
+                   {msg.contents}
+                </Box>
+                <Text color={'var(--info-text-color)'} marginLeft={isRight ? 'auto' : 'initial'}>
+                   {formatChatDate(new Date(msg.timestamp * 1000))}
+                </Text>
+             </Flex> */}
+          </Flex>
+       </Flex>
+    );
+};
+ 
+
 import { ModalInput } from '../design/ModalWrapper';
-import { AgreementDocType, ConversationDocType, MemberDocType, MessageDocType } from '@/lib/firebase_docstype';
+import { AgreementDocType, ConversationDocType, MemberDocType, MessageDocType, MultiMediaDocType } from '@/lib/firebase_docstype';
 import DrawerWrapper from '../design/Drawer';
 import CredentialsProvider from '@/lib/CredentialsProvider';
 import { UseStateProps } from '@/types/UseStateProps';
