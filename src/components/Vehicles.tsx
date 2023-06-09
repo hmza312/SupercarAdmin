@@ -23,30 +23,27 @@ import { usePaginator } from 'chakra-paginator';
 const pageQt = 15;
 
 export default function Vehicles() {
+   const fetchVehicles = async () => {
+      const res = await getDocs(vehiclesColRef);
+      const users = (await getDocs(membersColRef)).docs.map((d) => ({
+         ...d.data(),
+         uid: d.id
+      })) as Array<MemberDocType>;
+      setFilter({
+         ...filter,
+         customers: users.filter((user, idx, self) => {
+            return self.findIndex((val) => val.name == user.name) == idx;
+         })
+      });
+      const docs = (res.docs.map((doc) => doc.data()) as Array<VehicleDocType>).map((d) => ({
+         ...d,
+         owner_data: users.filter((u) => u.uid == d.owner)[0]
+      }));
+      setVehicles(docs);
+   };
+
    useEffect(() => {
-      const fetchDocs = async () => {
-         const res = await getDocs(vehiclesColRef);
-         const users = (await getDocs(membersColRef)).docs.map((d) => ({
-            ...d.data(),
-            uid: d.id
-         })) as Array<MemberDocType>;
-
-         setFilter({
-            ...filter,
-            customers: users.filter((user, idx, self) => {
-               return self.findIndex((val) => val.name == user.name) == idx;
-            })
-         });
-
-         const docs = (res.docs.map((doc) => doc.data()) as Array<VehicleDocType>).map((d) => ({
-            ...d,
-            owner_data: users.filter((u) => u.uid == d.owner)[0]
-         }));
-
-         setVehicles(docs);
-      };
-
-      fetchDocs();
+      fetchVehicles();
    }, []);
 
    const [vehicles, setVehicles] = useState<Array<VehicleDocType>>([]);
@@ -103,6 +100,9 @@ export default function Vehicles() {
                         behavior: 'smooth'
                      });
                   }}
+                  onSubmitFinish={() => {
+                     fetchVehicles();
+                  }}
                   pageCounts={paginationIndices.length}
                   filterState={[filter, setFilter]}
                />
@@ -128,7 +128,6 @@ const VehicleDetail = ({
 }) => {
    if (vehicle == null) return <></>;
 
-   
    return (
       <Flex
          flex={1.3}
@@ -211,7 +210,8 @@ const VehiclesList = ({
    onDrawerOpen,
    handlePageChange,
    pageCounts,
-   filterState
+   filterState,
+   onSubmitFinish
 }: {
    vehicles: Array<any>;
    onSelect: Dispatch<SetStateAction<VehicleDocType | null>>;
@@ -219,10 +219,11 @@ const VehiclesList = ({
    handlePageChange: (page: number) => void;
    pageCounts: number;
    filterState: UseStateProps<VehiclesFilter>;
+   onSubmitFinish: () => void;
 }) => {
    const [isUnder850] = useMediaQuery('(max-width: 850px)');
    const [filter, setFilter] = filterState;
-   
+
    const { onClose, onOpen, isOpen } = useDisclosure();
 
    return (
@@ -245,10 +246,19 @@ const VehiclesList = ({
                      setFilter({ ...filter, selectedCustomer: item });
                   }}
                />
-               <OrangeButton marginLeft={'auto'} onClick={()=> {
-                  onOpen()
-               }}>Add New Vehicle</OrangeButton>
-               <VehicleUploadForm customers={filter.customers} handler={{ onClose, onOpen, isOpen }} />
+               <OrangeButton
+                  marginLeft={'auto'}
+                  onClick={() => {
+                     onOpen();
+                  }}
+               >
+                  Add New Vehicle
+               </OrangeButton>
+               <VehicleUploadForm
+                  customers={filter.customers}
+                  handler={{ onClose, onOpen, isOpen }}
+                  onFinishSubmit={() => {}}
+               />
             </Flex>
             <Flex
                flexWrap={'wrap'}
@@ -262,13 +272,13 @@ const VehiclesList = ({
                {vehicles.map((vehicle, idx) => {
                   return (
                      <>
-                     <VehicleData
-                        vehicle={vehicle}
-                        key={idx}
-                        onClick={() => {
-                           onSelect(vehicle);
-                           onDrawerOpen();
-                        }}
+                        <VehicleData
+                           vehicle={vehicle}
+                           key={idx}
+                           onClick={() => {
+                              onSelect(vehicle);
+                              onDrawerOpen();
+                           }}
                         />
                      </>
                   );

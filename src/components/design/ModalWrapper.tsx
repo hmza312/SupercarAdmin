@@ -128,14 +128,13 @@ export const ModalDropDown = (props: ModalDropDownProps) => (
    </Box>
 );
 
-
 export const ModalFileInput = (props: ModalInputProps) => (
    <Box>
       <Text mb="2px" fontWeight={'600'} fontSize={'15px'}>
          {props.labelValue}
       </Text>
       <Input
-         className='custom-file-input'
+         className="custom-file-input"
          size="md"
          width={'100%'}
          border={`1px solid ${props.isOptional ? 'var(--orange-color)' : 'var(--info-text-color)'}`}
@@ -149,10 +148,10 @@ export const ModalFileInput = (props: ModalInputProps) => (
             fontWeight: '400',
             fontSize: '14px'
          }}
-         placeholder='Click to Select file'
+         placeholder="Click to Select file"
          {...props}
       />
-   
+
       {props.error && (
          <Text mb="2px" fontWeight={'600'} fontSize={'13px'} color={'red.400'}>
             {props.error}

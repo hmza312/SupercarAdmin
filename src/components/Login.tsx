@@ -31,7 +31,7 @@ const Login = () => {
    const [tabIdx, setTabIdx] = useState<number>(0);
    const [verifier, setVerifier] = useState<RecaptchaVerifier | null>(null);
 
-   const showRecaptchaVerifier = async ()=> {
+   const showRecaptchaVerifier = async () => {
       const auth = firebase.firebaseAuth;
       const recaptchaVerifier = new RecaptchaVerifier(
          'recaptcha-container',
@@ -43,9 +43,8 @@ const Login = () => {
          auth
       );
 
-      if(auth.currentUser) return;
+      if (auth.currentUser) return;
 
-      
       await recaptchaVerifier!.render();
       await recaptchaVerifier!.verify();
 
@@ -53,17 +52,16 @@ const Login = () => {
    };
 
    const loginUser = async () => {
-       const auth = firebase.firebaseAuth;
+      const auth = firebase.firebaseAuth;
 
+      if (!verifier) {
+         showRecaptchaVerifier();
+         return;
+      }
 
-       if (!verifier) {
-          showRecaptchaVerifier();
-          return;
-       }
-       
-       const confirmationResult = await signInWithPhoneNumber(auth, input, verifier);
-       setConfirmationResult(confirmationResult);
-       setTabIdx(1);
+      const confirmationResult = await signInWithPhoneNumber(auth, input, verifier);
+      setConfirmationResult(confirmationResult);
+      setTabIdx(1);
    };
 
    const VerifyCode = async () => {
@@ -71,9 +69,9 @@ const Login = () => {
       const res = await confirmationResult.confirm(code);
    };
 
-   useEffect(()=> {
-      showRecaptchaVerifier()
-   }, [])
+   useEffect(() => {
+      showRecaptchaVerifier();
+   }, []);
 
    const [isUnder500] = useMediaQuery('(max-width: 500px)');
 

@@ -17,7 +17,6 @@ export type VehicleDocType = {
    milage: string;
 };
 
-
 export type PaymentDocType = {
    amount: number;
    id: string;
@@ -74,7 +73,7 @@ export type MessageDocType = {
    timestamp: number;
    type: number;
    avatar?: string | undefined;
-   multimedia: MultiMediaDocType[] | null
+   multimedia: MultiMediaDocType[] | null;
 };
 
 export type ConversationDocType = {
@@ -92,15 +91,13 @@ export type AgreementDocType = {
    title: string;
    description: string;
    url: string;
-}
-
-
+};
 
 export type MultiMediaDocType = {
    extension: string;
-   order: 0
-   thumbnail: ""
-   title: string
-   type: string
-   url: string
-}
+   order: 0;
+   thumbnail: '';
+   title: string;
+   type: string;
+   url: string;
+};

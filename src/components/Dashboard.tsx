@@ -34,50 +34,65 @@ import { calculatePercentageChange } from '@/util/helpers';
 import { AsyncType } from '@/types/AsyncType';
 import WaitList from './dashboard/WaitList';
 
-
 const DashBoardContent = () => {
    const [totalCustomers] = useDocsCount(membersColRef);
    const [totalVehicles] = useDocsCount(vehiclesColRef);
    const [payments, setPayments] = useState<Array<PaymentDocType>>([]);
-   
-   const [users, setUsers] = useState<AsyncType<MemberDocType[]>> ({ loading: true, value: [] });
-   const [vehicles, setVehicles] = useState<AsyncType<VehicleDocType[]>> ({ loading: true, value: [] });
 
-   const [percentage, setPercentage] = useState({
-      vehicles: 0, user: 0
+   const [users, setUsers] = useState<AsyncType<MemberDocType[]>>({ loading: true, value: [] });
+   const [vehicles, setVehicles] = useState<AsyncType<VehicleDocType[]>>({
+      loading: true,
+      value: []
    });
 
+   const [percentage, setPercentage] = useState({
+      vehicles: 0,
+      user: 0
+   });
 
    useEffect(() => {
       const fetchRecentPayments = async () => {
-
-          const [paymentsDocs, userDocs, vehicleDocs] = await Promise.all ([
+         const [paymentsDocs, userDocs, vehicleDocs] = await Promise.all([
             getDocs(paymentsColRef),
-            getDocs(membersColRef), 
+            getDocs(membersColRef),
             getDocs(vehiclesColRef)
-          ]);
-           
-          setUsers({value: (userDocs.docs.map((d)=> ({...d.data(), uid: d.id } as MemberDocType))) as MemberDocType[], loading: false });
-          setVehicles({value: (vehicleDocs.docs.map(d=> ({...d.data(), id: d.id } as VehicleDocType))) as VehicleDocType[], loading: false });
+         ]);
 
-         // const userDocs = await 
-          const data = (paymentsDocs.docs.map((d) => d.data()) as Array<PaymentDocType>).map((p) => {
-            const user_data = userDocs.docs.map (d=>d.data()).filter (d => d.id == p.recipient)[0] as MemberDocType;
-            const vehicle_data = vehicleDocs.docs.map(d=>d.data()).filter(d => d.id == p.vehicle)[0] as VehicleDocType; 
+         setUsers({
+            value: userDocs.docs.map(
+               (d) => ({ ...d.data(), uid: d.id } as MemberDocType)
+            ) as MemberDocType[],
+            loading: false
+         });
+         setVehicles({
+            value: vehicleDocs.docs.map(
+               (d) => ({ ...d.data(), id: d.id } as VehicleDocType)
+            ) as VehicleDocType[],
+            loading: false
+         });
+
+         // const userDocs = await
+         const data = (paymentsDocs.docs.map((d) => d.data()) as Array<PaymentDocType>).map((p) => {
+            const user_data = userDocs.docs
+               .map((d) => d.data())
+               .filter((d) => d.id == p.recipient)[0] as MemberDocType;
+            const vehicle_data = vehicleDocs.docs
+               .map((d) => d.data())
+               .filter((d) => d.id == p.vehicle)[0] as VehicleDocType;
             return { ...p, user_data, vehicle_data };
-          });
-          
+         });
+
          //  calculatePercentageChange()
-          setPayments(data as Array<PaymentDocType>);
+         setPayments(data as Array<PaymentDocType>);
       };
 
       fetchRecentPayments();
    }, []);
 
-   useEffect(()=> {
+   useEffect(() => {
       const percentageChange = calculatePercentageChange(users.value, vehicles.value);
-      setPercentage({ user: percentageChange [0], vehicles: percentageChange[1] });
-   }, [users, vehicles])
+      setPercentage({ user: percentageChange[0], vehicles: percentageChange[1] });
+   }, [users, vehicles]);
 
    const [isUnder850] = useMediaQuery('(max-width: 850px)');
 
@@ -109,9 +124,9 @@ const DashBoardContent = () => {
          >
             <StatSection
                title="Total Customers"
-               badgeStatus={percentage.user > 0? "green" : "red"}
+               badgeStatus={percentage.user > 0 ? 'green' : 'red'}
                count={totalCustomers}
-               percentage={`${(percentage.user > 0 ? `+${percentage.user}` : `${percentage.user}`)}%`}
+               percentage={`${percentage.user > 0 ? `+${percentage.user}` : `${percentage.user}`}%`}
                routeTo={ROUTING.customers}
             >
                <IoIosPeople style={{ fontSize: '2rem' }} />
@@ -127,9 +142,11 @@ const DashBoardContent = () => {
             <StatSection
                routeTo={ROUTING.vehicles}
                title="Total Vehicles"
-               badgeStatus={percentage.user > 0? "green" : "red"}
+               badgeStatus={percentage.user > 0 ? 'green' : 'red'}
                count={totalVehicles}
-               percentage={`${(percentage.vehicles > 0 ? `+${percentage.vehicles}` : `${percentage.vehicles}`)}%`}
+               percentage={`${
+                  percentage.vehicles > 0 ? `+${percentage.vehicles}` : `${percentage.vehicles}`
+               }%`}
             >
                <AiFillCar style={{ fontSize: '2rem' }} />
             </StatSection>
@@ -141,7 +158,7 @@ const DashBoardContent = () => {
             bg="var(--grey-color)"
             rounded={'xl'}
          >
-            <Analytics vehicles={vehicles.value}/>
+            <Analytics vehicles={vehicles.value} />
          </GridItem>
 
          <GridItem
@@ -154,7 +171,7 @@ const DashBoardContent = () => {
          </GridItem>
 
          <GridItem gridColumn="5 / 7" gridRow="1 / span 5" bg="var(--grey-color)" rounded={'xl'}>
-            <WaitList users={users.value}/>
+            <WaitList users={users.value} />
          </GridItem>
 
          <GridItem gridColumn="5 / 7" gridRow="6 / span 7" bg="var(--grey-color)" rounded={'xl'}>
@@ -174,8 +191,8 @@ const FlexBoxLayout = ({
    totalCustomers: number;
    totalVehicles: number;
    payments: Array<PaymentDocType>;
-   vehicles: VehicleDocType[],
-   users: MemberDocType[]
+   vehicles: VehicleDocType[];
+   users: MemberDocType[];
 }) => {
    const [isUnder550] = useMediaQuery('(max-width: 550px)');
    const [isUnder850] = useMediaQuery('(max-width: 850px');
@@ -215,7 +232,7 @@ const FlexBoxLayout = ({
 
          {/* graph */}
          <Flex width={'100%'} bg="var(--grey-color)" rounded={'xl'}>
-            <Analytics vehicles={vehicles}/>
+            <Analytics vehicles={vehicles} />
          </Flex>
 
          {/*  recent payments */}
@@ -226,7 +243,7 @@ const FlexBoxLayout = ({
          {/* side bar */}
          <Flex width={'100%'} gap={'0.5rem'} flexDir={isUnder550 ? 'column' : 'row'}>
             <Flex bg="var(--grey-color)" rounded={'xl'} flex={1}>
-               <WaitList useMobStyle={isUnder850} users={users}/>
+               <WaitList useMobStyle={isUnder850} users={users} />
             </Flex>
             <Flex bg="var(--grey-color)" rounded={'xl'} flex={1}>
                <Activity />

@@ -181,14 +181,11 @@ body {
    width: 100%;
    padding: 0.5rem;
    background: var(--white-color);
-   
 }
-
 
 .custom-file-input::-webkit-file-upload-button {
    visibility: hidden;
    cursor: pointer;
-
 }
 
 .custom-file-input::before {
@@ -206,10 +203,9 @@ body {
 }
 
 .custom-file-input:hover::before {
-  border-color: var(--white-color);
-
+   border-color: var(--white-color);
 }
 
 .custom-file-input:active::before {
-  background: -webkit-linear-gradient(top, #e3e3e3, #f9f9f9);
+   background: -webkit-linear-gradient(top, #e3e3e3, #f9f9f9);
 }

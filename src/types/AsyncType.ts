@@ -1,7 +1,4 @@
 export interface AsyncType<T> {
-    value: T;
-    loading: boolean;
+   value: T;
+   loading: boolean;
 }
-
-
- 
