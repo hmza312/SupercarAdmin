@@ -14,7 +14,9 @@ export type VehicleDocType = {
    year: string;
    owner_data: MemberDocType | null;
    timestamp: number;
+   milage: string;
 };
+
 
 export type PaymentDocType = {
    amount: number;

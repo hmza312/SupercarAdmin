@@ -3,28 +3,58 @@ import ModalWrapper, { ModalDropDown, ModalInput } from "../design/ModalWrapper"
 import { Flex, Heading, useToast } from "@chakra-ui/react";
 import OrangeButton from "../design/OrangeButton";
 import { useState } from "react";
-import { MemberDocType } from "@/lib/firebase_docstype";
+import { MemberDocType, VehicleDocType } from "@/lib/firebase_docstype";
+import { ModalFileInput } from "../design/ModalWrapper";
+
+import { carMakes } from "@/util/constant";
+import { vehiclesColRef } from "@/lib/firebase";
+import { doc, setDoc } from "firebase/firestore";
+import { localTimeStamp } from "@/util/helpers";
 
 const VehicleUploadForm = (
     {handler, customers} : {handler : UseDisclosureProp, customers: MemberDocType[] }
 ) => {
 
-    const initialFormState = {
+    const initialFormState: {
+      customer: string
+      nickname: string
+      year: string
+      make: string
+      model: string
+      trim: string
+      mileage: string
+      thumbnail: File | null
+      cutout: File | null
+      title: string,
+      vin: string,
+      odometer: string
+    } = {
+        title: '',
         customer: '',
         nickname: '',
         year: '',
         make: '',
         model: '',
         trim: '',
-        mileage: ''
+        mileage: '',
+        thumbnail: null,
+        cutout: null,
+        vin: '',
+        odometer: ''
     };
-
+    
     const [formState, setFormState] = useState(initialFormState);
     const [errors, setErrors] = useState<any>({});
 
     const validateForm = () => {
         const newErrors: any = {};
         
+        if (!formState.title) {
+          newErrors.customer = "Please enter title";
+        } else if (formState.title.length == 0) {
+          newErrors.customer = "Please enter title";
+        }
+
         if (!formState.customer) {
           newErrors.customer = 'Please select a customer';
         }
@@ -52,7 +82,17 @@ const VehicleUploadForm = (
         } else if (!/^\d+$/.test(formState.mileage)) {
           newErrors.mileage = 'Please enter a valid mileage';
         }
-    
+
+        if (!formState.thumbnail) {
+          newErrors.thumbnail = 'Select thumbnail image';
+        } else if (formState.thumbnail.type != "image/png") {
+          newErrors.thumbnail = 'Select png file';
+        }
+
+        if (formState.cutout && formState.cutout.type != "image/png") {
+          newErrors.cutout = "Select png file";
+        }
+
         setErrors(newErrors);
         return Object.keys(newErrors).length === 0;
     };
@@ -66,12 +106,33 @@ const VehicleUploadForm = (
         }));
     };
     
-    const handleSubmit = () => {
+    const handleSubmit = async () => {
     
         const isValid = validateForm();
         
         if (isValid) {
           // Submit the form or perform desired actions
+          
+          const newVehicleDoc = doc(vehiclesColRef);
+          
+          setDoc(newVehicleDoc, {
+            cutout: '',
+            thumbnail: '',
+            id: newVehicleDoc.id,
+            make: formState.make,
+            model: formState.model,
+            owner: formState.customer,
+            status: 1,
+            trim: formState.trim,
+            timestamp: localTimeStamp(),
+            year: formState.year,
+            milage: formState.mileage,
+            vin: formState.vin,
+            odometer: formState.odometer,
+            title: formState.title,
+            t: ''
+          } as VehicleDocType);
+          
           // For example, show a success toast message
           toast({
             title: 'Form submitted',
@@ -80,7 +141,7 @@ const VehicleUploadForm = (
             duration: 3000,
             isClosable: true
           });
-    
+
           // Reset the form state
           setFormState(initialFormState);
           setErrors({});
@@ -106,10 +167,18 @@ const VehicleUploadForm = (
           </Flex>
       
           <Flex flexDir="column" width="100%" gap="0.5rem" color="black">
+
+            <ModalInput
+              labelValue="Enter title"
+              value={formState.title}
+              onChange={(e) => handleInputChange('title', e.target.value)}
+              error={errors.title}
+            />
+
             <ModalDropDown
               labelValue="Customer"
               menuItems={customers.map(c => c.name).filter (n => n != "").sort()}
-              menuTitle="Please Select"
+              menuTitle="Please Select" 
               onSelected={(s) => handleInputChange('customer', s)}
               error={errors.customer}
             />
@@ -133,12 +202,12 @@ const VehicleUploadForm = (
       
             <ModalDropDown
               labelValue="Make"
-              menuItems={['BMW', 'Audi', 'Acura', 'Ferrari']}
+              menuItems={carMakes.sort()}
               menuTitle="Please Select"
               onSelected={(s) => handleInputChange('make', s)}
               error={errors.make}
             />
-      
+
             <ModalInput
               labelValue="Model"
               placeholder="e.g. Aventador"
@@ -161,6 +230,42 @@ const VehicleUploadForm = (
               value={formState.mileage}
               onChange={(e) => handleInputChange('mileage', e.target.value)}
               error={errors.mileage}
+            />
+
+            <ModalFileInput 
+              labelValue="Thumbnail Image"
+              onChange={(e)=> {
+                handleInputChange('thumbnail', e.target.files?.[0])
+              }}
+              type="file"
+              accept=".png"
+              error={errors.thumbnail}
+              />
+            
+            <ModalFileInput 
+              labelValue="Vehicle Cutout Image (Optional)"
+              onChange={(e)=> {
+                handleInputChange('cutout', e.target.files?.[0])
+              }}
+              type="file"
+              accept=".png"
+              error={errors.cutout}
+            />
+
+            <ModalInput
+              labelValue="Enter vin (Optional)"
+              isOptional={true}
+              value={formState.vin}
+              onChange={(e) => handleInputChange('vin', e.target.value)}
+              error={errors.vin}
+            />
+
+            <ModalInput
+              labelValue="Enter odometer value (Optional)"
+              isOptional={true}
+              value={formState.odometer}
+              onChange={(e) => handleInputChange('odometer', e.target.value)}
+              error={errors.odometer}
             />
 
             <OrangeButton width="100%" onClick={handleSubmit}>

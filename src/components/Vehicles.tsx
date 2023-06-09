@@ -128,6 +128,7 @@ const VehicleDetail = ({
 }) => {
    if (vehicle == null) return <></>;
 
+   
    return (
       <Flex
          flex={1.3}

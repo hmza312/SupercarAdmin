@@ -152,7 +152,7 @@ export const ModalFileInput = (props: ModalInputProps) => (
          placeholder='Click to Select file'
          {...props}
       />
-
+   
       {props.error && (
          <Text mb="2px" fontWeight={'600'} fontSize={'13px'} color={'red.400'}>
             {props.error}
