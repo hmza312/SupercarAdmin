@@ -2,12 +2,14 @@ import { SearchIcon } from '@chakra-ui/icons';
 import { Flex, Heading, Box, GridItem, Grid, Text, Button, useMediaQuery } from '@chakra-ui/react';
 
 export default function Dashboard() {
+   const [user, setUser] = useContext(CredentialsProvider);
+
    return (
       <>
          <Flex width={'100%'} flexDir={'column'} gap={'1rem'} height={'100%'}>
             {/* Top Header */}
             <ContentHeader
-               heading="Welcome Back, Ethan 👋"
+               heading={`Welcome Back, ${user?.name} 👋`}
                description="Here’s an overview of your automation dashboard"
             />
             <DashBoardContent />
@@ -21,7 +23,7 @@ import { AiFillCar } from 'react-icons/ai';
 
 import StatSection from './dashboard/StatSection';
 import Analytics from './dashboard/Analytics';
-import { useEffect, useState } from 'react';
+import { useContext, useEffect, useState } from 'react';
 import { getDocData, membersColRef, paymentsColRef, vehiclesColRef } from '@/lib/firebase';
 import { getDocs } from 'firebase/firestore';
 import RecentPayments from './dashboard/RecentPayments';
@@ -33,6 +35,7 @@ import { ROUTING } from '@/util/constant';
 import { calculatePercentageChange } from '@/util/helpers';
 import { AsyncType } from '@/types/AsyncType';
 import WaitList from './dashboard/WaitList';
+import CredentialsProvider from '@/lib/CredentialsProvider';
 
 const DashBoardContent = () => {
    const [totalCustomers] = useDocsCount(membersColRef);
@@ -158,7 +161,7 @@ const DashBoardContent = () => {
             bg="var(--grey-color)"
             rounded={'xl'}
          >
-            <Analytics vehicles={vehicles.value} />
+            <Analytics vehicles={vehicles.value} payments={payments}/>
          </GridItem>
 
          <GridItem
@@ -232,7 +235,7 @@ const FlexBoxLayout = ({
 
          {/* graph */}
          <Flex width={'100%'} bg="var(--grey-color)" rounded={'xl'}>
-            <Analytics vehicles={vehicles} />
+            <Analytics vehicles={vehicles} payments={payments}/>
          </Flex>
 
          {/*  recent payments */}

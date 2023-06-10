@@ -82,6 +82,36 @@ export function calculatePercentageChange(
    return [memberChange, paymentChange];
 }
 
+export const countPaymentsByMonth = (payments: PaymentDocType[]): Record<string, number> => {
+   const monthCounts: Record<string, number> = {};
+
+   // Initialize monthCounts with zero counts for all months
+   const currentDate = new Date();
+   const currentYear = currentDate.getFullYear();
+   const monthNames = Array.from({ length: 12 }, (_, monthIndex) => {
+      const date = new Date(currentYear, monthIndex);
+      return date.toLocaleString('en-US', { month: 'long' });
+   });
+   monthNames.forEach((monthName) => {
+      monthCounts[monthName] = 0;
+   });
+
+   payments.forEach((payment) => {
+      const timestamp = payment.timestamp;
+      const date = new Date(timestamp * 1000);
+      if (isNaN(date.getTime())) {
+         // Skip members with invalid dates
+         return;
+      }
+
+      const month = date.toLocaleString('en-US', { month: 'long' });
+
+      monthCounts[month]++;
+   });
+   
+   return monthCounts;
+};
+
 export const countVehicleByMonth = (vehicles: VehicleDocType[]): Record<string, number> => {
    const monthCounts: Record<string, number> = {};
 
@@ -117,3 +147,29 @@ export function fileToBlob(file: File): Blob {
    const blobFile = new Blob([file], { type: file.type });
    return blobFile;
 }
+
+
+export const calculateFileSize = (url: string): Promise<number> => {
+   return new Promise((resolve, reject) => {
+     const xhr = new XMLHttpRequest();
+     xhr.open('HEAD', url);
+     xhr.onreadystatechange = function () {
+       if (xhr.readyState === xhr.DONE) {
+         if (xhr.status === 200) {
+           const contentLength = xhr.getResponseHeader('Content-Length');
+           const fileSizeBytes = parseInt(contentLength || '0', 10);
+           if (isNaN(fileSizeBytes)) {
+             reject(new Error('Invalid file size'));
+           } else {
+             const fileSizeMB = (fileSizeBytes / (1024 * 1024)).toFixed(2);
+             resolve(parseFloat(fileSizeMB));
+           }
+         } else {
+           reject(new Error('Unable to retrieve file size'));
+         }
+       }
+     };
+     xhr.send();
+   });
+};
+ 

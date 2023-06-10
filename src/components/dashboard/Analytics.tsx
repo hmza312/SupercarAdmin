@@ -1,15 +1,29 @@
 import { useEffect, useState } from 'react';
-import { Box, Flex, Heading } from '@chakra-ui/react';
+import { Box, Flex, Heading, Text, useMediaQuery } from '@chakra-ui/react';
 import dynamic from 'next/dynamic';
 const Chart = dynamic(() => import('react-apexcharts'), { ssr: false });
 
-export default function Analytics({ vehicles }: { vehicles: VehicleDocType[] }) {
+export default function Analytics({ vehicles, payments }: { payments: PaymentDocType[], vehicles: VehicleDocType[] }) {
+   const [isUnder500] = useMediaQuery("(max-width: 500px)")
+   
    return (
       <>
          <Flex height={'100%'} width={'100%'} p={'0.5rem'} flexDir={'column'}>
-            <Heading fontSize={'2xl'}>Analytics</Heading>
+            <Flex width={'100%'} gap={'1rem'} flexWrap={isUnder500 ? 'wrap' :'initial'} justifyContent={'center'}>
+               <Heading fontSize={'2xl'}>Analytics</Heading>
+               <Flex ml={isUnder500 ? 'initial' : 'auto'} gap={'1rem'}>
+                  <Text>
+                     <Flex p={'0.35rem'} mr={'0.2rem'} bg={'rgba(58, 111, 249, 1)'} rounded={'50%'} display={'inline-block'}>{' '}</Flex>
+                     Vehicles
+                  </Text>
+                  <Text>
+                     <Flex p={'0.35rem'} mr={'0.2rem'} bg={'rgba(100, 207, 246, 1)'} rounded={'50%'} display={'inline-block'}>{' '}</Flex>
+                     Payments
+                  </Text>
+               </Flex>
+            </Flex>
             <Box width={'100%'} height={'100%'} p={'0.1rem'}>
-               <ChartSection vehicles={vehicles} />
+               <ChartSection vehicles={vehicles} payments={payments}/>
             </Box>
          </Flex>
       </>
@@ -17,10 +31,10 @@ export default function Analytics({ vehicles }: { vehicles: VehicleDocType[] }) 
 }
 
 import { ApexOptions } from 'apexcharts';
-import { countVehicleByMonth } from '@/util/helpers';
-import { MemberDocType, VehicleDocType } from '@/lib/firebase_docstype';
+import { countPaymentsByMonth, countVehicleByMonth } from '@/util/helpers';
+import { MemberDocType, PaymentDocType, VehicleDocType } from '@/lib/firebase_docstype';
 
-const options: ApexOptions = {
+const options_initial: ApexOptions = {
    theme: {
       mode: 'dark'
    },
@@ -55,29 +69,47 @@ const options: ApexOptions = {
    }
 };
 
-const ChartSection = ({ vehicles }: { vehicles: VehicleDocType[] }) => {
-   const [state, setState] = useState({
-      series: [
-         {
-            name: 'Payments',
-            data: [21, 35, 75, 51, 41, 47, 30, 39]
-         },
-         {
-            name: 'Vehicles',
-            data: [41, 79, 57, 47, 63, 71, 90, 89]
-         }
-      ]
-   });
+const ChartSection = ({ vehicles, payments }: { vehicles: VehicleDocType[], payments: PaymentDocType[] }) => {
+   
 
-   const [xAxis, setXAxis] = useState<Array<string>>([]);
+   
+   const [series, setSeries] = useState([
+      {
+         name: 'Payments',
+         data: [0, 0, 0, 0, 0, 0, 0, 0]
+      },
+      {
+         name: 'Vehicles',
+         data: [0, 0, 0, 0, 0, 0, 0, 0]
+      }
+   ]);
+
+   const [options, setOptions] = useState(options_initial); 
 
    useEffect(() => {
-      setXAxis(Object.keys(countVehicleByMonth(vehicles)));
+      const vehiclesCount = Object.values(countVehicleByMonth(vehicles));
+      const paymentsCount = Object.values(countPaymentsByMonth(payments));
+      const xAxis = Object.keys(countVehicleByMonth(vehicles)).map (m => m.slice(0, 3));
+
+      setSeries([
+         {
+            name: 'Payments',
+            data: paymentsCount
+         }
+         ,{
+            name: 'Vehicles',
+            data: vehiclesCount
+      }]);
+
+      setOptions({...options, xaxis: {
+         categories: xAxis 
+      }});
+
    }, [vehicles]);
 
    return (
       <>
-         <Chart options={options} series={state.series} type="bar" width={'100%'} height={'100%'} />
+         <Chart options={options}  series={series} type="bar" width={'100%'} height={'100%'} />
       </>
    );
 };

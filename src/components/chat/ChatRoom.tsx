@@ -37,7 +37,7 @@ import {
    setDoc,
    where
 } from 'firebase/firestore';
-import { agreementsColRef, conversationsColRef, firebase, membersColRef } from '@/lib/firebase';
+import { agreementsColRef, conversationsColRef, firebase, membersColRef, uploadBlobToFirestore } from '@/lib/firebase';
 import ModalWrapper, { ModalDropDown, ModalFileInput } from '../design/ModalWrapper';
 import { UseDisclosureProp } from '@/types/UseDisclosureProp';
 import { useCallback } from 'react';
@@ -109,7 +109,6 @@ const ChatRoom = () => {
    useEffect(() => {
       if (!containerRef) return;
       (containerRef.current as HTMLDivElement).scrollIntoView({ behavior: 'smooth' });
-      console.log(chatMessages);
    }, [containerRef, chatMessages]);
 
    const { isOpen, onOpen, onClose } = useDisclosure();
@@ -539,6 +538,8 @@ const ChatMessage = ({
    );
 };
 
+import { FaCloudDownloadAlt } from "react-icons/fa";
+
 const MultiMedia = ({
    messagePos,
    multimedia,
@@ -553,6 +554,25 @@ const MultiMedia = ({
    const [isUnder850] = useMediaQuery('(max-width: 850px)');
    const padding = isUnder850 ? '10%' : '40%';
 
+   const [loader, setLoader] = useState<boolean>(false);
+   const [fileSize, setFileSize] = useState<string> ('');
+
+   const [isUnder500] = useMediaQuery("(max-width: 500px)");
+
+   useEffect(()=> {
+      if (multimedia.type == "document")
+      {
+         setLoader(true);
+         calculateFileSize(multimedia.url).then(size=> {
+            setFileSize(`${size} mb`)
+            setLoader(false);
+         }).catch ((err)=> {
+            setFileSize(`${multimedia.type}`)
+            setLoader(false);
+         });
+      }
+   }, [])
+
    return (
       <Flex
          width={'100%'}
@@ -562,24 +582,30 @@ const MultiMedia = ({
          flexDir={isRight ? 'row-reverse' : 'row'}
       >
          <Flex height={'100%'} gap={'0.5rem'} flexDir={isRight ? 'row-reverse' : 'row'}>
-            {/* <Avatar src={msg.avatar || ''} /> */}
+            <Avatar src={avatar || ''} />
 
             {multimedia.type == 'image' && (
                <Flex p={'0.5rem'} rounded={'lg'} flexDir={'column'} gap={'0.1rem'}>
                   <img
                      src={multimedia.url}
-                     style={{ borderRadius: '0.5rem', maxWidth: '300px', objectFit: 'contain' }}
+                     style={{ borderRadius: '0.5rem', maxWidth: (isUnder500 ? '250px' : '300px'), objectFit: 'contain' }}
                      alt={`${multimedia.title}`}
                   />
                </Flex>
             )}
 
-            {multimedia.type == 'document' && (
-               <Flex p={'0.5rem'} rounded={'lg'} flexDir={'column'} gap={'0.1rem'}>
-                  <img
-                     src={multimedia.url}
-                     style={{ borderRadius: '0.5rem', maxWidth: '300px', objectFit: 'contain' }}
-                  />
+            {multimedia.type == "document" && (
+               <Flex p={'1.2rem'} rounded={'lg'} justifyContent={'center'} alignItems={'center'} gap={'1rem'} bg={'var(--orange-color)'}>
+                  <Flex gap={'0.1rem'} flexDir={'column'}>
+                     <Heading fontSize={'xl'} fontWeight={'600'}>{multimedia.title}</Heading>
+                     {loader ? <Spinner /> : <Text fontWeight={'400'} fontSize={'md'}>{fileSize}</Text>}
+                  </Flex>
+
+                  <Icon fontSize={'2xl'} cursor={'pointer'}>
+                   <a href={multimedia.url as string} target='_blank'>
+                     <FaCloudDownloadAlt />
+                   </a>
+                  </Icon>
                </Flex>
             )}
             {/* <Flex flexDir={'column'} fontWeight={'400'} fontSize={'11px'} gap={'0.1rem'}>
@@ -610,13 +636,15 @@ import {
 import DrawerWrapper from '../design/Drawer';
 import CredentialsProvider from '@/lib/CredentialsProvider';
 import { UseStateProps } from '@/types/UseStateProps';
-import { formatChatDate, getFileNameAndExtension, localTimeStamp } from '@/util/helpers';
+import { calculateFileSize, formatChatDate, getFileNameAndExtension, localTimeStamp } from '@/util/helpers';
 import { ValidateType } from '@/types/ValidateType';
 
 const NewDocumentUpload = ({ handler }: { handler: UseDisclosureProp }) => {
    const [title, setTitle] = useState<ValidateType<string>>({ value: '', error: null });
    const [description, setDescription] = useState<ValidateType<string>>({ value: '', error: null });
    const [file, setFile] = useState<ValidateType<File | null>>({ value: null, error: null });
+
+   const [loading, setLoading] = useState<boolean> (false);
 
    const handleFileInput = (e: React.ChangeEvent<HTMLInputElement>) => {
       const selectedFile = e.target.files?.[0];
@@ -631,10 +659,12 @@ const NewDocumentUpload = ({ handler }: { handler: UseDisclosureProp }) => {
       setFile({ ...file, error: file.value ? null : 'select valid file' });
 
       if (title.value.length > 0 && file.value) {
+         setLoading(true);
          const newDoc = doc(agreementsColRef);
          const blobFile = new Blob([file.value], { type: file.value.type });
 
          const fileName = file.value.name;
+         const url = uploadBlobToFirestore(blobFile);
 
          setDoc(newDoc, {
             id: newDoc.id,
@@ -642,9 +672,11 @@ const NewDocumentUpload = ({ handler }: { handler: UseDisclosureProp }) => {
             description: description.value,
             extension: fileName.split('.').pop(),
             title: title.value,
-            url: URL.createObjectURL(blobFile)
+            url
          });
 
+         setLoading(false);
+         
          setTitle({ value: '', error: null });
          setDescription({ value: '', error: null });
          setFile({ value: null, error: null });
@@ -687,7 +719,7 @@ const NewDocumentUpload = ({ handler }: { handler: UseDisclosureProp }) => {
                      accept=".doc, .docx, .pdf, .txt"
                   />
                </Flex>
-               <OrangeButton width={'100%'} onClick={handleUpload}>
+               <OrangeButton width={'100%'} onClick={handleUpload} isLoading={loading}>
                   Upload Now
                </OrangeButton>
             </Flex>
