@@ -198,7 +198,7 @@ const ChatRoom = () => {
 
    return (
       <>
-         <Flex width={'100%'} height={'100%'} gap={'0.5rem'} flexDir={'column'}>
+         <Flex width={'100%'} height={'90vh'} gap={'0.5rem'} flexDir={'column'} >
             <BackBtn />
 
             <Flex flex={''} gap={'1rem'} height={'85%'}>
@@ -234,11 +234,11 @@ const ChatRoom = () => {
                {isUnder850 ? (
                   <>
                      <DrawerWrapper isOpen={sideBarHandle.isOpen} onClose={sideBarHandle.onClose}>
-                        <SideBar newDocUploadHandle={{ isOpen, onOpen, onClose }} />
+                        <SideBar newDocUploadHandle={{ isOpen, onOpen, onClose }} height={'100%'} />
                      </DrawerWrapper>
                   </>
                ) : (
-                  <SideBar newDocUploadHandle={{ isOpen, onOpen, onClose }} />
+                  <SideBar newDocUploadHandle={{ isOpen, onOpen, onClose }} height={'100%'} />
                )}
             </Flex>
          </Flex>
@@ -399,9 +399,11 @@ const ChatContainer = ({
 };
 
 const SideBar = ({
-   newDocUploadHandle: newDocUploadHandle
+   newDocUploadHandle: newDocUploadHandle,
+   height
 }: {
    newDocUploadHandle: UseDisclosureProp;
+   height: string
 }) => {
    const [isUnder500] = useMediaQuery('(max-width: 500px)');
 
@@ -416,12 +418,13 @@ const SideBar = ({
 
    return (
       <Flex
-         height={'100%'}
+         height={height}
          bg={'var(--grey-color)'}
          rounded={'xl'}
          // flex={1.2}
          width={'30%'}
          p={'1rem'}
+         pb={'0rem'}
          flexDir={'column'}
          gap={'0.5rem'}
       >
@@ -729,3 +732,5 @@ const NewDocumentUpload = ({ handler }: { handler: UseDisclosureProp }) => {
 };
 
 export default ChatRoom;
+
+

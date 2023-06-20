@@ -67,14 +67,14 @@ export default function Customers() {
          ]);
 
          setCustomers(
-            customersDocs.docs.map((d) => {
+            (customersDocs.docs.map((d) => {
                return {
                   ...d.data(),
                   uid: d.id,
                   payments: paymentsDocs.filter((p) => p.recipient == d.id),
                   vehicles: vehiclesDocs.filter((v) => v.owner == d.id)
                };
-            }) as Array<MemberDocType>
+            }) as Array<MemberDocType>).filter(customer => customer.permitted)
          );
       };
 
@@ -82,7 +82,7 @@ export default function Customers() {
    }, []);
 
    const topRef = useRef<any>(null);
-
+   
    return (
       <Flex width="100%" flexDir="column" gap="1rem" height="100%" ref={topRef}>
          <ContentHeader description="" heading={`Total Customers (${customerCount})`} />
@@ -114,7 +114,7 @@ export default function Customers() {
 const CustomerProfile = ({ customer }: { customer: MemberDocType | null }) => {
    const [isUnder850] = useMediaQuery('(max-width: 850px)');
    if (!customer) return <></>;
-
+   
    return (
       <Flex
          flex={1}
@@ -170,9 +170,9 @@ const CustomersList = ({
       <Flex
          flex={isUnder850 ? 1 : 3}
          width={'100%'}
-         height={'100vh'}
+         height={'90vh'}
          maxH={'100vh'}
-         minHeight={'100vh'}
+         minHeight={'90vh'}
          flexDir={'column'}
          gap={'1rem'}
          p={isUnder850 ? '0rem' : '1rem'}
@@ -198,8 +198,8 @@ const CustomersList = ({
                );
             })}
          </Flex>
-         <Flex flexBasis={'17%'} alignSelf={'flex-end'}>
-            <Box>
+         <Flex  alignSelf={'flex-end'}>
+            <Box p={'0.5rem'}> 
                <Pagination pageCounts={pageCounts} handlePageChange={handlePageChange} />
             </Box>
          </Flex>

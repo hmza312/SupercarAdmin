@@ -42,8 +42,8 @@ const sideBarLinks: Array<SideBarLink> = [
    { text: 'Customers', linkTo: ROUTING.customers, icon: <BiStats /> },
    { text: 'Vehicles', linkTo: ROUTING.vehicles, icon: <IoWalletOutline /> },
    { text: 'Requests', linkTo: ROUTING.requests, icon: <BiUser /> },
-   { text: 'Payments', linkTo: ROUTING.payments, icon: <FiSettings /> }
-   // { text: 'Waitlist', linkTo: ROUTING.waitList, icon: <FiSettings /> },
+   { text: 'Payments', linkTo: ROUTING.payments, icon: <FiSettings /> },
+   { text: 'Waitlist', linkTo: ROUTING.waitList, icon: <FiSettings /> },
    // { text: 'Settings', linkTo: ROUTING.settings, icon: <BsShieldCheck /> },
    // { text: 'Help Centre', linkTo: ROUTING.helpCentre, icon: <BiHelpCircle /> }
 ];

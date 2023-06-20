@@ -21,6 +21,7 @@ export default function MainLayout({
             height: '100%',
             overflowY: 'auto',
             padding: `${!padding ? (isUnder500 ? '0.5rem' : '1rem') : padding}`,
+            paddingBottom: '0',
             marginBottom: isUnder500 ? '2rem' : 'initial'
          }}
          className={className ? className : oxygen.className}

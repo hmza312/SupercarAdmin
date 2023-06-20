@@ -87,7 +87,7 @@ export default function Payments() {
    const topRef = useRef<any>(null);
 
    return (
-      <Flex width="100%" flexDir="column" gap="1rem" height="100%" pb={'2rem'} ref={topRef}>
+      <Flex width="100%" flexDir="column" gap="1rem" height="100%" pb={'1rem'} ref={topRef}>
          <PaymentContentHeader
             heading={`All Payments (${
                payments.filter((p) =>
@@ -96,7 +96,7 @@ export default function Payments() {
             })`}
             description=""
          />
-         <Flex p={'0.5rem'} gap={'1rem'} width={'100%'}>
+         <Flex  gap={'1rem'} width={'100%'}>
             <Box ml={'auto'}>
                <DropDown
                   menuTitle={
@@ -113,7 +113,7 @@ export default function Payments() {
          <Flex
             flex={3}
             width={'100%'}
-            minHeight={'90vh'}
+            minHeight={'80vh'}
             flexDir={'column'}
             gap={'1rem'}
             p={under800 ? '0.5rem' : '1rem'}
@@ -124,8 +124,8 @@ export default function Payments() {
             <Flex flexDir={'column'} gap={'1rem'} overflowY={'auto'} flexBasis={'90%'}>
                <PaymentsTable payments={requestsToShow} />
             </Flex>
-            <Flex flexBasis={'17%'} alignSelf={'flex-end'}>
-               <Box>
+            <Flex alignSelf={'flex-end'}>
+               <Box p = {'0.5rem'}>
                   <Pagination
                      pageCounts={paginationIndices.length}
                      handlePageChange={(page) => {

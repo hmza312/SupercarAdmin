@@ -82,7 +82,7 @@ export default function Vehicles() {
 
    return (
       <>
-         <Flex width="100%" flexDir="column" gap="1rem" height="100%" ref={topRef}>
+         <Flex width="100%" flexDir="column" gap="1rem" height="100%" ref={topRef} >
             <ContentHeader
                description="Catalog of all vehicles available in you automation fleet"
                heading={`Vehicles (${vehicleCount})`}
@@ -133,7 +133,7 @@ const VehicleDetail = ({
          flex={1.3}
          bg={renderInDrawer ? 'var(--bg-color)' : 'var(--grey-color)'}
          rounded="lg"
-         height={'90%'}
+         height={'100%'}
          flexDir={'column'}
          gap={'1rem'}
          overflowY={'auto'}
@@ -171,7 +171,7 @@ const VehicleDetail = ({
             <Center>
                <Text>{vehicle.model}</Text>
             </Center>
-            <Center px={'25%'} py={'0.5rem'}>
+            <Center px={'25%'} py={'0.2rem'}>
                <Divider borderColor={'var(--white-color)'} borderWidth={'1px'} />
             </Center>
 
@@ -181,7 +181,7 @@ const VehicleDetail = ({
             <Center>
                <Text>{vehicle.make}</Text>
             </Center>
-            <Center px={'25%'} py={'0.5rem'}>
+            <Center px={'25%'} py={'0.2rem'}>
                <Divider borderColor={'var(--white-color)'} borderWidth={'1px'} />
             </Center>
 
@@ -191,7 +191,7 @@ const VehicleDetail = ({
             <Center>
                <Text>{5624}</Text>
             </Center>
-            <Center px={'25%'} py={'0.5rem'}>
+            <Center px={'25%'} py={'0.2rem'}>
                <Divider borderColor={'var(--white-color)'} borderWidth={'1px'} />
             </Center>
          </Flex>
@@ -231,9 +231,9 @@ const VehiclesList = ({
          <Flex
             flex={isUnder850 ? 1 : 3}
             width={'100%'}
-            height={'99vh'}
-            maxH={'100vh'}
-            minHeight={'99vh'}
+            height={'80vh'}
+            maxH={'90vh'}
+            minHeight={'86vh'}
             flexDir={'column'}
             gap={'0rem'}
             py={0}
@@ -284,8 +284,8 @@ const VehiclesList = ({
                   );
                })}
             </Flex>
-            <Flex flexBasis={'17%'} alignSelf={'flex-end'} px={'0.5rem'}>
-               <Box>
+            <Flex alignSelf={'flex-end'} px={'0.5rem'} >
+               <Box p={'0.5rem'}>
                   <Pagination pageCounts={pageCounts} handlePageChange={handlePageChange} />
                </Box>
             </Flex>

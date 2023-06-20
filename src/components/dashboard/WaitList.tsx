@@ -1,5 +1,7 @@
 import { MemberDocType } from '@/lib/firebase_docstype';
+import { ROUTING } from '@/util/constant';
 import { Box, Button, Flex, Heading, Text } from '@chakra-ui/react';
+import { useRouter } from 'next/router';
 import { useEffect, useState } from 'react';
 
 const WaitListPayment = ({ user }: { user: MemberDocType }) => {
@@ -50,6 +52,8 @@ const WaitList = (
       );
    }, [users]);
 
+   const router  = useRouter();
+
    return (
       <Flex flexDir={'column'} width={'100%'} height={'100%'} gap={'1rem'} p={'1rem'}>
          <Heading fontSize={'2xl'}>Waitlist</Heading>
@@ -75,6 +79,9 @@ const WaitList = (
             color={'black'}
             background={'var(--white-color)'}
             _hover={{ background: 'var(--white-color)' }}
+            onClick={()=>{
+               router.push(ROUTING.waitList)
+            }}
          >
             See Full User Waitlist
          </Button>

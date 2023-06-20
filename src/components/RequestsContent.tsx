@@ -86,7 +86,7 @@ export default function RequestsContent() {
 
    return (
       <>
-         <Flex width="100%" flexDir="column" gap="1rem" height="100%" ref={topRef}>
+         <Flex width="100%" flexDir="column" gap="0.5rem" height="100%" ref={topRef}>
             <ContentHeader
                description="Use the chatroom to discuss payments and other client relations"
                heading={`Help Requests (${
@@ -97,7 +97,7 @@ export default function RequestsContent() {
                   }).length
                })`}
             />
-            <Flex p={'0.5rem'} gap={'1rem'} width={'100%'}>
+            <Flex gap={'1rem'} width={'100%'} pb={'0.2rem'}>
                <Box ml={'auto'}>
                   <DropDown
                      menuTitle={
@@ -186,9 +186,8 @@ const CustomersList = ({
       <Flex
          flex={3}
          width={'100%'}
-         height={'100vh'}
-         maxH={'100vh'}
-         minHeight={'100vh'}
+         height={'80vh'}
+         minHeight={'80vh'}
          flexDir={'column'}
          gap={'1rem'}
          p={isUnder650 ? '0.5rem' : '1rem'}
@@ -215,8 +214,8 @@ const CustomersList = ({
                );
             })}
          </Flex>
-         <Flex flexBasis={'17%'} alignSelf={'flex-end'}>
-            <Box>
+         <Flex alignSelf={'flex-end'}>
+            <Box p = {'0.5rem'}>
                <Pagination pageCounts={pageCounts} handlePageChange={handlePageChange} />
             </Box>
          </Flex>
