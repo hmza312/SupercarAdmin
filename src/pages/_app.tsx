@@ -19,40 +19,13 @@ export default function App({ Component, pageProps }: AppProps) {
    const [user, setUser] = useState<MemberDocType | null>(null);
    const [loggedInUser] = useAuthState(firebase.firebaseAuth);
 
-   useEffect(() => {
-      if (!loggedInUser) {
-         setUser(null);
-         return;
-      }
-
-      const getUser = async () => {
-         const q = query(
-            membersColRef,
-            where(
-               'mobile',
-               '==',
-               loggedInUser.phoneNumber?.slice(2, loggedInUser.phoneNumber.length)
-            ),
-            where('admin', '==', true)
-         );
-         const potentialUsers = (await getDocs(q)).docs.map((d) => ({
-            ...d.data(),
-            uid: d.id
-         })) as Array<MemberDocType>;
-         setUser(potentialUsers[0]);
-      };
-
-      getUser();
-   }, [loggedInUser]);
+   
 
    return (
       <>
          <ChakraProvider theme={appTheme}>
             <CredentialsProvider.Provider value={[user, setUser]}>
                <DarkTheme />
-               {!loggedInUser ? (
-                  <Login />
-               ) : (
                   <Flex
                      display={'flex'}
                      height={'100%'}
@@ -62,7 +35,6 @@ export default function App({ Component, pageProps }: AppProps) {
                      <SideBar useMobStyle={isUnder1100} />
                      <Component {...pageProps} />
                   </Flex>
-               )}
             </CredentialsProvider.Provider>
          </ChakraProvider>
       </>
